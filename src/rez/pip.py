@@ -318,6 +318,8 @@ def wheel_to_variants(distribution):
                 variants["platform"] = platform_.name
 
             if key == "tag":
+                # NOTE: May appear twice
+                #
                 # Possible combinations:
                 #   py2-none-any
                 #   py3-none-any
