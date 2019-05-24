@@ -16,6 +16,8 @@ from rez.utils.data_utils import AttrDictWrapper
 from rez.utils.formatting import expandvars
 from rez.vendor.enum import Enum
 
+basestring = six.string_types[0]
+
 
 #===============================================================================
 # Actions
@@ -610,7 +612,7 @@ class Python(ActionInterpreter):
         if self.manager:
             self.target_environ.update(self.manager.environ)
 
-        shell_mode = not hasattr(args, '__iter__')
+        shell_mode = isinstance(args, basestring)
         return popen(args,
                      shell=shell_mode,
                      env=self.target_environ,
