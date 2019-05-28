@@ -1,6 +1,8 @@
 """
 Functions for manipulating dot-based resolve graphs.
 """
+from __future__ import print_function
+from rez.vendor.six import six
 import re
 import os.path
 import subprocess
@@ -28,7 +30,7 @@ def read_graph_from_string(txt):
         return read_dot(txt)  # standard dot format
 
     def conv(value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             return '"' + value + '"'
         else:
             return value
@@ -41,7 +43,7 @@ def read_graph_from_string(txt):
         attrs = [(k, conv(v)) for k, v in attrs]
 
         for value in values:
-            if isinstance(value, basestring):
+            if isinstance(value, six.string_types):
                 node_name = value
                 attrs_ = attrs
             else:
@@ -76,7 +78,7 @@ def write_compacted(g):
     d_edges = {}
 
     def conv(value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             return value.strip('"')
         else:
             return value
@@ -165,7 +167,7 @@ def prune_graph(graph_str, package_name):
     g = read_dot(graph_str)
     nodes = set()
 
-    for node, attrs in g.node_attr.iteritems():
+    for node, attrs in g.node_attr.items():
         attr = [x for x in attrs if x[0] == "label"]
         if attr:
             label = attr[0][1]
@@ -232,7 +234,7 @@ def view_graph(graph_str, dest_file=None):
     from rez.config import config
 
     if (system.platform == "linux") and (not os.getenv("DISPLAY")):
-        print >> sys.stderr, "Unable to open display."
+        print("Unable to open display.", file=sys.stderr)
         sys.exit(1)
 
     dest_file = _write_graph(graph_str, dest_file=dest_file)
@@ -240,7 +242,7 @@ def view_graph(graph_str, dest_file=None):
     # view graph
     viewed = False
     prog = config.image_viewer or 'browser'
-    print "loading image viewer (%s)..." % prog
+    print("loading image viewer (%s)..." % prog)
 
     if config.image_viewer:
         proc = popen([config.image_viewer, dest_file])
@@ -259,7 +261,7 @@ def _write_graph(graph_str, dest_file=None):
         os.close(tmpf[0])
         dest_file = tmpf[1]
 
-    print "rendering image to " + dest_file + "..."
+    print("rendering image to " + dest_file + "...")
     save_graph(graph_str, dest_file)
     return dest_file
 

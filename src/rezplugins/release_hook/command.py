@@ -1,6 +1,7 @@
 """
 Executes pre- and post-release shell commands
 """
+from __future__ import print_function
 
 import getpass
 import sys
@@ -16,6 +17,12 @@ from rez.utils.scope import scoped_formatter
 from rez.utils.formatting import expandvars
 from rez.vendor.schema.schema import Schema, Or, Optional, Use, And
 from rez.util import which
+
+try:
+    basestring
+except NameError:
+    # Python 3+
+    basestring = str
 
 
 class CommandReleaseHook(ReleaseHook):
@@ -50,7 +57,7 @@ class CommandReleaseHook(ReleaseHook):
         def _err(msg):
             errors.append(msg)
             if self.settings.print_error:
-                print >> sys.stderr, msg
+                print(msg, file=sys.stderr)
 
         kwargs = {}
         if env:
@@ -65,7 +72,7 @@ class CommandReleaseHook(ReleaseHook):
                 _err(msg)
                 return False
             if self.settings.print_output:
-                print stdout.strip()
+                print(stdout.strip())
             return True
 
         if not os.path.isfile(cmd_name):
@@ -177,11 +184,11 @@ class CommandReleaseHook(ReleaseHook):
                 msgs = []
                 msgs.append("running command: %s" % list2cmdline(toks))
                 if env:
-                    for key, value in env.iteritems():
+                    for key, value in env.items():
                         msgs.append("    with: %s=%s" % (key, value))
 
                 if self.settings.print_commands:
-                    print '\n'.join(msgs)
+                    print('\n'.join(msgs))
                 else:
                     for msg in msgs:
                         print_debug(msg)

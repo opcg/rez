@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import signal
@@ -112,7 +113,7 @@ class LazyArgumentParser(ArgumentParser):
         if self._subparsers:
             for action in self._subparsers._actions:
                 if isinstance(action, LazySubParsersAction):
-                    for parser_name, parser in action._name_parser_map.iteritems():
+                    for parser_name, parser in action._name_parser_map.items():
                         action._setup_subparser(parser_name, parser)
         return super(LazyArgumentParser, self).format_help()
 
@@ -147,7 +148,7 @@ def sigint_handler(signum, frame):
     if not _handled_int:
         _handled_int = True
         if not _env_var_true("_REZ_QUIET_ON_SIG"):
-            print >> sys.stderr, "Interrupted by user"
+            print("Interrupted by user", file=sys.stderr)
         sigbase_handler(signum, frame)
 
 
@@ -157,7 +158,7 @@ def sigterm_handler(signum, frame):
     if not _handled_term:
         _handled_term = True
         if not _env_var_true("_REZ_QUIET_ON_SIG"):
-            print >> sys.stderr, "Terminated by user"
+            print("Terminated by user", file=sys.stderr)
         sigbase_handler(signum, frame)
 
 

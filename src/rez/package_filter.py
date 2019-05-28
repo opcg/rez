@@ -1,3 +1,4 @@
+from rez.vendor.six import six
 from rez.packages_ import iter_packages
 from rez.exceptions import ConfigurationError
 from rez.config import config
@@ -65,7 +66,7 @@ class PackageFilterBase(object):
 
     @property
     def sha1(self):
-        return sha1(str(self)).hexdigest()
+        return sha1(str(self).encode("ascii")).hexdigest()
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, str(self))
@@ -136,9 +137,9 @@ class PackageFilter(PackageFilterBase):
     def __and__(self, other):
         """Combine two filters."""
         result = self.copy()
-        for rule in other._excludes.itervalues():
+        for rule in other._excludes.values():
             result.add_exclusion(rule)
-        for rule in other._includes.itervalues():
+        for rule in other._includes.values():
             result.add_inclusion(rule)
         return result
 
@@ -156,7 +157,7 @@ class PackageFilter(PackageFilterBase):
             float: The approximate cost of the filter.
         """
         total = 0.0
-        for family, rules in self._excludes.iteritems():
+        for family, rules in self._excludes.items():
             cost = sum(x.cost() for x in rules)
             if family:
                 cost = cost / float(10)
@@ -169,7 +170,7 @@ class PackageFilter(PackageFilterBase):
         for namespace, func in (("excludes", f.add_exclusion),
                                 ("includes", f.add_inclusion)):
             rule_strs = data.get(namespace, [])
-            if isinstance(rule_strs, basestring):
+            if isinstance(rule_strs, six.string_types):
                 rule_strs = [rule_strs]
             for rule_str in rule_strs:
                 rule = Rule.parse_rule(rule_str)
@@ -182,7 +183,7 @@ class PackageFilter(PackageFilterBase):
                                  ("includes", self._includes)):
             if dict_:
                 rules = []
-                for rules_ in dict_.itervalues():
+                for rules_ in dict_.values():
                     rules.extend(map(str, rules_))
                 data[namespace] = rules
         return data

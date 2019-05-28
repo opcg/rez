@@ -1,6 +1,7 @@
 """
 CMake-based build system
 """
+from __future__ import print_function
 from rez.build_system import BuildSystem
 from rez.build_process_ import BuildType
 from rez.resolved_context import ResolvedContext
@@ -16,6 +17,12 @@ import functools
 import os.path
 import sys
 import os
+
+try:
+    basestring
+except NameError:
+    # Python 3+
+    basestring = str
 
 
 class RezCMakeError(BuildSystemError):
@@ -104,7 +111,7 @@ class CMakeBuildSystem(BuildSystem):
               build_type=BuildType.local):
         def _pr(s):
             if self.verbose:
-                print s
+                print(s)
 
         # find cmake binary
         if self.settings.cmake_binary:

@@ -1,7 +1,9 @@
-import rez.vendor.unittest2 as unittest
+from __future__ import print_function
+import unittest
 from rez.config import config, _create_locked_config
 from rez.shells import get_shell_types
 from rez.system import system
+from rez.vendor.six import six
 import tempfile
 import shutil
 import os.path
@@ -9,6 +11,9 @@ import os
 import functools
 import sys
 from contextlib import contextmanager
+
+# Backwards compatibility with Python 2
+basestring = six.string_types[0]
 
 
 class TestBase(unittest.TestCase):
@@ -177,7 +182,7 @@ def shell_dependent(exclude=None):
             for shell in shells:
                 if exclude and shell in exclude:
                     self.skipTest("This test does not run on %s shell." % shell)
-                print "\ntesting in shell: %s..." % shell
+                print("\ntesting in shell: %s..." % shell)
                 config.override("default_shell", shell)
                 func(self, *args, **kwargs)
         return wrapper
@@ -215,7 +220,7 @@ def get_cli_output(args):
     """
 
     import sys
-    from StringIO import StringIO
+    from rez.vendor.six.six.moves import StringIO
 
     command = args[0]
     other_args = list(args[1:])

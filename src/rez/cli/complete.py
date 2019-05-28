@@ -1,6 +1,7 @@
 """
 Prints package completion strings.
 """
+from __future__ import print_function
 from rez.vendor import argparse
 
 
@@ -53,11 +54,11 @@ def command(opts, parser, extra_arg_groups=None):
         subcommand = cmd.split("-", 1)[-1]
 
     if subcommand is None:
-        cmds = [k for k, v in subcommands.iteritems() if not v.get("hidden")]
+        cmds = [k for k, v in subcommands.items() if not v.get("hidden")]
 
         if prefix:
             cmds = (x for x in cmds if x.startswith(prefix))
-        print " ".join(cmds)
+        print(" ".join(cmds))
 
     if subcommand not in subcommands:
         return
@@ -94,7 +95,7 @@ def command(opts, parser, extra_arg_groups=None):
                                     comp_line=comp_line,
                                     comp_point=comp_point)
     words = completer.completions
-    print ' '.join(words)
+    print(' '.join(words))
 
 
 # Copyright 2013-2016 Allan Johns.

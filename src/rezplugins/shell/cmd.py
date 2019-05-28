@@ -6,12 +6,17 @@ from rez.rex import RexExecutor, literal, OutputStyle, EscapedString
 from rez.shells import Shell
 from rez.utils.system import popen
 from rez.utils.platform_ import platform_
-from rez.util import shlex_join
 from rez.backport.shutilwhich import which
 from functools import partial
 import os
 import re
 import subprocess
+
+try:
+    basestring
+except NameError:
+    # Python 3+
+    basestring = str
 
 
 class CMD(Shell):
@@ -78,7 +83,7 @@ class CMD(Shell):
 
         # detect system paths using registry
         def gen_expected_regex(parts):
-            whitespace = "[\s]+"
+            whitespace = r"[\s]+"
             return whitespace.join(parts)
 
         paths = []
@@ -98,8 +103,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -123,8 +131,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -228,7 +239,11 @@ class CMD(Shell):
 
         is_detached = (cmd[0] == 'START')
 
-        p = popen(cmd, env=env, shell=is_detached, **Popen_args)
+        p = popen(cmd,
+                  env=env,
+                  shell=is_detached,
+                  universal_newlines=True,
+                  **Popen_args)
         return p
 
     def get_output(self, style=OutputStyle.file):

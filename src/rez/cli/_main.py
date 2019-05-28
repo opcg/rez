@@ -1,5 +1,7 @@
 """The main command-line entry point."""
+from __future__ import print_function
 import sys
+import importlib
 from rez.vendor.argparse import _StoreTrueAction, SUPPRESS
 from rez.cli._util import subcommands, LazyArgumentParser, _env_var_true
 from rez.utils.logging_ import print_error
@@ -28,7 +30,7 @@ class SetupRezSubParser(object):
             error_msg = "command module %s  must provide a setup_parser() " \
                 "function" % self.module_name
         if error_msg:
-            print >> sys.stderr, error_msg
+            print(error_msg, file=sys.stderr)
             return SUPPRESS
 
         mod.setup_parser(parser)
@@ -43,7 +45,7 @@ class SetupRezSubParser(object):
 
     def get_module(self):
         if self.module_name not in sys.modules:
-            __import__(self.module_name, globals(), locals(), [], -1)
+            importlib.import_module(self.module_name)
         return sys.modules[self.module_name]
 
 
@@ -60,9 +62,9 @@ class InfoAction(_StoreTrueAction):
     def __call__(self, parser, args, values, option_string=None):
         from rez.system import system
         txt = system.get_summary_string()
-        print
-        print txt
-        print
+        print()
+        print(txt)
+        print()
         sys.exit(0)
 
 

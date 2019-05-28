@@ -1,6 +1,7 @@
 '''
 Build a package from source.
 '''
+from __future__ import print_function
 import os
 
 
@@ -46,7 +47,7 @@ def setup_parser_common(parser):
             cls_ = clss[0]
             title = "%s build system arguments" % cls_.name()
             group = parser.add_argument_group(title)
-            cls_.bind_cli(group)
+            cls_.bind_cli(parser, group)
 
         types = [x.name() for x in clss]
     else:
@@ -168,7 +169,7 @@ def command(opts, parser, extra_arg_groups=None):
                       install=opts.install,
                       variants=opts.variants)
     except BuildContextResolveError as e:
-        print >> sys.stderr, str(e)
+        print(str(e), file=sys.stderr)
 
         if opts.fail_graph:
             if e.context.graph:
@@ -176,8 +177,7 @@ def command(opts, parser, extra_arg_groups=None):
                 g = e.context.graph(as_dot=True)
                 view_graph(g)
             else:
-                print >> sys.stderr, \
-                    "the failed resolve context did not generate a graph."
+                print("the failed resolve context did not generate a graph.", file=sys.stderr)
         sys.exit(1)
 
 

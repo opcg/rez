@@ -1,3 +1,5 @@
+from __future__ import print_function
+from rez.vendor.six import six
 from rez.packages_ import get_latest_package
 from rez.vendor.version.version import Version
 from rez.vendor.distlib import DistlibException
@@ -13,7 +15,7 @@ from rez.package_maker__ import make_package
 from rez.config import config
 from rez.utils.platform_ import platform_
 from tempfile import mkdtemp
-from StringIO import StringIO
+from rez.vendor.six.six.moves import StringIO
 from pipes import quote
 import os.path
 import shutil
@@ -31,7 +33,7 @@ def _get_dependencies(requirement, distributions):
         return pip_to_rez_name
 
     result = []
-    requirements = ([requirement] if isinstance(requirement, basestring)
+    requirements = ([requirement] if isinstance(requirement, six.string_types)
                     else requirement["requires"])
 
     for package in requirements:
@@ -316,6 +318,8 @@ def wheel_to_variants(distribution):
                 variants["platform"] = platform_.name
 
             if key == "tag":
+                # NOTE: May appear twice
+                #
                 # Possible combinations:
                 #   py2-none-any
                 #   py3-none-any
@@ -376,6 +380,7 @@ def pip_install_package(source_name, python_version=None,
 
     if prefix is not None:
         config.release_packages_path = prefix
+        config.local_packages_path = prefix
 
     # TODO: should check if packages_path is writable
     # before continuing with pip
@@ -392,7 +397,7 @@ def pip_install_package(source_name, python_version=None,
     python_exe, context = find_python(python_version)
     if context and config.debug("package_release"):
         buf = StringIO()
-        print >> buf, "\n\npackage download environment:"
+        print("\n\npackage download environment:", file=buf)
         context.print_info(buf)
         _log(buf.getvalue())
 

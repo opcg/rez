@@ -1,9 +1,8 @@
 from rez.utils.formatting import StringFormatMixin, StringFormatType
-import UserDict
 import sys
 
 
-class RecursiveAttribute(UserDict.UserDict, StringFormatMixin):
+class RecursiveAttribute(dict, StringFormatMixin):
     """An object that can have new attributes added recursively::
 
         >>> a = RecursiveAttribute()
@@ -89,7 +88,7 @@ class RecursiveAttribute(UserDict.UserDict, StringFormatMixin):
     def to_dict(self):
         """Get an equivalent dict representation."""
         d = {}
-        for k, v in self.__dict__["data"].iteritems():
+        for k, v in self.__dict__["data"].items():
             if isinstance(v, RecursiveAttribute):
                 d[k] = v.to_dict()
             else:
@@ -106,7 +105,7 @@ class RecursiveAttribute(UserDict.UserDict, StringFormatMixin):
         self._update(data)
 
     def _update(self, data):
-        for k, v in data.iteritems():
+        for k, v in data.items():
             if isinstance(v, dict):
                 v = RecursiveAttribute(v)
             self.__dict__["data"][k] = v
@@ -138,7 +137,7 @@ class _Scope(RecursiveAttribute):
         d = self.__dict__
         locals_ = sys._getframe(1).f_locals
         self_locals = d["locals"]
-        for k, v in locals_.iteritems():
+        for k, v in locals_.items():
             if not (k.startswith("__") and k.endswith("__")) \
                     and (k not in self_locals or v != self_locals[k]) \
                     and not isinstance(v, _Scope):
