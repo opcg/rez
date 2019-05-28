@@ -40,6 +40,7 @@ subcommands = {
     "interpret": {},
     "memcache": {},
     "pip": {},
+    "wheel": {},
     "plugins": {},
     "python": {
         "arg_mode": "passthrough"
