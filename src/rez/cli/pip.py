@@ -1,6 +1,7 @@
 """
 Install a pip-compatible python package, and its dependencies, as rez packages.
 """
+from __future__ import print_function
 
 
 def setup_parser(parser, completions=False):
@@ -65,9 +66,14 @@ def command(opts, parser, extra_arg_groups=None):
         if v.subpath:
             txt += " (%s)" % v.subpath
         print("  " + txt)
+<<<<<<< HEAD
 
     print("")
 
+=======
+
+    print()
+>>>>>>> nerdvegas/master
     if installed_variants:
         print("%d packages were installed:" % len(installed_variants))
         for variant in installed_variants:
@@ -76,11 +82,20 @@ def command(opts, parser, extra_arg_groups=None):
         print("NO packages were installed.")
 
     if skipped_variants:
+<<<<<<< HEAD
         print("\n%d packages were already installed:" % len(skipped_variants))
         for variant in skipped_variants:
             print_variant(variant)
 
     print("")
+=======
+        print()
+        print("%d packages were already installed:" % len(skipped_variants))
+        for variant in skipped_variants:
+            print_variant(variant)
+
+    print()
+>>>>>>> nerdvegas/master
 
 
 # Copyright 2013-2016 Allan Johns.
