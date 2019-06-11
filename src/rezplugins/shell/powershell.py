@@ -1,6 +1,5 @@
-"""
-Windows Command Prompt (DOS) shell.
-"""
+"""Windows PowerShell 5+"""
+
 from rez.config import config
 from rez.rex import RexExecutor, OutputStyle, EscapedString
 from rez.shells import Shell
