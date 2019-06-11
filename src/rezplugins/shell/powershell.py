@@ -83,6 +83,12 @@ class PowerShell(Shell):
             os.path.dirname(which("scrcons")),
         ]
 
+        # And Rez itself, for making rez calls
+        # within the resulting context
+        cls.syspaths += [
+            os.path.dirname(which("rez")),
+        ]
+
         return cls.syspaths
 
     def _bind_interactive_rez(self):
