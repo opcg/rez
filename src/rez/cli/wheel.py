@@ -191,7 +191,7 @@ def _install(opts, tempdir):
     for package in new:
         tell(row_line.format(
             package.name,
-            package.version,
+            str(package.version),
             format_variants(package)
         ))
 
@@ -200,7 +200,7 @@ def _install(opts, tempdir):
         for package in exists:
             tell(row_line.format(
                 package.name,
-                package.version,
+                str(package.version),
                 format_variants(package)
             ))
 
