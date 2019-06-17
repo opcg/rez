@@ -69,6 +69,39 @@ class InfoAction(_StoreTrueAction):
 
 
 def run(command=None):
+    import os
+
+    safe = not os.getenv("REZ_UNSAFEMODE")
+    patched = "_REZ_PATCHED_ENV" not in os.environ
+    if safe and not patched:
+        # Re-spawn Python with safe environment
+
+        import subprocess
+        environ = os.environ.copy()
+
+        # Clear any notion of PYTHONPATH
+        environ.pop("PYTHONPATH", None)
+
+        # Prevent subsequent session from spawing new session
+        environ["_REZ_PATCHED_ENV"] = "1"
+
+        argv = ["-m", "rez"] + sys.argv[1:]
+
+        rezdir = os.path.join(__file__, "..", "..", "..")
+        popen = subprocess.Popen(
+            [sys.executable] + argv,
+
+            # Use doctored-environment
+            env=environ,
+
+            # Consider rez from current working directory,
+            # instead of PYTHONPATH
+            cwd=rezdir
+        )
+
+        # Delegate all further input to child
+        exit(popen.wait())
+
     setup_logging()
 
     parser = LazyArgumentParser("rez")
@@ -154,7 +187,6 @@ def run(command=None):
             sys.exit(1)
 
     sys.exit(returncode or 0)
-
 
 
 # Entry points for pip
