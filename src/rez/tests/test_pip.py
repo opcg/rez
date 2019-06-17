@@ -1,197 +1,259 @@
 """
-test rez pip
+test rez wheel
 """
+import os
+import stat
+import shutil
+import tempfile
+import subprocess
 
 from rez.tests.util import TempdirMixin, TestBase
-from rez import pip
+from rez import wheel
+from rez.resolved_context import ResolvedContext
+from rez.package_maker__ import make_package
+from rez.packages_ import iter_packages
+from rez.util import which
 
 
-class TestPip(TestBase, TempdirMixin):
+def rmtree(path):
+    # Rez write-protects the package.py files
+    def del_rw(action, name, exc):
+        os.chmod(name, stat.S_IWRITE)
+        os.remove(name)
+
+    shutil.rmtree(path, onerror=del_rw)
+
+
+class TestWheel(TestBase, TempdirMixin):
     @classmethod
     def setUpClass(cls):
         TempdirMixin.setUpClass()
         cls.settings = dict()
+        cls.tempdir = tempfile.mkdtemp()
+
+        python = which("python")
+        assert python, "No Python found"
+
+        result = subprocess.check_output(
+            [python, "--version"],
+            universal_newlines=True,
+            stderr=subprocess.STDOUT,
+        )
+        _, version = result.rstrip().split(" ", 1)
+        version = version.split()[-1]
+        version = int(version[0])
+
+        with make_package("python", cls.tempdir) as maker:
+            PATH = os.path.dirname(python)
+            maker.version = str(version)
+            maker.commands = "\n".join([
+                "env.PATH.prepend('%s')" % PATH
+            ])
+
+        cls.context = ResolvedContext(
+            ["python"],
+            package_paths=[cls.tempdir]
+        )
+
+        cls.python_version = version
 
     @classmethod
     def tearDownClass(cls):
         TempdirMixin.tearDownClass()
+        rmtree(cls.tempdir)
 
-    def test_classifiers_none(self):
-        """Test no relevant classifiers"""
-        classifiers = [
-            "Development Status :: 4 - Beta",
-            "License :: OSI Approved :: MIT License",
-            "Intended Audience :: Developers",
-            "Programming Language :: Ruby",
-            "Topic :: Software Development",
-            "Topic :: System :: Software Distribution"
+    def setUp(self):
+        """Called for each test"""
+        self.temprepo = tempfile.mkdtemp()
+
+    def tearDown(self):
+        rmtree(self.temprepo)
+
+    def _execute(self, cmd):
+        assert self.context.execute_shell(command=cmd).wait() == 0
+
+    def _install(self, *packages, **kwargs):
+        return wheel.install(packages, prefix=self.temprepo, **kwargs)
+
+    def _installed_packages(self, name):
+        return list(iter_packages(name, paths=[self.temprepo]))
+
+    def _test_install(self, package, version):
+        installed = self._install("%s==%s" % (package, version))
+        assert installed, "Something should have been installed"
+
+        names = [pkg.name for pkg in installed]
+        versions = {
+            package.name: str(package.version)
+            for package in installed
+        }
+
+        self.assertIn(package, names)
+        self.assertEqual(versions[package], version)
+
+    def test_wheel_to_variants1(self):
+        """Test wheel_to_variants with pure-Python wheel"""
+        WHEEL = """\
+Wheel-Version: 1.0
+Generator: bdist_wheel 1.0
+Root-Is-Purelib: true
+Tag: py2-none-any
+Tag: py3-none-any
+"""
+
+        variants = wheel.wheel_to_variants(WHEEL)
+        self.assertEqual(variants, [])
+
+    def test_wheel_to_variants2(self):
+        """Test wheel_to_variants with compiled wheel"""
+        WHEEL = """\
+Wheel-Version: 1.0
+Generator: bdist_wheel 1.0
+Root-Is-Purelib: false
+Tag: cp36-cp36m-win_amd64
+"""
+
+        variants = wheel.wheel_to_variants(WHEEL)
+        self.assertEqual(variants, [
+            "platform-%s" % wheel.platform_name(),
+            "os-%s" % wheel.os_name(),
+            "python-3.6",
+        ])
+
+    def test_wheel_to_variants3(self):
+        """Test wheel_to_variants with unsupported WHEEL"""
+        WHEEL = """\
+Wheel-Version: 2.0
+Generator: bdist_wheel 1.0
+Root-Is-Purelib: false
+Tag: cp36-cp36m-win_amd64
+"""
+
+        self.assertRaises(Exception, wheel.wheel_to_variants, WHEEL)
+
+    def test_wheel_to_variants4(self):
+        """Test wheel_to_variants with pure-Python, solo-version wheel"""
+        WHEEL = """\
+Wheel-Version: 1.0
+Generator: bdist_wheel 1.0
+Root-Is-Purelib: true
+Tag: py2-none-any
+"""
+
+        variants = wheel.wheel_to_variants(WHEEL)
+        self.assertEqual(variants, ["python-2"])
+
+    def test_wheel_to_variants5(self):
+        """Test wheel_to_variants with badly formatted WHEEL"""
+        WHEEL = """\
+I am b'a'd
+"""
+
+        self.assertRaises(Exception, wheel.wheel_to_variants, WHEEL)
+
+    def test_purepython_23(self):
+        """Install a pure-Python package compatible with both Python 2 and 3"""
+        self._test_install("six", "1.12.0")
+
+    def test_purepython_2(self):
+        """Install a pure-Python package only compatible with Python 2"""
+        self._test_install("futures", "3.2.0")
+
+    def test_compiled(self):
+        """Install a compiled Python package"""
+        self._test_install("pyyaml", "5.1")
+
+    def test_dependencies(self):
+        """Install mkdocs, which carries lots of dependencies"""
+        installed = self._install("mkdocs==1.0.4")
+        assert installed, "Something should have been installed"
+
+        names = [pkg.name for pkg in installed]
+        package = {package.name: package for package in installed}["mkdocs"]
+        versions = {
+            package.name: str(package.version)
+            for package in installed
+        }
+
+        self.assertEqual(versions["mkdocs"], "1.0.4")
+
+        # From https://github.com/mkdocs/mkdocs/blob/1.0.4/setup.py#L58
+        dependencies = (
+            "click",
+            "jinja2",
+            "livereload",
+            "markdown",
+            "pyyaml",
+            "tornado",
+        )
+
+        for name in dependencies:
+            self.assertIn(name.lower(), names)
+
+        # All requirements have been installed
+        for req in package.requires:
+            self.assertIn(req.name.lower(), names)
+
+    def test_override_variant(self):
+        """Test overriding variant"""
+        installed = self._install("six", variants=["python-2"])
+        assert installed, "Something should have been installed"
+        package = installed[0].variants[0][0]
+        self.assertEqual(str(package), "python-2")
+
+    def test_existing_variant(self):
+        """Test installing another variant"""
+
+        # Package does not exist prior to install it
+        self.assertEqual(self._installed_packages(name="six"), [])
+
+        self._install("six", variants=["python-2"])
+        package = self._installed_packages("six")[0]
+        variants = [str(v[0]) for v in package.variants]
+        self.assertEqual(variants, ["python-2"])
+
+        # Make sure an install doesn't break or remove a prior variant
+        # This normally happens when installing the same package
+        # on another platform.
+        self._install("six", variants=["python-3"])
+        package = self._installed_packages("six")[0]
+        variants = [str(v[0]) for v in package.variants]
+        self.assertEqual(variants, ["python-2", "python-3"])
+
+    def test_battery(self):
+        """Install a variety of packages"""
+        packages = [
+            "Cython",
+            "Jinja2",
+            "MarkupSafe",
+            "Pillow",
+            "Qt.py",
+            "blockdiag",
+            "certifi",
+            "excel",
+            "funcparserlib",
+            "lockfile",
+            "lxml",
+            "ordereddict",
+            "pyblish-base",
+            "pyblish-lite",
+            "pyblish-maya",
+            "setuptools",
+            "urllib3",
+            "webcolors",
+            "xlrd",
+            "six",
         ]
 
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, [])
+        if os.name == "nt":
+            packages += [
+                "pywin32",
+                "pythonnet",
+            ]
 
-    def test_classifiers_all(self):
-        """Test matches to all available classifiers
+        self._install(*packages)
 
-        Commit:
-            https://github.com/mkdocs/mkdocs/blob/
-            ddf84aefd5f43bca53228c49d503707457175018/setup.py
-
-        """
-
-        classifiers = [
-            "Operating System :: Microsoft :: Windows 10",
-            "Programming Language :: Python :: 2.6",
-        ]
-
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, [
-            "platform-windows", "python-2"])
-
-    def test_classifiers_os_independent(self):
-        """Test OS independent pip classifiers"""
-        classifiers = [
-            "Operating System :: OS Independent",
-        ]
-
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, [])
-
-    def test_classifiers_os_windows(self):
-        """Test Windows classifier"""
-        classifiers = [
-            "Operating System :: Microsoft",
-        ]
-
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, ["platform-windows"])
-
-    def test_classifiers_os_linux(self):
-        """Test Linux classifiers"""
-        classifiers = [
-            "Operating System :: POSIX",
-        ]
-
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, ["platform-linux"])
-
-    def test_classifiers_python_2(self):
-        """Test Python dual-compatible"""
-        classifiers = [
-            "Programming Language :: Python",
-            "Programming Language :: Python :: 2",
-            "Programming Language :: Python :: 2.6",
-            "Programming Language :: Python :: 2.7",
-        ]
-
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, ["python-2"])
-
-    def test_classifiers_python_2_only(self):
-        """Test Python 2-only"""
-        classifiers = [
-            "Programming Language :: Python :: 2 :: Only",
-        ]
-
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, ["python-2"])
-
-    def test_classifiers_python_3_only(self):
-        """Test Python 3-only"""
-        classifiers = [
-            "Programming Language :: Python :: 3 :: Only",
-        ]
-
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, ["python-3"])
-
-    def test_classifiers_mkdocs(self):
-        """Test real-world classifiers from mkdocs
-
-        Commit:
-            https://github.com/mkdocs/mkdocs/blob/
-            ddf84aefd5f43bca53228c49d503707457175018/setup.py
-
-        """
-
-        classifiers = [
-            'Development Status :: 5 - Production/Stable',
-            'Environment :: Console',
-            'Environment :: Web Environment',
-            'Intended Audience :: Developers',
-            'License :: OSI Approved :: BSD License',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 2',
-            'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.4',
-            'Programming Language :: Python :: 3.5',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-            "Programming Language :: Python :: Implementation :: CPython",
-            "Programming Language :: Python :: Implementation :: PyPy",
-            'Topic :: Documentation',
-            'Topic :: Text Processing',
-        ]
-
-        # Compatible with both Python's, no need for variant
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, [])
-
-    def test_classifiers_six(self):
-        """Test real-world classifiers from six
-
-        Commit:
-            https://github.com/benjaminp/six/blob/
-            8da94b8a153ceb0d6417d76729ba75e80eaa75c1/setup.py#L22
-
-        """
-
-        classifiers = [
-            "Development Status :: 5 - Production/Stable",
-            "Programming Language :: Python :: 2",
-            "Programming Language :: Python :: 3",
-            "Intended Audience :: Developers",
-            "License :: OSI Approved :: MIT License",
-            "Topic :: Software Development :: Libraries",
-            "Topic :: Utilities",
-        ]
-
-        # Compatible with both Python's, no need for variant
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, [])
-
-    def test_classifiers_jinja2(self):
-        """Test real-world classifiers from jinja2
-
-        Commit:
-            https://github.com/benjaminp/six/blob/
-            8da94b8a153ceb0d6417d76729ba75e80eaa75c1/setup.py#L22
-
-        """
-
-        classifiers = [
-            'Development Status :: 5 - Production/Stable',
-            'Environment :: Web Environment',
-            'Intended Audience :: Developers',
-            'License :: OSI Approved :: BSD License',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 2',
-            'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.4',
-            'Programming Language :: Python :: 3.5',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: Implementation :: CPython',
-            'Programming Language :: Python :: Implementation :: PyPy',
-            'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-            'Topic :: Software Development :: Libraries :: Python Modules',
-            'Topic :: Text Processing :: Markup :: HTML'
-        ]
-
-        # Compatible with both Python's, no need for variant
-        variants = pip.classifiers_to_variants(classifiers)
-        self.assertListEqual(variants, [])
+    def test_pyside2(self):
+        """Install PySide2"""
+        if self.python_version != 3:
+            self.skipTest("PySide2 is not available on PyPI for Python 2")

@@ -2,7 +2,6 @@
 Build a package from source.
 '''
 from __future__ import print_function
-
 import os
 
 
@@ -178,8 +177,7 @@ def command(opts, parser, extra_arg_groups=None):
                 g = e.context.graph(as_dot=True)
                 view_graph(g)
             else:
-                print("the failed resolve context did not generate a graph.",
-                      file=sys.stderr)
+                print("the failed resolve context did not generate a graph.", file=sys.stderr)
         sys.exit(1)
 
 

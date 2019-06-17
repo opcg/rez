@@ -1,5 +1,4 @@
-from __future__ import print_function
-
+from rez.vendor.six import six
 from rez.config import config
 from rez.vendor.memcache.memcache import Client as Client_, SERVER_MAX_KEY_LENGTH
 from threading import local
@@ -21,9 +20,18 @@ class Client(object):
     - unlimited key length;
     - hard/soft flushing;
     - ability to cache None.
+
     """
+
     class _Miss(object):
-        def __nonzero__(self): return False
+        def __nonzero__(self):
+            return False
+
+        def __iter__(self):
+            yield {}  # solver_dict
+            yield {}  # variant_states_dict
+            yield {}  # release_times_dict
+
     miss = _Miss()
 
     logger = config.debug_printer("memcache")
@@ -37,7 +45,7 @@ class Client(object):
                 debugging - run 'memcached -vv' in the foreground to see the keys
                 being get/set/stored.
         """
-        self.servers = [servers] if isinstance(servers, basestring) else servers
+        self.servers = [servers] if isinstance(servers, six.string_types) else servers
         self.key_hasher = self._debug_key_hash if debug else self._key_hash
         self._client = None
         self.debug = debug
@@ -154,7 +162,7 @@ class Client(object):
         """Disconnect from server(s). Behaviour is undefined after this call."""
         if self.servers and self._client:
             self._client.disconnect_all()
-        # print("Disconnected memcached client %s" % str(self))
+        #print "Disconnected memcached client %s" % str(self)
 
     def _qualified_key(self, key):
         return "%s:%s:%s" % (cache_interface_version, self.current, key)
@@ -164,7 +172,7 @@ class Client(object):
 
     @classmethod
     def _key_hash(cls, key):
-        return md5(key).hexdigest()
+        return md5(key.encode("ascii")).hexdigest()
 
     @classmethod
     def _debug_key_hash(cls, key):

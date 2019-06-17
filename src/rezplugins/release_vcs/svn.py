@@ -2,7 +2,6 @@
 Svn version control
 """
 from __future__ import print_function
-
 from rez.release_vcs import ReleaseVCS
 from rez.exceptions import ReleaseVCSError
 import os.path
@@ -36,7 +35,7 @@ def get_last_changed_revision(client, url):
         if not svn_entries:
             raise ReleaseVCSError("svn.info2() returned no results on url %s" % url)
         return svn_entries[0][1].last_changed_rev
-    except pysvn.ClientError, ce:
+    except pysvn.ClientError as ce:
         raise ReleaseVCSError("svn.info2() raised ClientError: %s" % ce)
 
 

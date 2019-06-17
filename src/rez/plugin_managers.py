@@ -1,3 +1,4 @@
+from rez.vendor.six import six
 """
 Manages loading of all types of Rez plugins.
 """
@@ -104,7 +105,7 @@ class RezPluginType(object):
         # extend_path, above). this means that `walk_packages` will walk over all
         # modules on the search path at the same level (.e.g in a
         # 'rezplugins/type_name' sub-directory).
-        paths = [package.__path__] if isinstance(package.__path__, basestring) \
+        paths = [package.__path__] if isinstance(package.__path__, six.string_types) \
             else package.__path__
         for path in paths:
             for loader, modname, ispkg in pkgutil.walk_packages(
@@ -145,7 +146,7 @@ class RezPluginType(object):
                         self.failed_plugins[nameish] = str(e)
                         if config.debug("plugins"):
                             import traceback
-                            from StringIO import StringIO
+                            from rez.vendor.six.six.moves import StringIO
                             out = StringIO()
                             traceback.print_exc(file=out)
                             print_debug(out.getvalue())
@@ -177,7 +178,7 @@ class RezPluginType(object):
         from rez.config import _plugin_config_dict
         d = _plugin_config_dict.get(self.type_name, {})
 
-        for name, plugin_class in self.plugin_classes.iteritems():
+        for name, plugin_class in self.plugin_classes.items():
             if hasattr(plugin_class, "schema_dict") \
                     and plugin_class.schema_dict:
                 d_ = {name: plugin_class.schema_dict}
@@ -266,14 +267,14 @@ class RezPluginManager(object):
 
     def get_plugin_types(self):
         """Return a list of the registered plugin types."""
-        return self._plugin_types.keys()
+        return list(self._plugin_types.keys())
 
     # -- plugins
 
     def get_plugins(self, plugin_type):
         """Return a list of the registered names available for the given plugin
         type."""
-        return self._get_plugin_type(plugin_type).plugin_classes.keys()
+        return list(self._get_plugin_type(plugin_type).plugin_classes.keys())
 
     def get_plugin_class(self, plugin_type, plugin_name):
         """Return the class registered under the given plugin name."""

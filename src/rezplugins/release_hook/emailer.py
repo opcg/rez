@@ -2,7 +2,6 @@
 Sends a post-release email
 """
 from __future__ import print_function
-
 from rez.release_hook import ReleaseHook
 from rez.system import system
 from email.mime.text import MIMEText
@@ -12,7 +11,12 @@ from rez.utils.scope import scoped_formatter
 from rez.vendor.schema.schema import Or
 import os.path
 import smtplib
-import sys
+
+try:
+    basestring
+except NameError:
+    # Python 3+
+    basestring = str
 
 
 class EmailReleaseHook(ReleaseHook):
@@ -87,7 +91,7 @@ class EmailReleaseHook(ReleaseHook):
                        to_addrs=recipients,
                        msg=msg.as_string())
             print('Email(s) sent.')
-        except Exception, e:
+        except Exception as e:
             print_error("release email delivery failed: %s" % str(e))
 
     def get_recipients(self):
@@ -126,7 +130,7 @@ class EmailReleaseHook(ReleaseHook):
             match = True
 
             if filters:
-                for attr, test_value in test(filters, dict).iteritems():
+                for attr, test_value in test(filters, dict).items():
 
                     missing = object()
                     value = getattr(self.package, attr, missing)

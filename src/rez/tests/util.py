@@ -1,9 +1,9 @@
 from __future__ import print_function
-
-import rez.vendor.unittest2 as unittest
+import unittest
 from rez.config import config, _create_locked_config
 from rez.shells import get_shell_types
 from rez.system import system
+from rez.vendor.six import six
 import tempfile
 import shutil
 import os.path
@@ -11,6 +11,9 @@ import os
 import functools
 import sys
 from contextlib import contextmanager
+
+# Backwards compatibility with Python 2
+basestring = six.string_types[0]
 
 
 class TestBase(unittest.TestCase):
@@ -194,8 +197,8 @@ def install_dependent(fn):
         if os.getenv("__REZ_SELFTEST_RUNNING"):
             fn(self, *args, **kwargs)
         else:
-            print("\nskipping test, must be run via 'rez-selftest' tool, from "
-                  "a PRODUCTION rez installation.")
+            print ("\nskipping test, must be run via 'rez-selftest' tool, from "
+                   "a PRODUCTION rez installation.")
     return _fn
 
 
@@ -217,7 +220,7 @@ def get_cli_output(args):
     """
 
     import sys
-    from StringIO import StringIO
+    from rez.vendor.six.six.moves import StringIO
 
     command = args[0]
     other_args = list(args[1:])
