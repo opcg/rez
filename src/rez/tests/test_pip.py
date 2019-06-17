@@ -1,5 +1,5 @@
 """
-test rez wheel
+test rez pip
 """
 import os
 import stat
@@ -8,7 +8,7 @@ import tempfile
 import subprocess
 
 from rez.tests.util import TempdirMixin, TestBase
-from rez import wheel
+from rez import pip
 from rez.resolved_context import ResolvedContext
 from rez.package_maker__ import make_package
 from rez.packages_ import iter_packages
@@ -73,7 +73,7 @@ class TestWheel(TestBase, TempdirMixin):
         assert self.context.execute_shell(command=cmd).wait() == 0
 
     def _install(self, *packages, **kwargs):
-        return wheel.install(packages, prefix=self.temprepo, **kwargs)
+        return pip.install(packages, prefix=self.temprepo, **kwargs)
 
     def _installed_packages(self, name):
         return list(iter_packages(name, paths=[self.temprepo]))
@@ -92,7 +92,7 @@ class TestWheel(TestBase, TempdirMixin):
         self.assertEqual(versions[package], version)
 
     def test_wheel_to_variants1(self):
-        """Test wheel_to_variants with pure-Python wheel"""
+        """Test wheel_to_variants with pure-Python pip"""
         WHEEL = """\
 Wheel-Version: 1.0
 Generator: bdist_wheel 1.0
@@ -101,11 +101,11 @@ Tag: py2-none-any
 Tag: py3-none-any
 """
 
-        variants = wheel.wheel_to_variants(WHEEL)
+        variants = pip.wheel_to_variants(WHEEL)
         self.assertEqual(variants, [])
 
     def test_wheel_to_variants2(self):
-        """Test wheel_to_variants with compiled wheel"""
+        """Test wheel_to_variants with compiled pip"""
         WHEEL = """\
 Wheel-Version: 1.0
 Generator: bdist_wheel 1.0
@@ -113,10 +113,10 @@ Root-Is-Purelib: false
 Tag: cp36-cp36m-win_amd64
 """
 
-        variants = wheel.wheel_to_variants(WHEEL)
+        variants = pip.wheel_to_variants(WHEEL)
         self.assertEqual(variants, [
-            "platform-%s" % wheel.platform_name(),
-            "os-%s" % wheel.os_name(),
+            "platform-%s" % pip.platform_name(),
+            "os-%s" % pip.os_name(),
             "python-3.6",
         ])
 
@@ -129,10 +129,10 @@ Root-Is-Purelib: false
 Tag: cp36-cp36m-win_amd64
 """
 
-        self.assertRaises(Exception, wheel.wheel_to_variants, WHEEL)
+        self.assertRaises(Exception, pip.wheel_to_variants, WHEEL)
 
     def test_wheel_to_variants4(self):
-        """Test wheel_to_variants with pure-Python, solo-version wheel"""
+        """Test wheel_to_variants with pure-Python, solo-version pip"""
         WHEEL = """\
 Wheel-Version: 1.0
 Generator: bdist_wheel 1.0
@@ -140,7 +140,7 @@ Root-Is-Purelib: true
 Tag: py2-none-any
 """
 
-        variants = wheel.wheel_to_variants(WHEEL)
+        variants = pip.wheel_to_variants(WHEEL)
         self.assertEqual(variants, ["python-2"])
 
     def test_wheel_to_variants5(self):
@@ -149,7 +149,7 @@ Tag: py2-none-any
 I am b'a'd
 """
 
-        self.assertRaises(Exception, wheel.wheel_to_variants, WHEEL)
+        self.assertRaises(Exception, pip.wheel_to_variants, WHEEL)
 
     def test_purepython_23(self):
         """Install a pure-Python package compatible with both Python 2 and 3"""
