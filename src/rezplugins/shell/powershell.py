@@ -124,6 +124,9 @@ class PowerShell(Shell):
         if shell_command:
             executor.command(shell_command)
 
+        # Forward exit call to parent PowerShell process
+        executor.command("exit $LastExitCode")
+
         code = executor.get_output()
         target_file = os.path.join(
             tmpdir, "rez-shell.%s" % self.file_extension()
@@ -147,7 +150,6 @@ class PowerShell(Shell):
 
         p = popen(cmd,
                   env=env,
-                  shell=True,
                   universal_newlines=True,
                   **Popen_args)
         return p
