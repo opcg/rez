@@ -35,11 +35,8 @@ jobs:
         displayName: 'Use Python $(python.version)'
 
       - script: |
-          apt-get update
-          apt-get install -y software-properties-common
-          add-apt-repository universe
-          apt-get update
-          apt-get install -y tcsh csh
+          sudo apt-get update
+          sudo apt-get install -y tcsh csh
         displayName: "Ubuntu Setup"
 
       - script: |
