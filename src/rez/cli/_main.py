@@ -88,6 +88,10 @@ def run(command=None):
         # Prevent subsequent session from spawing new session
         environ["_REZ_PATCHED_ENV"] = "1"
 
+        # Restore subsequent shells to the current directory,
+        # countering the `cwd=rezdir` below.
+        environ["_REZ_INITIAL_CWD"] = os.getcwd()
+
         # Replace absolute path to executable with python
         # Why not use sys.argv as-is?
         #   The first argument is the absolute path to the executable

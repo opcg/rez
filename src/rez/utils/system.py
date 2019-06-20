@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import subprocess
+import os
 import sys
 
 
@@ -34,5 +35,9 @@ def popen(args, **kwargs):
 
         if file_no not in (0, 1, 2):
             kwargs["stdin"] = subprocess.PIPE
+
+    # Account for REZ_UNSAFEMODE
+    if os.getenv("_REZ_INITIAL_CWD"):
+        kwargs["cwd"] = os.getenv("_REZ_INITIAL_CWD")
 
     return subprocess.Popen(args, **kwargs)
