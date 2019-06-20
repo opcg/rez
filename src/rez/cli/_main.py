@@ -71,8 +71,11 @@ class InfoAction(_StoreTrueAction):
 def run(command=None):
     import os
 
+    # For safety, replace the current session with one
+    # that doesn't include PYTHONPATH.
+
     safe = not os.getenv("REZ_UNSAFEMODE")
-    patched = "_REZ_PATCHED_ENV" not in os.environ
+    patched = "_REZ_PATCHED_ENV" in os.environ
     if safe and not patched:
         # Re-spawn Python with safe environment
 
@@ -85,11 +88,17 @@ def run(command=None):
         # Prevent subsequent session from spawing new session
         environ["_REZ_PATCHED_ENV"] = "1"
 
-        argv = ["-m", "rez"] + sys.argv[1:]
+        # Replace absolute path to executable with python
+        # Why not use sys.argv as-is?
+        #   The first argument is the absolute path to the executable
+        #   with this command, followed by the arguments. On Windows
+        #   however, this executable does not include its extension,
+        #   ".exe" which causes it not to be found.
+        argv = [sys.executable, "-m", "rez"] + sys.argv[1:]
 
         rezdir = os.path.join(__file__, "..", "..", "..")
         popen = subprocess.Popen(
-            [sys.executable] + argv,
+            argv,
 
             # Use doctored-environment
             env=environ,
