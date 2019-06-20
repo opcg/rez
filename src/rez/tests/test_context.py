@@ -65,6 +65,11 @@ class TestContext(TestBase, TempdirMixin):
 
     def test_execute_command_environ(self):
         """Test that execute_command properly sets environ dict."""
+        if platform_.name == "windows":
+            self.skipTest("This test does not run on Windows due to problems"
+                          " with the automated binding of the 'hello_world'"
+                          " executable.")
+
         parent_environ = {"BIGLY": "covfefe"}
         r = ResolvedContext(["hello_world"])
 
