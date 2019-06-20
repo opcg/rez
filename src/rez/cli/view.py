@@ -44,8 +44,7 @@ def command(opts, parser, extra_arg_groups=None):
 
         variant = context.get_resolved_package(req.name)
         if variant is None:
-            print("Package %r is not in the current context" % req.name,
-                  file=sys.stderr)
+            print("Package %r is not in the current context" % req.name, file=sys.stderr)
             sys.exit(1)
 
         package = variant.parent

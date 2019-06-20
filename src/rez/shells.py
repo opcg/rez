@@ -10,10 +10,14 @@ from rez.system import system
 from rez.exceptions import RezSystemError
 from rez.rex import EscapedString
 from rez.config import config
+from rez.vendor.six import six
 import subprocess
 import os
 import os.path
 import pipes
+
+# Backwards compatibility with Python 2
+basestring = six.string_types[0]
 
 
 def get_shell_types():
@@ -252,8 +256,7 @@ class UnixShell(Shell):
                 ex.info('')
                 ex.info('You are now in a rez-configured environment.')
                 ex.info('')
-                if system.is_production_rez_install:
-                    ex.command('rezolve context')
+                ex.command('rezolve context')
 
         def _write_shell(ex, filename):
             code = ex.get_output()
@@ -350,7 +353,7 @@ class UnixShell(Shell):
 
         cmd = []
         if pre_command:
-            if isinstance(pre_command, basestring):
+            if isinstance(pre_command, six.string_types):
                 cmd = pre_command.strip().split()
             else:
                 cmd = pre_command
@@ -381,7 +384,7 @@ class UnixShell(Shell):
     def command(self, value):
         if hasattr(value, '__iter__'):
             it = iter(value)
-            cmd = EscapedString.disallow(it.next())
+            cmd = EscapedString.disallow(next(it))
             args_str = ' '.join(self.escape_string(x) for x in it)
             value = "%s %s" % (cmd, args_str)
         else:

@@ -12,9 +12,12 @@ from rez.packages_ import Package
 from rez.package_py_utils import expand_requirement
 from rez.vendor.schema.schema import Schema, Optional, Or, Use, And
 from rez.vendor.version.version import Version
+from rez.vendor.six import six
 from contextlib import contextmanager
 import os
 
+# Backwards compatibility with Python 2
+basestring = six.string_types[0]
 
 # this schema will automatically harden request strings like 'python-*'; see
 # the 'expand_requires' function for more info.
@@ -117,7 +120,7 @@ class PackageMaker(AttrDictWrapper):
         # retrieve the package from the new repository
         family_resource = repo.get_package_family(self.name)
         it = repo.iter_packages(family_resource)
-        package_resource = it.next()
+        package_resource = next(it)
 
         package = self.package_cls(package_resource)
 
@@ -132,7 +135,7 @@ class PackageMaker(AttrDictWrapper):
         data.pop("skipped_variants", None)
         data.pop("package_cls", None)
 
-        data = dict((k, v) for k, v in data.iteritems() if v is not None)
+        data = dict((k, v) for k, v in data.items() if v is not None)
         return data
 
 

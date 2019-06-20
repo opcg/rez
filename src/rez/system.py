@@ -124,7 +124,7 @@ class System(object):
             elif (shell not in shells) and ("bash" in shells):
                 shell = "bash"  # failed detection, fall back on 'bash'
             elif shell not in shells:
-                shell = iter(shells).next()  # give up - just choose a shell
+                shell = next(iter(shells))  # give up - just choose a shell
 
             # sh has to be handled as a special case
             if shell == "sh":
@@ -146,7 +146,7 @@ class System(object):
                             if "bash" in shells:
                                 shell = "bash"  # fall back on bash
                             else:
-                                shell = iter(shells).next()  # give up - just choose a shell
+                                shell = next(iter(shells))  # give up - just choose a shell
 
             # TODO: remove this when/if dash support added
             if shell == "dash":
@@ -211,16 +211,9 @@ class System(object):
                 binpath = os.path.dirname(path)
 
         if binpath:
-            validation_file = os.path.join(binpath, ".rez_production_install")
-            if os.path.exists(validation_file):
-                return os.path.realpath(binpath)
+            return os.path.realpath(binpath)
 
         return None
-
-    @property
-    def is_production_rez_install(self):
-        """Return True if this is a production rez install."""
-        return bool(self.rez_bin_path)
 
     def get_summary_string(self):
         """Get a string summarising the state of Rez as a whole.

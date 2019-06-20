@@ -1,5 +1,4 @@
 from __future__ import print_function
-
 from rez.exceptions import RezBindError
 from rez import module_root_path
 from rez.util import get_close_pkgs
@@ -152,7 +151,7 @@ def _bind_package(name, path=None, version_range=None, bind_args=None,
     # load the bind module
     stream = open(bindfile)
     namespace = {}
-    exec stream in namespace
+    exec(stream, namespace)
 
     # parse bind module params
     bind_parser = argparse.ArgumentParser(prog="rez bind %s" % name,

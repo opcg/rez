@@ -6,10 +6,11 @@ from rez.tests.util import restore_os_environ, restore_sys_path, TempdirMixin, \
 from rez.resolved_context import ResolvedContext
 from rez.bind import hello_world
 from rez.utils.platform_ import platform_
-import rez.vendor.unittest2 as unittest
+import unittest
 import subprocess
 import os.path
 import os
+import sys
 
 
 class TestContext(TestBase, TempdirMixin):
@@ -68,11 +69,10 @@ class TestContext(TestBase, TempdirMixin):
         r = ResolvedContext(["hello_world"])
 
         pycode = ("import os; "
-                  "print(os.getenv(\"BIGLY\")); "
-                  "print(os.getenv(\"OH_HAI_WORLD\"))")
+                  "print(os.getenv('BIGLY')); "
+                  "print(os.getenv('OH_HAI_WORLD'))")
 
-        args = ["python", "-c", pycode]
-
+        args = [sys.executable, "-c", pycode]
         p = r.execute_command(args, parent_environ=parent_environ,
                               stdout=subprocess.PIPE)
         stdout, _ = p.communicate()

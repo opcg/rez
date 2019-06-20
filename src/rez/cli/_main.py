@@ -1,13 +1,12 @@
-"""
-The main command-line entry point.
-"""
+"""The main command-line entry point."""
 from __future__ import print_function
-
 import sys
+import importlib
 from rez.vendor.argparse import _StoreTrueAction, SUPPRESS
 from rez.cli._util import subcommands, LazyArgumentParser, _env_var_true
 from rez.utils.logging_ import print_error
 from rez.exceptions import RezError, RezSystemError
+from rez.utils.logging_ import setup_logging
 from rez import __version__
 
 
@@ -46,7 +45,7 @@ class SetupRezSubParser(object):
 
     def get_module(self):
         if self.module_name not in sys.modules:
-            __import__(self.module_name, globals(), locals(), [], -1)
+            importlib.import_module(self.module_name)
         return sys.modules[self.module_name]
 
 
@@ -70,6 +69,8 @@ class InfoAction(_StoreTrueAction):
 
 
 def run(command=None):
+    setup_logging()
+
     parser = LazyArgumentParser("rez")
 
     parser.add_argument("-i", "--info", action=InfoAction,
@@ -153,6 +154,84 @@ def run(command=None):
             sys.exit(1)
 
     sys.exit(returncode or 0)
+
+
+
+# Entry points for pip
+def rez_config():
+    return run("config")
+
+
+def rez_build():
+    return run("build")
+
+
+def rez_release():
+    return run("release")
+
+
+def rez_env():
+    return run("env")
+
+
+def rez_context():
+    return run("context")
+
+
+def rez_suite():
+    return run("suite")
+
+
+def rez_interpret():
+    return run("interpret")
+
+
+def rez_python():
+    return run("python")
+
+
+def rez_selftest():
+    return run("selftest")
+
+
+def rez_bind():
+    return run("bind")
+
+
+def rez_search():
+    return run("search")
+
+
+def rez_view():
+    return run("view")
+
+
+def rez_status():
+    return run("status")
+
+
+def rez_help():
+    return run("help")
+
+
+def rez_depends():
+    return run("depends")
+
+
+def rez_memcache():
+    return run("memcache")
+
+
+def rez_yaml2py():
+    return run("yaml2py")
+
+
+def run_fwd():
+    return run("forward")
+
+
+def run_complete():
+    return run("complete")
 
 
 if __name__ == '__main__':

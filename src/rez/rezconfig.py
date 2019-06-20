@@ -712,7 +712,7 @@ rez_1_cmake_variables = True
 # * rez_1_cmake_variables will be set to False.
 # You should aim to do this - it will mean your packages are more strictly
 # validated, and you can more easily use future versions of Rez.
-disable_rez_1_compatibility = False
+disable_rez_1_compatibility = True
 
 
 ###############################################################################

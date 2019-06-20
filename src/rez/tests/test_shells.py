@@ -2,12 +2,11 @@
 test shell invocation
 """
 from __future__ import print_function
-
 from rez.system import system
 from rez.shells import create_shell
 from rez.resolved_context import ResolvedContext
 from rez.rex import RexExecutor, literal, expandable
-import rez.vendor.unittest2 as unittest
+import unittest
 from rez.tests.util import TestBase, TempdirMixin, shell_dependent, \
     install_dependent
 from rez.util import which
@@ -189,7 +188,7 @@ class TestShells(TestBase, TempdirMixin):
 
             out, _ = p.communicate()
             self.assertEqual(p.returncode, 0)
-            token = '\r\n' if platform_.name == 'windows' else '\n'
+            token = "\n"  # universal newline
             output = out.strip().split(token)
             self.assertEqual(output, expected_output)
 

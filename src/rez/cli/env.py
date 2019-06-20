@@ -215,8 +215,7 @@ def command(opts, parser, extra_arg_groups=None):
                 g = context.graph(as_dot=True)
                 view_graph(g)
             else:
-                print("the failed resolve context did not generate a graph.",
-                      file=sys.stderr)
+                print("the failed resolve context did not generate a graph.", file=sys.stderr)
 
     if opts.output:
         if opts.output == '-':  # print to stdout

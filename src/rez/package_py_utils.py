@@ -1,3 +1,4 @@
+from rez.vendor.six import six
 """
 This sourcefile is intended to be imported in package.py files, in functions
 including:
@@ -112,7 +113,7 @@ def expand_requirement(request, paths=None):
         # 'foo-1+<1_' - '1_' is the next possible version after '1'. So we have
         # to detect this case and remap the uid-ified wildcard back here too.
         #
-        for v, expanded_v in expanded_versions.iteritems():
+        for v, expanded_v in expanded_versions.items():
             if version == v.next():
                 return expanded_v.next()
 
@@ -129,7 +130,7 @@ def expand_requirement(request, paths=None):
     result = str(req)
 
     # do some cleanup so that long uids aren't left in invalid wildcarded strings
-    for uid, token in wildcard_map.iteritems():
+    for uid, token in wildcard_map.items():
         result = result.replace(uid, token)
 
     # cast back to a Requirement again, then back to a string. This will catch
@@ -189,7 +190,7 @@ def exec_python(attr, src, executable="python"):
     """
     import subprocess
 
-    if isinstance(src, basestring):
+    if isinstance(src, six.string_types):
         src = [src]
 
     p = popen([executable, "-c", "; ".join(src)],

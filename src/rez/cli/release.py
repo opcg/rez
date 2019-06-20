@@ -2,7 +2,6 @@
 Build a package from source and deploy it.
 '''
 from __future__ import print_function
-
 import os
 import sys
 from subprocess import call

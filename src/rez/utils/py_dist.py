@@ -2,7 +2,6 @@
 Functions for converting python distributions to rez packages.
 """
 from __future__ import print_function
-
 from rez.exceptions import RezSystemError
 import pkg_resources
 import shutil
@@ -75,9 +74,7 @@ def convert_requirement(req):
             r = "!%s-%s" % (pkg_name, ver)
             req_strs.append(r)
         else:
-            print("Warning: Can't understand op '%s', just depending on "
-                  "unversioned package..." % op,
-                  file=sys.stderr)
+            print("Warning: Can't understand op '%s', just depending on unversioned package..." % op, file=sys.stderr)
             req_strs.append(pkg_name)
 
     return req_strs

@@ -2,11 +2,11 @@
 Filesystem-related utilities.
 """
 from __future__ import print_function
-
 from threading import Lock
 from tempfile import mkdtemp
 from contextlib import contextmanager
 from uuid import uuid4
+from rez.vendor.six import six
 import weakref
 import atexit
 import posixpath
@@ -16,6 +16,10 @@ import shutil
 import os
 import re
 import stat
+
+
+# Backwards compatibility with Python 2
+basestring = six.string_types[0]
 
 
 class TempDirs(object):
@@ -286,7 +290,13 @@ def is_subdirectory(path_a, path_b):
     """Returns True if `path_a` is a subdirectory of `path_b`."""
     path_a = os.path.realpath(path_a)
     path_b = os.path.realpath(path_b)
-    relative = os.path.relpath(path_a, path_b)
+    try:
+        relative = os.path.relpath(path_a, path_b)
+    except ValueError:
+        # On Windows a ValueError is raised if the paths are on different
+        # drives, UNC roots, or are mixing drive and UNC root specifications.
+        # This of course means path_a can't be a subdirectory of path_b.
+        return False
     return (not relative.startswith(os.pardir + os.sep))
 
 
@@ -321,7 +331,7 @@ def copy_or_replace(src, dst):
     '''
     try:
         shutil.copy(src, dst)
-    except (OSError, IOError), e:
+    except (OSError, IOError) as e:
         # It's possible that the file existed, but was owned by someone
         # else - in that situation, shutil.copy might then fail when it
         # tries to copy perms.
@@ -386,18 +396,18 @@ def copytree(src, dst, symlinks=False, ignore=None, hardlinks=False):
             else:
                 copy(srcname, dstname)
         # XXX What about devices, sockets etc.?
-        except (IOError, os.error), why:
+        except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except shutil.Error, err:
+        except shutil.Error as err:
             errors.extend(err.args[0])
     try:
         shutil.copystat(src, dst)
     except shutil.WindowsError:
         # can't copy file access times on Windows
         pass
-    except OSError, why:
+    except OSError as why:
         errors.extend((src, dst, str(why)))
     if errors:
         raise shutil.Error(errors)

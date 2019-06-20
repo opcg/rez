@@ -85,8 +85,9 @@ class Platform(object):
             return self._physical_cores_base()
         except Exception as e:
             from rez.utils.logging_ import print_error
-            print_error("Error detecting physical core count, defaulting to 1: %s"
-                        % str(e))
+            print_error(
+                "Error detecting physical core count, defaulting to 1: %s" % e
+            )
         return 1
 
     @cached_property
@@ -100,8 +101,9 @@ class Platform(object):
             return self._logical_cores()
         except Exception as e:
             from rez.utils.logging_ import print_error
-            print_error("Error detecting logical core count, defaulting to 1: %s"
-                        % str(e))
+            print_error(
+                "Error detecting logical core count, defaulting to 1: %s" % e
+            )
         return 1
 
     # -- implementation
@@ -156,8 +158,13 @@ class Platform(object):
         raise NotImplementedError
 
     def _logical_cores(self):
-        from multiprocessing import cpu_count
-        return cpu_count()
+        try:
+            # Favour Python 3
+            return os.cpu_count()
+
+        except AttributeError:
+            import multiprocessing
+            return multiprocessing.cpu_count()
 
 
 # -----------------------------------------------------------------------------
@@ -222,7 +229,9 @@ class LinuxPlatform(_UnixPlatform):
         import subprocess
 
         p = popen(['/usr/bin/env', 'lsb_release', '-a'],
-                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                  universal_newlines=True,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE)
         txt = p.communicate()[0]
 
         if not p.returncode:
@@ -293,18 +302,15 @@ class LinuxPlatform(_UnixPlatform):
             return "%s -hold -e" % term
 
     def _image_viewer(self):
-        from rez.util import which
         return which("xdg-open", "eog", "kview")
 
     def _editor(self):
         ed = os.getenv("EDITOR")
         if ed is None:
-            from rez.util import which
-            ed = which("vi", "vim", "xdg-open")
+            ed = which("xdg-open", "vim", "vi")
         return ed
 
     def _difftool(self):
-        from rez.util import which
         return which("kdiff3", "meld", "diff")
 
     @classmethod
@@ -365,7 +371,10 @@ class LinuxPlatform(_UnixPlatform):
     def _physical_cores_from_lscpu(self):
         import subprocess
         try:
-            p = popen(['lscpu'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = popen(['lscpu'],
+                      universal_newlines=True,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE)
         except (OSError, IOError):
             return None
 
@@ -433,7 +442,9 @@ class OSXPlatform(_UnixPlatform):
         import subprocess
         try:
             p = popen(['sysctl', '-n', 'hw.physicalcpu'],
-                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                      universal_newlines=True,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE)
         except (OSError, IOError):
             return None
 
@@ -447,9 +458,10 @@ class OSXPlatform(_UnixPlatform):
         return self._physical_cores_from_osx_sysctl()
 
     def _difftool(self):
-        from rez.util import which
-        return which("meld", "diff")
+        return which("kdiff3", "meld", "diff")
 
+    def _new_session_popen_args(self):
+        return dict(preexec_fn=os.setpgrp)
 
 # -----------------------------------------------------------------------------
 # Windows
@@ -513,7 +525,9 @@ class WindowsPlatform(Platform):
         import subprocess
         try:
             p = popen('wmic cpu get NumberOfCores /value'.split(),
-                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                      universal_newlines=True,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE)
         except (OSError, IOError):
             return None
 
@@ -543,6 +557,9 @@ class WindowsPlatform(Platform):
         # although meld would be preferred, fc ships with all Windows versions back to DOS
         from rez.util import which
         return which("meld", "fc")
+
+    def _difftool(self):
+        return "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\x64\\WinDiff.Exe"
 
 
 # singleton
