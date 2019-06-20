@@ -10,55 +10,177 @@ Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branch
 
 <br>
 
-### Usage
+### Quickstart
 
-There are a few ways you can use this repo.
+Choose your installation method.
 
-1. Use it in place of Rez, it is entirely backwards compatible with your existing install and package repository
-1. Each feature branch is self-contained and compatible with Rez, you can merge only the ones you like
-2. Most commits are self-contained and well documented, you could cherry-pick only the ones that interest you
+<details>
+  <summary>Simple</summary>
+<table>
+<tr><td>
+<br>
 
-**Install**
+**Simple** The simple approach is well suited for beginners and those looking to learn more about Rez and whether it is suited to their problem and environment.
+
+</td></tr>
+<tr><td>
 
 ```bash
 $ pip install bleeding-rez
+$ rez --version
+2.31.0
+```
+</td></tr>
+<tr><td>
+
+<br>
+
+**Advantages**
+
+- **User-friendly and familiar installation method** Everybody loves pip
+- **Inception** Make `bleeding-rez` a Rez package with [pipz](https://github.com/mottosso/rez-pipz)
+
+</td></tr>
+</table>
+
+</details>
+<details>
+  <summary>Recommended</summary>
+
+<table>
+<tr><td>
+<br>
+
+**Recommended** The recommended approach is better suited for live production, where you've committed to Rez and want precision and control.
+
+</td></tr>
+<tr><td>
+
+```bash
+$ python -m virtualenv rez
+$ rez\Scripts\activate  # *
+(rez) $ pip install bleeding-rez
 ```
 
-<details>
-    <summary>Alternative 1 - Latest <code>master</code></summary>
+> Use `source rez/bin/activate` on Linux and OSX
 
-Each release on PyPI comes from tagged commits on master.
+**Advanced**
+
+You may alternatively install directly from the GitHub repository using one of the following commands.
 
 ```bash
 $ pip install git+https://github.com/mottosso/bleeding-rez.git
-```
-</details>
-
-
-<details>
-    <summary>Alternative 2 - Latest <code>dev</code></summary>
-
-Where development happens, with commits that are later cherry-picked into `master` and their corresponding feature branch.
-
-```bash
 $ pip install git+https://github.com/mottosso/bleeding-rez.git@dev
-```
-</details>
-
-
-<details>
-    <summary>Alterantive 3 - Specific feature branch</summary>
-
-Each feature works both standalone and together.
-
-```bash
 $ pip install git+https://github.com/mottosso/bleeding-rez.git@feature/windows-alias-additional-argument
 ```
+
+</td></tr>
+<tr><td>
+<br>
+
+**Optional**
+
+Virtualenv exposes a `python` and `pip` binary on your `PATH` which make them available from within a Rez context despite no `python` or `pip` package having been included. For additional protection, you can create a separate directory with only Rez binaries and expose this on your `PATH` instead.
+
+<details>
+  <summary>Windows</summary>
+
+```bash
+(rez) $ mkdir rez\Scripts\rez
+(rez) $ cp rez\Scripts\rez*.exe rez\Scripts\rez\
+(rez) $ deactivate
+$ set PATH=%cd%\rez\Scripts\rez
+$ rez env
+> $ python
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+```
 </details>
+
+<details>
+  <summary>Linux and MacOS</summary>
+
+```bash
+(rez) $ mkdir rez\bin\rez
+(rez) $ cp rez\bin\rez* rez\bin\rez\
+(rez) $ deactivate
+$ export PATH=$(pwd)\rez\bin\rez
+$ rez env
+> $ python
+-bash: python: command not found
+```
+
+</details>
+<br>
+
+**Advantages**
+
+- **Isolated PATH** No interference from external binaries in your `Scripts/` Python directory.
+- **Isolated site-packages** No interference from system-wide Python packages
+
+</td></tr>
+</table>
+</details>
+<details>
+  <summary>Developer</summary>
+
+<table>
+<tr><td>
+<br>
+
+**Developer** The developer approach maintains Git history and enables you to contribute back to this project (yay!)
+
+</td></tr>
+<tr><td>
+
+```bash
+$ python -m virtualenv rez-dev
+$ rez-dev\Scripts\activate
+(rez) $ git clone https://github.com/mottosso/bleeding-rez.git
+(rez) $ cd rez
+(rez) $ pip install . -e
+```
+
+> Use `. rez-dev\bin\activate` on Linux and MacOS
+
+</td></tr>
+<tr><td>
+<br>
+
+**Advantages**
+
+- **Git history** History is maintained and you're all set to contribute back to the project
+
+</td></tr>
+</table>
+</details>
+<br>
+
+This installs the Rez command line tools.
+
+Next, you'll need to create some essential Rez packages.
+
+```bash
+$ rez bind platform
+$ rez bind arch
+$ rez bind os
+```
+
+Now try creating an empty environment.
+
+```bash
+$ rez env
+> $ echo Hello World!
+Hello World!
+```
+
+The `>` character denotes that you are in a resolved environment, great job!
 
 <br>
 
 ### Changes
+
+This project is fully compatible with the original Rez and contains, amongst others, these additional features.
 
 <table>
     <tr>
@@ -217,7 +339,7 @@ Rez used to create a .bat file which was later used as the Rez context. Exiting 
 
 ### PRs
 
-Along with merged pull-requests from the original repository, as they can take a while to get through (some take years!)
+Along with these pull-requests from the original repository, as they can take a while to get through (some take years!)
 
 <table>
     <tr>
@@ -240,7 +362,7 @@ Change</th>
 
 > Make logging less destructive.
 
-Previously, when configured in rez.__init__ rez's logging (when used as
+Previously, when configured in `rez.__init__` rez's logging (when used as
 an api) would clobber anything set by the calling application.  Push log
 configuration down into the cli only so it's more acceptale to api
 usage.
@@ -280,8 +402,64 @@ this function.
   which you started - that is bad for tests etc.            
 
 </td>
-        <td>
+<td>
 
 [#204](https://github.com/nerdvegas/rez/pull/204)</td>
-    </tr>
+</tr>
 </table>
+
+<br>
+
+### Backwards Compatibility
+
+Some deprecated features have been disabled by default. If you encounter any issues, here is how can re-enable them.
+
+**rezconfig.py**
+
+```python
+# bleeding-rez does not affect file permissions at all
+# as it can cause issues on SMB/CIFS shares
+make_package_temporarily_writable = True
+
+# bleeding-rez does not support Rez 1 or below
+disable_rez_1_compatibility = False
+```
+
+<br>
+
+### Safe Mode
+
+Per default, Rez forwards your full environment into each new Rez context, which means that if you've got something on PATH you'll still have it from within a context.
+
+```bash
+$ rez env
+> $ python
+>>>
+```
+
+This is sometimes undesirable, you may instead want the new context to contain *only* the requested.
+
+```bash
+$ rez env
+> $ python
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+> $ exit
+$ rez env python
+> $ python
+>>>
+```
+
+To achieve this, you can enable a so-called "safe mode".
+
+```bash
+$ export REZ_SAFEMODE=1
+$ rez env
+> $ python
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+```
+
+This will include a subset of your environment into the context and exclude PYTHONPATH and most of PATH.
+
+You can query whether you are in a "patched" environment via the `_REZ_PATCHED_ENV=1` environment variable.
