@@ -40,7 +40,7 @@ jobs:
         displayName: "Ubuntu Setup"
 
       - script: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install .
         displayName: 'pip install'
 
@@ -50,7 +50,7 @@ jobs:
 
       # Finally, perform code coverage
       - script: |
-          python -m pip install coverage codecov
+          pip install coverage codecov
           coverage run -m rez selftest
           codecov
         displayName: 'CodeCov'
