@@ -68,6 +68,26 @@ $ pip install git+https://github.com/mottosso/bleeding-rez.git@feature/windows-a
     </tr>
     <tr></tr>
     <tr>
+        <td>Python 2 and 3</td>
+        <td>
+
+Support has been updated from Python 2.7 to 2.7-3.7 and beyond.
+
+</td>
+        <td><a href=https://github.com/nerdvegas/rez/pull/629><i>PR</i></a></td>
+    <tr></tr>
+    </tr>
+    <tr>
+        <td>PowerShell</td>
+        <td>
+
+The native `cmd` integration of the original Rez supports environment variable length up-to 2,000 characters, which may cause issues in particular with `PATH` and `PYTHONPATH`. PowerShell supports lengths up-to 32,000 characters.
+
+</td>
+        <td><a href=https://github.com/nerdvegas/rez/pull/644><i>PR</i></a></td>
+    <tr></tr>
+    </tr>
+    <tr>
         <td>Rez & PyPI</td>
         <td>
 
@@ -93,19 +113,29 @@ $ setx PYTHONPATH=some_dir
 `rezconfig.py` can take a `preprocess` function, rather than having to create and manage a separate module and `PYTHONPATH`</td>
         <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
     </tr>
+    <tr></tr>
     <tr>
         <td>Windows Tests</td>
         <td>Tests now run on both Windows and Linux</td>
         <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
-    <tr></tr>
     </tr>
+    <tr></tr>
+    <tr>
+        <td>OR-versions on Windows</td>
+        <td>
+
+Now you can use `rez-2.28|2.29` on Windows, like you can on Linux.
+
+</td>
+        <td><a href=https://github.com/nerdvegas/rez/pull/647><i>PR</i></a></td>
+    </tr>
+    <tr>
         <td>Preprocess function</td>
         <td>
 
 `rezconfig.py` can take a `preprocess` function, rather than having to create and manage a separate module and `PYTHONPATH`</td>
         <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
     </tr>
-    <tr></tr>
     <tr>
         <td>Aliases & Windows</td>
         <td>
