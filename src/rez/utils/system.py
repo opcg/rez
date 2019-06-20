@@ -36,7 +36,7 @@ def popen(args, **kwargs):
         if file_no not in (0, 1, 2):
             kwargs["stdin"] = subprocess.PIPE
 
-    # Account for REZ_UNSAFEMODE
+    # Account for REZ_SAFEMODE
     if os.getenv("_REZ_INITIAL_CWD"):
         kwargs["cwd"] = os.getenv("_REZ_INITIAL_CWD")
 

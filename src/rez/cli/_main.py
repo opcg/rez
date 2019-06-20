@@ -74,7 +74,7 @@ def run(command=None):
     # For safety, replace the current session with one
     # that doesn't include PYTHONPATH.
 
-    safe = not os.getenv("REZ_UNSAFEMODE")
+    safe = os.getenv("REZ_SAFEMODE")
     patched = "_REZ_PATCHED_ENV" in os.environ
     if safe and not patched:
         # Re-spawn Python with safe environment
