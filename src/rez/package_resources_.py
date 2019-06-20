@@ -1,3 +1,4 @@
+from rez.vendor.six import six
 from rez.utils.resources import Resource
 from rez.utils.schema import Required, schema_keys
 from rez.utils.logging_ import print_warning
@@ -15,6 +16,8 @@ from textwrap import dedent
 import os.path
 from hashlib import sha1
 
+# Backwards compatibility with Python 2
+basestring = six.string_types[0]
 
 # package attributes created at release time
 package_release_keys = (
@@ -399,7 +402,7 @@ class PackageResourceHelper(PackageResource):
                 print_warning(msg)
             commands = convert_old_commands(commands)
 
-        if isinstance(commands, basestring):
+        if isinstance(commands, six.string_types):
             return SourceCode(source=commands)
         elif callable(commands):
             return SourceCode(func=commands)
@@ -407,7 +410,11 @@ class PackageResourceHelper(PackageResource):
             return commands
 
 
-class VariantResourceHelper(VariantResource):
+class _Metas(AttributeForwardMeta, LazyAttributeMeta):
+    pass
+
+
+class VariantResourceHelper(six.with_metaclass(_Metas, VariantResource)):
     """Helper class for implementing variants that inherit properties from their
     parent package.
 
@@ -416,10 +423,8 @@ class VariantResourceHelper(VariantResource):
     exceptions - eg 'variants', 'requires'). This is a common enough pattern
     that it's supplied here for other repository plugins to use.
     """
-    class _Metas(AttributeForwardMeta, LazyAttributeMeta):
-        pass
 
-    __metaclass__ = _Metas
+    # __metaclass__ = _Metas
 
     # Note: lazy key validation doesn't happen in this class, it just fowards on
     # attributes from the package. But LazyAttributeMeta does still use this
@@ -461,6 +466,7 @@ class VariantResourceHelper(VariantResource):
             return hashdir
         else:
             dirs = [x.safe_str() for x in self.variant_requires]
+            dirs = dirs or [""]
             subpath = os.path.join(*dirs)
             return subpath
 

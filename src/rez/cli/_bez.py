@@ -1,5 +1,4 @@
 from __future__ import print_function
-
 import os
 import sys
 import os.path
@@ -36,13 +35,11 @@ def run():
 
     # run rezbuild.py:build() in python subprocess. Cannot import module here
     # because we're in a python env configured for rez, not the build
-    code = \
-    """
+    code = """\
     from __future__ import print_function
-
     stream=open("%(buildfile)s")
     env={}
-    exec stream in env
+    exec(compile(stream.read(), stream.name, 'exec'), env)
 
     buildfunc = env.get("build")
     if not buildfunc:
@@ -58,7 +55,7 @@ def run():
 
     import inspect
     args = inspect.getargspec(buildfunc).args
-    kwargs = dict((k, v) for k, v in kwargs.iteritems() if k in args)
+    kwargs = {k: v for k, v in kwargs.items() if k in args}
 
     buildfunc(**kwargs)
 
@@ -77,7 +74,7 @@ def run():
         fd.write(cli_code)
 
     print("executing rezbuild.py...")
-    cmd = ["python", bezfile]
+    cmd = [sys.executable, bezfile]
     p = subprocess.Popen(cmd)
     p.wait()
     tmpdir_manager.clear()

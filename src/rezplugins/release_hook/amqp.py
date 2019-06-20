@@ -2,11 +2,16 @@
 Publishes a message to the broker.
 """
 from __future__ import print_function
-
 from rez.release_hook import ReleaseHook
 from rez.utils.logging_ import print_error, print_debug
 from rez.utils.amqp import publish_message
 from rez.config import config
+
+try:
+    basestring
+except NameError:
+    # Python 3+
+    basestring = str
 
 
 class AmqpReleaseHook(ReleaseHook):

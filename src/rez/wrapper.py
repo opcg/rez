@@ -1,5 +1,4 @@
 from __future__ import print_function
-
 from rez.resolved_context import ResolvedContext
 from rez.utils.colorize import heading, local, critical, Printer
 from rez.utils.data_utils import cached_property
@@ -216,7 +215,7 @@ class Wrapper(object):
             if len(variants) > 1:
                 self._print_conflicting(variants)
             else:
-                variant = iter(variants).next()
+                variant = next(iter(variants))
                 print("Package:  %s" % variant.qualified_package_name)
         return 0
 
@@ -230,7 +229,7 @@ class Wrapper(object):
                 return 1
             else:
                 from rez.packages_ import iter_packages
-                variant = iter(variants).next()
+                variant = next(iter(variants))
                 it = iter_packages(name=variant.name)
                 rows = []
                 colors = []

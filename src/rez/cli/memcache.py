@@ -30,8 +30,8 @@ def poll(client, interval):
     import time
 
     prev_entry = None
-    print("%-64s %-16s %-16s %-16s %-16s %-16s"
-          % ("SERVER", "CONNS", "GET/s", "SET/s", "TEST_GET", "TEST_SET"))
+    print("%-64s %-16s %-16s %-16s %-16s %-16s" \
+        % ("SERVER", "CONNS", "GET/s", "SET/s", "TEST_GET", "TEST_SET"))
 
     while True:
         stats = dict(client.get_stats())
@@ -42,7 +42,7 @@ def poll(client, interval):
             t, stats = entry
 
             dt = t - prev_t
-            for instance, payload in stats.iteritems():
+            for instance, payload in stats.items():
                 prev_payload = prev_stats.get(instance)
                 if payload and prev_payload:
                     # stats
@@ -63,9 +63,9 @@ def poll(client, interval):
 
                     nconns = int(payload["curr_connections"])
 
-                    print("%-64s %-16d %-16g %-16g %-16g %-16g"
-                          % (instance, nconns, gets_per_sec, sets_per_sec,
-                             test_get, test_set))
+                    print("%-64s %-16d %-16g %-16g %-16g %-16g" \
+                        % (instance, nconns, gets_per_sec, sets_per_sec,
+                           test_get, test_set))
 
         prev_entry = entry
         time.sleep(interval)

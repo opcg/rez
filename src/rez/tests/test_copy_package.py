@@ -114,7 +114,7 @@ class TestCopyPackage(TestBase, TempdirMixin):
         # check the copied package exists and matches
         dest_pkg = self._get_dest_pkg("floob", "1.2.0")
         result_variant = result["copied"][0][1]
-        dest_variant = dest_pkg.iter_variants().next()
+        dest_variant = next(dest_pkg.iter_variants())
         self.assertEqual(dest_variant.handle, result_variant.handle)
 
         pyfile = os.path.join(dest_pkg.base, "python")
@@ -146,6 +146,10 @@ class TestCopyPackage(TestBase, TempdirMixin):
 
         pyfile = os.path.join(dest_pkg.base, "python")
         ctime = os.stat(pyfile).st_ctime
+
+        if os.getenv("TRAVIS_OS_NAME") == "osx":
+            # In case tests runs too fast
+            time.sleep(2)
 
         # overwrite same package copy
         result = copy_package(
@@ -184,6 +188,10 @@ class TestCopyPackage(TestBase, TempdirMixin):
             pyfile = os.path.join(dest_variant.root, "python")
             ctime = os.stat(pyfile).st_ctime
             ctimes.append(ctime)
+
+        if os.getenv("TRAVIS_OS_NAME") == "osx":
+            # In case tests runs too fast
+            time.sleep(2)
 
         # copy variant with no overwrite, should do nothing
         result = copy_package(
@@ -237,7 +245,7 @@ class TestCopyPackage(TestBase, TempdirMixin):
         # check copied variant is the one we expect
         dest_pkg = self._get_dest_pkg("flaab", "5.4.1")
         result_variant = result["copied"][0][1]
-        dest_variant = dest_pkg.iter_variants().next()
+        dest_variant = next(dest_pkg.iter_variants())
         self.assertEqual(dest_variant.handle, result_variant.handle)
 
     def test_5(self):
@@ -298,7 +306,7 @@ class TestCopyPackage(TestBase, TempdirMixin):
         # check copied variant contains expected timestamp
         dest_pkg = self._get_dest_pkg("floob", "1.2.0")
 
-        for k, v in overrides.iteritems():
+        for k, v in list(overrides.items()):
             self.assertEqual(getattr(dest_pkg, k), v)
 
     def test_8(self):
@@ -312,7 +320,7 @@ class TestCopyPackage(TestBase, TempdirMixin):
         )
 
         dest_pkg = self._get_dest_pkg("foo", "1.1.0")
-        dest_variant = dest_pkg.iter_variants().next()
+        dest_variant = next(dest_pkg.iter_variants())
 
         # do a resolve
         ctxt = ResolvedContext(

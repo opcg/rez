@@ -1,5 +1,4 @@
 from __future__ import print_function
-
 import os
 import sys
 import signal
@@ -114,7 +113,7 @@ class LazyArgumentParser(ArgumentParser):
         if self._subparsers:
             for action in self._subparsers._actions:
                 if isinstance(action, LazySubParsersAction):
-                    for parser_name, parser in action._name_parser_map.iteritems():
+                    for parser_name, parser in action._name_parser_map.items():
                         action._setup_subparser(parser_name, parser)
         return super(LazyArgumentParser, self).format_help()
 
@@ -136,7 +135,10 @@ def sigbase_handler(signum, frame):
     # kill all child procs
     # FIXME this kills parent procs as well
     if not _env_var_true("_REZ_NO_KILLPG"):
-        os.killpg(os.getpgid(0), signum)
+        if os.name == "nt":
+            os.kill(os.getpid(), signal.CTRL_C_EVENT)
+        else:
+            os.killpg(os.getpgid(0), signum)
     sys.exit(1)
 
 

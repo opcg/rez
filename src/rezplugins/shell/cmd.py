@@ -4,14 +4,19 @@ Windows Command Prompt (DOS) shell.
 from rez.config import config
 from rez.rex import RexExecutor, literal, OutputStyle, EscapedString
 from rez.shells import Shell
-from rez.system import system
 from rez.utils.system import popen
 from rez.utils.platform_ import platform_
-from rez.util import shlex_join
+from rez.backport.shutilwhich import which
 from functools import partial
 import os
 import re
 import subprocess
+
+try:
+    basestring
+except NameError:
+    # Python 3+
+    basestring = str
 
 
 class CMD(Shell):
@@ -24,7 +29,7 @@ class CMD(Shell):
 
     # Regex to aid with escaping of Windows-specific special chars:
     # http://ss64.com/nt/syntax-esc.html
-    _escape_re = re.compile(r'(?<!\^)[&<>]|(?<!\^)\^(?![&<>\^])')
+    _escape_re = re.compile(r'(?<!\^)[&<>]|(?<!\^)\^(?![&<>\^])|(\|)')
     _escaper = partial(_escape_re.sub, lambda m: '^' + m.group(0))
 
     @property
@@ -78,7 +83,7 @@ class CMD(Shell):
 
         # detect system paths using registry
         def gen_expected_regex(parts):
-            whitespace = "[\s]+"
+            whitespace = r"[\s]+"
             return whitespace.join(parts)
 
         paths = []
@@ -98,8 +103,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -123,8 +131,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -133,7 +144,14 @@ class CMD(Shell):
             if match:
                 paths.extend(match.group(2).split(os.pathsep))
 
-        cls.syspaths = set([x for x in paths if x])
+        cls.syspaths = list(set([x for x in paths if x]))
+
+        # add Rez binaries
+        exe = which("rez-env")
+        assert exe, "Could not find rez binary, this is a bug"
+        rez_bin_dir = os.path.dirname(exe)
+        cls.syspaths.insert(0, rez_bin_dir)
+
         return cls.syspaths
 
     def _bind_interactive_rez(self):
@@ -163,12 +181,11 @@ class CMD(Shell):
             if bind_rez:
                 ex.interpreter._bind_interactive_rez()
             if print_msg and not quiet:
-                if system.is_production_rez_install:
-                    # previously this was called with the /K flag, however
-                    # that would leave spawn_shell hung on a blocked call
-                    # waiting for the user to type "exit" into the shell that
-                    # was spawned to run the rez context printout
-                    ex.command("cmd /Q /C rez context")
+                # previously this was called with the /K flag, however
+                # that would leave spawn_shell hung on a blocked call
+                # waiting for the user to type "exit" into the shell that
+                # was spawned to run the rez context printout
+                ex.command("cmd /Q /C rez context")
 
         def _create_ex():
             return RexExecutor(interpreter=self.new_shell(),
@@ -188,22 +205,6 @@ class CMD(Shell):
         else:
             _record_shell(executor, files=startup_sequence["files"], print_msg=(not quiet))
 
-        if shell_command:
-            # Launch the provided command in the configured shell and wait
-            # until it exits.
-            executor.command(shell_command)
-
-        # Test for None specifically because resolved_context.execute_rex_code
-        # passes '' and we do NOT want to keep a shell open during a rex code
-        # exec operation.
-        elif shell_command is None: 
-            # Launch the configured shell itself and wait for user interaction
-            # to exit.
-            executor.command('cmd /Q /K')
-            
-        # Exit the configured shell.
-        executor.command('exit %errorlevel%')
-
         code = executor.get_output()
         target_file = os.path.join(tmpdir, "rez-shell.%s"
                                    % self.file_extension())
@@ -221,15 +222,28 @@ class CMD(Shell):
             else:
                 cmd = pre_command
 
-        if shell_command:
-            cmd_flags = ['/Q', '/C']
-        else:
+        # Test for None specifically because resolved_context.execute_rex_code
+        # passes '' and we do NOT want to keep a shell open during a rex code
+        # exec operation.
+        if shell_command is None:
             cmd_flags = ['/Q', '/K']
+        else:
+            cmd_flags = ['/Q', '/C']
 
-        cmd = cmd + [self.executable] + cmd_flags + ['call {}'.format(target_file)]
+        cmd += [self.executable]
+        cmd += cmd_flags
+        cmd += ['call {}'.format(target_file)]
+
+        if shell_command:
+            cmd += ["& " + shell_command]
+
         is_detached = (cmd[0] == 'START')
 
-        p = popen(cmd, env=env, shell=is_detached, **Popen_args)
+        p = popen(cmd,
+                  env=env,
+                  shell=is_detached,
+                  universal_newlines=True,
+                  **Popen_args)
         return p
 
     def get_output(self, style=OutputStyle.file):
@@ -284,7 +298,7 @@ class CMD(Shell):
             except:
                 self._doskey = "doskey"
 
-        self._addline("%s %s=%s" % (self._doskey, key, value))
+        self._addline("%s %s=%s $*" % (self._doskey, key, value))
 
     def comment(self, value):
         for line in value.split('\n'):
@@ -308,7 +322,7 @@ class CMD(Shell):
         return "%%%s%%" % key
 
     def join(self, command):
-        return shlex_join(command).replace("'", '"')
+        return " ".join(command)
 
 
 def register_plugin():
