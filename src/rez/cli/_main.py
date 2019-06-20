@@ -68,6 +68,46 @@ class InfoAction(_StoreTrueAction):
         sys.exit(0)
 
 
+def safe_environment():
+    import os
+    from rez.backport.shutilwhich import which
+
+    environ = {
+        key: os.getenv(key)
+        for key in ("USERNAME",
+                    "SYSTEMROOT",
+
+                    # Windows
+                    "ComSpec",
+                    "windir",
+                    "PROMPT",
+                    "PathExt",
+                    "OS",
+                    "TMP",
+                    "Temp",
+
+                    # Linux
+                    "DISPLAY")
+        if os.getenv(key)
+    }
+
+    def whichdir(exe):
+        return os.path.dirname(which(exe))
+
+    if os.name == "nt":
+        environ["PATH"] = os.pathsep.join([
+            whichdir("cmd"),
+            whichdir("powershell"),
+        ])
+
+    else:
+        environ["PATH"] = os.pathsep.join([
+            whichdir("bash"),
+        ])
+
+    return environ
+
+
 def run(command=None):
     import os
 
@@ -80,10 +120,7 @@ def run(command=None):
         # Re-spawn Python with safe environment
 
         import subprocess
-        environ = os.environ.copy()
-
-        # Clear any notion of PYTHONPATH
-        environ.pop("PYTHONPATH", None)
+        environ = safe_environment()
 
         # Prevent subsequent session from spawing new session
         environ["_REZ_PATCHED_ENV"] = "1"
