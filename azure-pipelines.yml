@@ -36,7 +36,7 @@ jobs:
 
       - script: |
           sudo apt-get update
-          sudo apt-get install -y tcsh csh
+          sudo apt-get install -y tcsh csh cmake
         displayName: "Ubuntu Setup"
 
       - script: |
