@@ -3,6 +3,7 @@
 
 Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged.
 
+[![Build Status](https://mottosso.visualstudio.com/what%20does%20it%20mean/_apis/build/status/mottosso.bleeding-rez?branchName=master)](https://mottosso.visualstudio.com/what%20does%20it%20mean/_build/latest?definitionId=1&branchName=master)
 [![](https://ci.appveyor.com/api/projects/status/github/mottosso/bleeding-rez?branch=master&svg=true&passingText=Windows&failingText=Windows&pendingText=Windows)](https://ci.appveyor.com/project/mottosso/bleeding-rez)
 [![](https://ci.appveyor.com/api/projects/status/github/mottosso/bleeding-rez?branch=master&svg=true&passingText=Linux&failingText=Linux&pendingText=Linux)](https://ci.appveyor.com/project/mottosso/bleeding-rez)
 [![](https://img.shields.io/travis/mottosso/bleeding-rez/master.svg?label=MacOS)](https://travis-ci.org/mottosso/bleeding-rez)
@@ -198,6 +199,33 @@ Support has been updated from Python 2.7 to 2.7-3.7 and beyond.
 </td>
         <td><a href=https://github.com/nerdvegas/rez/pull/629><i>PR</i></a></td>
     <tr></tr>
+    </tr>
+    <tr>
+        <td>Continuous Integration</td>
+        <td>
+
+Every commit is run against each supported platform and version of Python.
+
+**OS's**
+
+- Windows 7
+- Windows 10
+- Ubuntu 16
+- Ubuntu 18
+- CentOS 6
+- CentOS 7
+- MacOS Mojave
+
+**Python's**
+
+- Python 2.7
+- Python 3.5
+- Python 3.6
+- Python 3.7
+
+</td>
+<td></td>
+<tr></tr>
     </tr>
     <tr>
         <td>PowerShell</td>
