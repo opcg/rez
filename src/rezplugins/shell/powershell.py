@@ -145,7 +145,7 @@ class PowerShell(Shell):
         cmd += [self.executable]
         cmd += ['. "{}"'.format(target_file)]
 
-        if not shell_command:
+        if shell_command is None:
             cmd.insert(1, "-noexit")
 
         p = popen(cmd,
@@ -208,7 +208,12 @@ class PowerShell(Shell):
 
     def info(self, value):
         for line in value.split('\n'):
-            self._addline('Write-Host %s' % line)
+            self._addline('Write-Output %s' % line)
+
+            # Prefer Write-Output to Write-Host, as Write-Output
+            # is designed for console output, whereas Write-Host
+            # is a lower-level print mechanism that doesn't work
+            # well with non-String types
 
     def error(self, value):
         for line in value.split('\n'):

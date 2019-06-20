@@ -176,7 +176,7 @@ class TestShells(TestBase, TempdirMixin):
             p.wait()
             self.assertEqual(p.returncode, 0)
 
-    @shell_dependent()
+    @shell_dependent(exclude=["powershell"])
     def test_rex_code(self):
         """Test that Rex code run in the shell creates the environment variable
         values that we expect."""
