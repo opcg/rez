@@ -155,7 +155,13 @@ class TestShells(TestBase, TempdirMixin):
             return
 
         cmd = [os.path.join(system.rez_bin_path, "rez-env"), "--", "echo", "hey"]
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
         sh_out, _ = process.communicate()
         out = str(sh_out).strip()
         self.assertEqual(out, "hey")

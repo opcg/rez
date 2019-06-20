@@ -105,6 +105,9 @@ def safe_environment():
             whichdir("bash"),
         ])
 
+    # Prevent __pycache__ folders from being picked up as packages
+    environ["PYTHONDONOTWRITEBYTECODE"] = "1"
+
     return environ
 
 
@@ -153,6 +156,10 @@ def run(command=None):
         exit(popen.wait())
 
     setup_logging()
+
+    # Prevent `__pycache__` folders from being accidentally
+    # created and picked up as Rez packages.
+    sys.dont_write_bytecode = True
 
     parser = LazyArgumentParser("rez")
 
