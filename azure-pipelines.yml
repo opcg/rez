@@ -1,3 +1,4 @@
+---
 trigger:
 - master
 - dev
@@ -24,8 +25,8 @@ steps:
 - script: |
     python -m pip install --upgrade pip
     pip install .
-  displayName: 'Install'
+  displayName: 'pip install'
 
 - script: |
-    rez selftest -s bash -vvv
-  displayName: 'Test'
+    rez selftest -vv
+  displayName: 'selftest'
