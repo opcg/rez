@@ -40,6 +40,7 @@ test_script:
 
 #
 # Automatically upload to PyPI whenever a new tag is made
+# Regardless of whether tests pass
 #
-deploy_script:
+after_test:
   - cmd: python .appveyor/deploy.py
