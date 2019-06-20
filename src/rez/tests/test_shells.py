@@ -293,7 +293,9 @@ class TestShells(TestBase, TempdirMixin):
 
         _execute_code(_rex_appending, expected_output)
 
-    @shell_dependent()
+    # On Ubuntu, `sh` is a symbolic link to `dash` which doesn't
+    # support bash-like function() statements
+    @shell_dependent(exclude=["sh"])
     def test_rex_code_alias(self):
         """Ensure PATH changes do not influence the alias command.
 
