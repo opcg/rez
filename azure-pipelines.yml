@@ -1,32 +1,52 @@
 ---
 trigger:
-- master
-- dev
+  branches:
+    include: ["*"]
+  paths:
+    exclude:
+      - .github/*
+      - doc/*
+      - wiki/*
+      - .gitignore
+      - LICENSE
+      - README.md
+      - CONTRIBUTING.md
+      - CHANGELOG.md
 
-pool:
-  vmImage: 'ubuntu-latest'
-strategy:
-  matrix:
-    Python27:
-      python.version: '2.7'
-    Python35:
-      python.version: '3.5'
-    Python36:
-      python.version: '3.6'
-    Python37:
-      python.version: '3.7'
+jobs:
+  - job: Ubuntu
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        Python27:
+          python.version: '2.7'
+        Python35:
+          python.version: '3.5'
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
 
-- script: |
-    python -m pip install --upgrade pip
-    pip install .
-  displayName: 'pip install'
+      - script: |
+          apt-get update
+          apt-get install -y software-properties-common
+          add-apt-repository universe
+          apt-get update
+          apt-get install -y tcsh csh
+        displayName: "Ubuntu Setup"
 
-- script: |
-    rez selftest -vv
-  displayName: 'selftest'
+      - script: |
+          python -m pip install --upgrade pip
+          pip install .
+        displayName: 'pip install'
+
+      - script: |
+          rez selftest -vv
+        displayName: 'selftest'
