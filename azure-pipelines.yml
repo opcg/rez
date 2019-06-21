@@ -67,7 +67,6 @@ jobs:
           testRunTitle: 'Publish test results for Python $(python.version)'
 
   - job: MacOS
-    timeoutInMinutes: 0
     pool:
       vmImage: 'macOS-10.13'
     strategy:
@@ -103,6 +102,11 @@ jobs:
           python.version: '3.7'
 
     steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
+
       - powershell: |
           # Skip make and CMake tests on Windows, they don't work
           cmake --version
