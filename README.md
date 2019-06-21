@@ -3,11 +3,24 @@
 
 Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged.
 
-[![Build Status](https://mottosso.visualstudio.com/what%20does%20it%20mean/_apis/build/status/mottosso.bleeding-rez?branchName=master)](https://mottosso.visualstudio.com/what%20does%20it%20mean/_build/latest?definitionId=1&branchName=master)
-[![](https://ci.appveyor.com/api/projects/status/github/mottosso/bleeding-rez?branch=master&svg=true&passingText=Windows&failingText=Windows&pendingText=Windows)](https://ci.appveyor.com/project/mottosso/bleeding-rez)
-[![](https://ci.appveyor.com/api/projects/status/github/mottosso/bleeding-rez?branch=master&svg=true&passingText=Linux&failingText=Linux&pendingText=Linux)](https://ci.appveyor.com/project/mottosso/bleeding-rez)
-[![](https://img.shields.io/travis/mottosso/bleeding-rez/master.svg?label=MacOS)](https://travis-ci.org/mottosso/bleeding-rez)
-[![](https://img.shields.io/codecov/c/github/mottosso/bleeding-rez.svg)](https://codecov.io/gh/mottosso/bleeding-rez)
+<br>
+
+#### Build Status
+
+<table>
+    <tr>
+        <td><code>master</code></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/master.svg?label=Windows></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/master.svg?label=Linux></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/master.svg?label=MacOS></a></td>
+    </tr>
+    <tr>
+        <td><code>dev</code></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/dev.svg?label=Windows></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/dev.svg?label=Linux></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/dev.svg?label=MacOS></a></td>
+    </tr>
+</table>
 
 <br>
 
