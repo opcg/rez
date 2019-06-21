@@ -5,7 +5,7 @@ import importlib
 from rez.vendor.argparse import _StoreTrueAction, SUPPRESS
 from rez.cli._util import subcommands, LazyArgumentParser, _env_var_true
 from rez.utils.logging_ import print_error
-from rez.exceptions import RezError, RezSystemError
+from rez.exceptions import RezError, RezSystemError, RezUncatchableError
 from rez.utils.logging_ import setup_logging
 from rez import __version__
 
@@ -68,28 +68,81 @@ class InfoAction(_StoreTrueAction):
         sys.exit(0)
 
 
+def safe_environment():
+    import os
+    from rez.backport.shutilwhich import which
+
+    environ = {
+        key: os.getenv(key)
+        for key in ("USERNAME",
+                    "SYSTEMROOT",
+
+                    # Windows
+                    "ComSpec",
+                    "windir",
+                    "PROMPT",
+                    "PathExt",
+                    "OS",
+                    "TMP",
+                    "Temp",
+
+                    # Linux
+                    "DISPLAY")
+        if os.getenv(key)
+    }
+
+    def whichdir(exe):
+        return os.path.dirname(which(exe))
+
+    if os.name == "nt":
+        environ["PATH"] = os.pathsep.join([
+            whichdir("cmd"),
+            whichdir("powershell"),
+        ])
+
+    else:
+        environ["PATH"] = os.pathsep.join([
+            whichdir("bash"),
+        ])
+
+    # Prevent __pycache__ folders from being picked up as packages
+    environ["PYTHONDONOTWRITEBYTECODE"] = "1"
+
+    return environ
+
+
 def run(command=None):
     import os
 
-    safe = not os.getenv("REZ_UNSAFEMODE")
-    patched = "_REZ_PATCHED_ENV" not in os.environ
+    # For safety, replace the current session with one
+    # that doesn't include PYTHONPATH.
+
+    safe = os.getenv("REZ_SAFEMODE")
+    patched = "_REZ_PATCHED_ENV" in os.environ
     if safe and not patched:
         # Re-spawn Python with safe environment
 
         import subprocess
-        environ = os.environ.copy()
-
-        # Clear any notion of PYTHONPATH
-        environ.pop("PYTHONPATH", None)
+        environ = safe_environment()
 
         # Prevent subsequent session from spawing new session
         environ["_REZ_PATCHED_ENV"] = "1"
 
-        argv = ["-m", "rez"] + sys.argv[1:]
+        # Restore subsequent shells to the current directory,
+        # countering the `cwd=rezdir` below.
+        environ["_REZ_INITIAL_CWD"] = os.getcwd()
+
+        # Replace absolute path to executable with python
+        # Why not use sys.argv as-is?
+        #   The first argument is the absolute path to the executable
+        #   with this command, followed by the arguments. On Windows
+        #   however, this executable does not include its extension,
+        #   ".exe" which causes it not to be found.
+        argv = [sys.executable, "-m", "rez"] + sys.argv[1:]
 
         rezdir = os.path.join(__file__, "..", "..", "..")
         popen = subprocess.Popen(
-            [sys.executable] + argv,
+            argv,
 
             # Use doctored-environment
             env=environ,
@@ -103,6 +156,10 @@ def run(command=None):
         exit(popen.wait())
 
     setup_logging()
+
+    # Prevent `__pycache__` folders from being accidentally
+    # created and picked up as Rez packages.
+    sys.dont_write_bytecode = True
 
     parser = LazyArgumentParser("rez")
 
@@ -166,7 +223,7 @@ def run(command=None):
         extra_arg_groups = []
 
     if opts.debug or _env_var_true("REZ_DEBUG"):
-        exc_type = None
+        exc_type = RezUncatchableError
     else:
         exc_type = RezError
 

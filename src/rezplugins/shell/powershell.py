@@ -124,6 +124,9 @@ class PowerShell(Shell):
         if shell_command:
             executor.command(shell_command)
 
+        # Forward exit call to parent PowerShell process
+        executor.command("exit $LastExitCode")
+
         code = executor.get_output()
         target_file = os.path.join(
             tmpdir, "rez-shell.%s" % self.file_extension()
@@ -142,12 +145,11 @@ class PowerShell(Shell):
         cmd += [self.executable]
         cmd += ['. "{}"'.format(target_file)]
 
-        if not shell_command:
+        if shell_command is None:
             cmd.insert(1, "-noexit")
 
         p = popen(cmd,
                   env=env,
-                  shell=True,
                   universal_newlines=True,
                   **Popen_args)
         return p
@@ -198,7 +200,9 @@ class PowerShell(Shell):
         self._addline(self.setenv(key, value))
 
     def alias(self, key, value):
-        self._addline("Set-Alias -Name %s -Value \"%s\"" % (key, value))
+        value = EscapedString.disallow(value)
+        cmd = "function {key}() {{ {value} $args }}"
+        self._addline(cmd.format(key=key, value=value))
 
     def comment(self, value):
         for line in value.split('\n'):
@@ -206,14 +210,19 @@ class PowerShell(Shell):
 
     def info(self, value):
         for line in value.split('\n'):
-            self._addline('Write-Host %s' % line)
+            self._addline('Write-Output %s' % line)
+
+            # Prefer Write-Output to Write-Host, as Write-Output
+            # is designed for console output, whereas Write-Host
+            # is a lower-level print mechanism that doesn't work
+            # well with non-String types
 
     def error(self, value):
         for line in value.split('\n'):
             self._addline('Write-Error "%s"' % line)
 
     def source(self, value):
-        self._addline("%s" % value)
+        self._addline(". \"%s\"" % value)
 
     def command(self, value):
         self._addline(value)

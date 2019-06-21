@@ -1,31 +1,123 @@
+---
 trigger:
-- master
-- dev
+  branches:
+    include: ["*"]
+  paths:
+    exclude:
+      - .github/*
+      - doc/*
+      - wiki/*
+      - .gitignore
+      - LICENSE
+      - README.md
+      - CONTRIBUTING.md
+      - CHANGELOG.md
 
-pool:
-  vmImage: 'ubuntu-latest'
-strategy:
-  matrix:
-    Python27:
-      python.version: '2.7'
-    Python35:
-      python.version: '3.5'
-    Python36:
-      python.version: '3.6'
-    Python37:
-      python.version: '3.7'
+jobs:
+  - job: Ubuntu
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        Python27:
+          python.version: '2.7'
+        Python35:
+          python.version: '3.5'
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
 
-- script: |
-    python -m pip install --upgrade pip
-    pip install .
-  displayName: 'Install'
+      - script: |
+          sudo apt-get update
+          sudo apt-get install -y tcsh csh cmake
+        displayName: "Ubuntu Setup"
 
-- script: |
-    rez selftest -s bash -vvv
-  displayName: 'Test'
+      - script: |
+          pip install --upgrade pip
+          pip install .
+        displayName: 'pip install'
+
+      - script: |
+          rez selftest -vv
+        displayName: 'selftest'
+
+      # Finally, perform code coverage
+      - script: |
+          pip install nose2 codecov
+          nose2 --plugin nose2.plugins.junitxml --junit-xml
+          pwd
+          ls -la
+          codecov --file nose2-junit.xml
+        displayName: 'CodeCov'
+        condition: eq(variables['python.version'], '3.7')
+        env:
+          CODECOV_TOKEN: $(CODECOV_TOKEN)
+
+      - task: PublishTestResults@2
+        condition: and(succeededOrFailed(), eq(variables['python.version'], '3.7'))
+        inputs:
+          testResultsFiles: 'nose2-junit.xml'
+          testRunTitle: 'Publish test results for Python $(python.version)'
+
+  - job: MacOS
+    pool:
+      vmImage: 'macOS-10.13'
+    strategy:
+      matrix:
+        Python27:
+          python.version: '2.7'
+        Python35:
+          python.version: '3.7'
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
+
+      - script: |
+          pip install --upgrade pip
+          pip install .
+        displayName: 'pip install'
+
+      - script: |
+          rez selftest -vv
+        displayName: 'selftest'
+
+  - job: Windows
+    pool:
+      vmImage: vs2017-win2016
+    strategy:
+      matrix:
+        Python27:
+          python.version: '2.7'
+        Python35:
+          python.version: '3.7'
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
+
+      - powershell: |
+          # Skip make and CMake tests on Windows, they don't work
+          cmake --version
+          make --version
+          Remove-Item $(Get-Command cmake).path
+          Remove-Item $(Get-Command make).path
+        displayName: 'Disable CMake'
+      - powershell: |
+          pip install --upgrade pip
+          pip install .
+        displayName: 'pip install'
+      - powershell: |
+          rez selftest -vv
+        displayName: 'selftest'
