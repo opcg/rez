@@ -200,7 +200,9 @@ class PowerShell(Shell):
         self._addline(self.setenv(key, value))
 
     def alias(self, key, value):
-        self._addline("Set-Alias -Name %s -Value \"%s\"" % (key, value))
+        value = EscapedString.disallow(value)
+        cmd = "function {key}() {{ {value} $args }}"
+        self._addline(cmd.format(key=key, value=value))
 
     def comment(self, value):
         for line in value.split('\n'):
@@ -220,7 +222,7 @@ class PowerShell(Shell):
             self._addline('Write-Error "%s"' % line)
 
     def source(self, value):
-        self._addline("%s" % value)
+        self._addline(". \"%s\"" % value)
 
     def command(self, value):
         self._addline(value)
