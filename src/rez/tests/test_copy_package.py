@@ -18,7 +18,7 @@ from rez.tests.util import TestBase, TempdirMixin
 
 def copy_package(*args, **kwargs):
     """Protect against copies being made too fast
-    
+
     On fast-enough disks, and especially cloud-based CI like Azure,
     copying a package can take so little time that comparing it with
     the current time afterwards can yield identical results, causing
@@ -29,7 +29,7 @@ def copy_package(*args, **kwargs):
     try:
         return _copy_package(*args, **kwargs)
     finally:
-        time.sleep(0.01)
+        time.sleep(1)
 
 
 class TestCopyPackage(TestBase, TempdirMixin):
