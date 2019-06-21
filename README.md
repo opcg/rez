@@ -1,7 +1,7 @@
 
 ![image](https://user-images.githubusercontent.com/2152766/56459362-3eb1ff00-638a-11e9-9db4-6ae83f6dc70f.png)
 
-Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged.
+Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged, editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
 
 <br>
 
