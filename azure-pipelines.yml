@@ -1,10 +1,18 @@
 ---
 trigger:
+
+  # Already default, but made explicit here
   branches:
     include: ["*"]
+
+  # Ensure Azure triggers a build on a new tag
+  # We use these for GitHub releases
+  tags:
+    include: ['*']
+
   paths:
+    # Do not trigger a build on changes at these paths
     exclude:
-      - .github/*
       - doc/*
       - wiki/*
       - .gitignore
@@ -13,7 +21,15 @@ trigger:
       - CONTRIBUTING.md
       - CHANGELOG.md
 
+
 jobs:
+
+  # -----------------------------------------------------------------------
+  #
+  # Test
+  #
+  # -----------------------------------------------------------------------
+
   - job: Ubuntu
     pool:
       vmImage: 'ubuntu-latest'
@@ -61,7 +77,11 @@ jobs:
           CODECOV_TOKEN: $(CODECOV_TOKEN)
 
       - task: PublishTestResults@2
-        condition: and(succeededOrFailed(), eq(variables['python.version'], '3.7'))
+        condition: |
+          and(
+            succeededOrFailed(),
+            eq(variables['python.version'], '3.7')
+          )
         inputs:
           testResultsFiles: 'nose2-junit.xml'
           testRunTitle: 'Publish test results for Python $(python.version)'
@@ -121,3 +141,42 @@ jobs:
       - powershell: |
           rez selftest -vv
         displayName: 'selftest'
+
+
+  # -----------------------------------------------------------------------
+  #
+  # Deploy to PyPI
+  #
+  # -----------------------------------------------------------------------
+
+  - job: Deploy
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags')
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        Python37:
+          python.version: '3.7'
+
+    # Decrypt secret variables provided by Azure web console
+    env:
+      _LOGIN: $(PYPI_LOGIN)
+      _PASSWORD: $(PYPI_PASSWORD)
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
+
+
+      - script: |
+          pip install wheel twine
+          python setup.py sdist bdist_wheel
+          echo [distutils] > ~/.pypirc
+          echo index-servers=pypi >> ~/.pypirc
+          echo [pypi] >> ~/.pypirc
+          echo username=$_LOGIN >> ~/.pypirc
+          echo password=$_PASSWORD >> ~/.pypirc
+          twine upload dist/*
+        displayName: "Deploy to PyPI"
