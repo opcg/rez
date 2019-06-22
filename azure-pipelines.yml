@@ -158,17 +158,11 @@ jobs:
         Python37:
           python.version: '3.7'
 
-    # Decrypt secret variables provided by Azure web console
-    env:
-      _LOGIN: $(PYPI_LOGIN)
-      _PASSWORD: $(PYPI_PASSWORD)
-
     steps:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '$(python.version)'
         displayName: 'Use Python $(python.version)'
-
 
       - script: |
           pip install wheel twine
@@ -180,3 +174,8 @@ jobs:
           echo password=$_PASSWORD >> ~/.pypirc
           twine upload dist/*
         displayName: "Deploy to PyPI"
+
+        # Decrypt secret variables provided by Azure web console
+        env:
+          _LOGIN: $(PYPI_LOGIN)
+          _PASSWORD: $(PYPI_PASSWORD)
