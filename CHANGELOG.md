@@ -1,5 +1,37 @@
 # Change Log
 
+## [2.31.4](https://github.com/nerdvegas/rez/tree/2.31.4) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.3...2.31.4)
+
+**Merged pull requests:**
+
+- Expose Python standard module __file__ and __name__ to rezconfig [\#636](https://github.com/nerdvegas/rez/pull/636) ([mottosso](https://github.com/mottosso))
+
+## [2.31.3](https://github.com/nerdvegas/rez/tree/2.31.3) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.2...2.31.3)
+
+**Merged pull requests:**
+
+- Bugfix for alias() on Windows [\#607](https://github.com/nerdvegas/rez/pull/607) ([mottosso](https://github.com/mottosso))
+
+## [2.31.2](https://github.com/nerdvegas/rez/tree/2.31.2) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.1...2.31.2)
+
+**Merged pull requests:**
+
+- Fix #558 [\#647](https://github.com/nerdvegas/rez/pull/647) ([mottosso](https://github.com/mottosso))
+
+**Closed issues:**
+
+- rez-build breaks if "|" in a required package's version on Windows [\#558](https://github.com/nerdvegas/rez/issues/558)
+
+## [2.31.1](https://github.com/nerdvegas/rez/tree/2.31.1) (2019-06-18)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.0...2.31.1)
+
+**Merged pull requests:**
+
+- Automatically create missing package repository dir [\#623](https://github.com/nerdvegas/rez/pull/623) ([mottosso](https://github.com/mottosso))
+
 ## [2.31.0](https://github.com/nerdvegas/rez/tree/2.31.0) (2019-06-04)
 [Full Changelog](https://github.com/nerdvegas/rez/compare/2.30.2...2.31.0)
 

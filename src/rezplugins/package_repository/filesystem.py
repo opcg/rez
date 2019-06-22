@@ -30,11 +30,6 @@ from rez.vendor.version.version import Version, VersionRange
 
 debug_print = config.debug_printer("resources")
 
-try:
-    basestring
-except NameError:
-    # Python 3+
-    basestring = str
 
 # ------------------------------------------------------------------------------
 # format version
@@ -376,7 +371,7 @@ class FileSystemCombinedPackageResource(PackageResourceHelper):
 
             overrides = self.parent.version_overrides
             if overrides:
-                for range_, data_ in overrides.items():
+                for range_, data_ in overrides.iteritems():
                     if version in range_:
                         data.update(data_)
                 del data["version_overrides"]
@@ -593,7 +588,7 @@ class FileSystemPackageRepository(PackageRepository):
                 variant_version == variant_resource.version:
             return variant_resource
 
-        # check repo exists on disk
+        # create repo path on disk if it doesn't exist
         path = self.location
 
         try:
@@ -601,8 +596,8 @@ class FileSystemPackageRepository(PackageRepository):
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise PackageRepositoryError(
-                    "Package repository did not exist "
-                    "and could not be created."
+                    "Package repository path %r could not be created: %s: %s"
+                    % (path, e.__class__.__name__, e)
                 )
 
         # install the variant
@@ -736,11 +731,11 @@ class FileSystemPackageRepository(PackageRepository):
         # tested regardless. Failed releases may cause 'building files' to be
         # left behind, so we need to clear these out also
         #
-        dirs = list()
+        dirs = set()
         building_dirs = set()
 
         # find dirs and dirs marked as 'building'
-        for name in sorted(os.listdir(root), reverse=True):
+        for name in os.listdir(root):
             if name.startswith('.'):
                 if not name.startswith(self.building_prefix):
                     continue
@@ -750,8 +745,8 @@ class FileSystemPackageRepository(PackageRepository):
 
             path = os.path.join(root, name)
 
-            if name not in dirs and os.path.isdir(path) and not ignore_dir(name):
-                dirs.append(name)
+            if os.path.isdir(path) and not ignore_dir(name):
+                dirs.add(name)
 
         # check 'building' dirs for validity
         for name in building_dirs:
@@ -763,7 +758,7 @@ class FileSystemPackageRepository(PackageRepository):
                 # package probably still being built
                 dirs.remove(name)
 
-        return dirs
+        return list(dirs)
 
     # True if `path` contains package.py or similar
     def _is_valid_package_directory(self, path):
@@ -844,10 +839,6 @@ class FileSystemPackageRepository(PackageRepository):
 
         # find or create the package family
         family = self.get_package_family(variant_name)
-
-        if not family and dry_run:
-            return None
-
         if not family:
             family = self._create_family(variant_name)
 
@@ -969,7 +960,7 @@ class FileSystemPackageRepository(PackageRepository):
         if existing_package:
             if variant.index is None:
                 existing_installed_variant = \
-                    next(self.iter_variants(existing_package))
+                    self.iter_variants(existing_package).next()
             else:
                 variant_requires = variant.variant_requires
 
@@ -1046,7 +1037,7 @@ class FileSystemPackageRepository(PackageRepository):
         # This is done so that variants added to an existing package don't change
         # attributes such as 'timestamp' or release-related fields like 'revision'.
         #
-        for key, value in overrides.items():
+        for key, value in overrides.iteritems():
             if existing_package:
                 if key not in package_data:
                     package_data[key] = value
