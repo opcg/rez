@@ -67,7 +67,7 @@ scripts = [
 
 
 setup(
-    name=os.getenv("REZ_PYPI_NAME", "rez"),  # for development on fork
+    name="bleeding-rez",
     version=version,
     description=("A cross-platform packaging system that can build and "
                  "install multiple version of packages, and dynamically "

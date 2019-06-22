@@ -166,7 +166,7 @@ def run(command=None):
     parser.add_argument("-i", "--info", action=InfoAction,
                         help="print information about rez and exit")
     parser.add_argument("-V", "--version", action="version",
-                        version="Rez %s" % __version__)
+                        version="bleeding-rez %s" % __version__)
 
     # add args common to all subcommands... we add them both to the top parser,
     # AND to the subparsers, for two reasons:
