@@ -1,4 +1,3 @@
-from rez.vendor.six import six
 from rez.config import config
 from rez.packages_ import Package
 from rez.serialise import load_from_file, FileFormat, set_objects
@@ -82,13 +81,13 @@ class DeveloperPackage(Package):
                     break
             if data:
                 name = data.get("name")
-                if name is not None or isinstance(name, six.string_types):
+                if name is not None or isinstance(name, basestring):
                     break
 
         if data is None:
             raise PackageMetadataError("No package definition file found at %s" % path)
 
-        if name is None or not isinstance(name, six.string_types):
+        if name is None or not isinstance(name, basestring):
             raise PackageMetadataError(
                 "Error in %r - missing or non-string field 'name'" % filepath)
 
@@ -107,7 +106,7 @@ class DeveloperPackage(Package):
         package.includes = set()
 
         def visit(d):
-            for k, v in d.items():
+            for k, v in d.iteritems():
                 if isinstance(v, SourceCode):
                     package.includes |= (v.includes or set())
                 elif isinstance(v, dict):
@@ -169,24 +168,22 @@ class DeveloperPackage(Package):
 
         with add_sys_paths(config.package_definition_build_python_paths):
             preprocess_func = getattr(self, "preprocess", None)
-            funcname = None
 
             if preprocess_func:
                 print_info("Applying preprocess from package.py")
 
             else:
                 # load globally configured preprocess function
-                dotted = self.config.package_preprocess_function
+                package_preprocess_function = self.config.package_preprocess_function
 
-                if not dotted:
+                if not package_preprocess_function:
                     return None
 
-                elif isfunction(dotted):
-                    funcname = dotted.__name__
-                    preprocess_func = dotted
+                elif isfunction(package_preprocess_function):
+                    preprocess_func = package_preprocess_function
 
-                elif isinstance(dotted, six.string_types):
-                    if '.' not in dotted:
+                elif isinstance(package_preprocess_function, basestring):
+                    if '.' not in package_preprocess_function:
                         print_error(
                             "Setting 'package_preprocess_function' must be of "
                             "form 'module[.module.module...].funcname'. "
@@ -194,14 +191,14 @@ class DeveloperPackage(Package):
                         )
                         return None
 
-                    name, funcname = dotted.rsplit('.', 1)
+                    name, funcname = package_preprocess_function.rsplit('.', 1)
 
                     try:
                         module = __import__(name=name, fromlist=[funcname])
                     except Exception as e:
                         print_error(
                             "Failed to load preprocessing function '%s': %s"
-                            % (dotted, str(e))
+                            % (package_preprocess_function, str(e))
                         )
 
                         return None
@@ -211,15 +208,15 @@ class DeveloperPackage(Package):
 
                 else:
                     print_error(
-                        "Invalid package_preprocess_function: %s" % funcname
+                        "Invalid package_preprocess_function: %s" % package_preprocess_function
                     )
                     return None
 
-            if not preprocess_func or not isfunction(preprocess_func):
-                print_error("Function '%s' not found" % funcname)
-                return None
+                print_info("Applying preprocess function %s" % preprocess_func)
 
-            print_info("Applying preprocess function %s" % funcname)
+            if not preprocess_func or not isfunction(preprocess_func):
+                print_error("Function '%s' not found" % package_preprocess_function)
+                return None
 
             preprocessed_data = deepcopy(data)
 
