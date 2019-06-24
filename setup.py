@@ -41,6 +41,9 @@ _rez_version = None  # just to keep linting happy
 exec(code)  # inits _rez_version
 version = _rez_version
 
+with open(os.path.join(dirname, "README.md")) as f:
+    README = f.read()
+
 
 scripts = [
     "rez-config",
@@ -73,10 +76,10 @@ setup(
                  "install multiple version of packages, and dynamically "
                  "configure resolved environments at runtime."),
     keywords="package resolve version build install software management",
-    long_description=None,
-    url="https://github.com/nerdvegas/rez",
-    author="Allan Johns",
-    author_email="nerdvegas@gmail.com",
+    long_description=README,
+    url="https://github.com/mottosso/bleeding-rez",
+    author="Marcus Ottosson",
+    author_email="konstruktion@gmail.com",
     license="LGPL",
     entry_points={
         "console_scripts": [
@@ -112,7 +115,7 @@ setup(
             find_files('*', 'icons', root='rezgui')
     },
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
