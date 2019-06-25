@@ -543,13 +543,16 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
     @property
     def nonlocal_packages_path(self):
         """Returns package search paths with local path removed."""
-        packages_path = self.local_packages_path
 
-        # Account for relative paths and varying or duplicate slashes
-        packages_path = os.path.abspath(packages_path)
-        packages_path = os.path.normpath(packages_path)
+        def normalise_path(path):
+            # Account for relative paths and varying or duplicate slashes
+            path = os.path.abspath(path)
+            path = os.path.normpath(path)
+            return path
 
-        paths = self.packages_path[:]
+        packages_path = normalise_path(self.local_packages_path)
+        paths = list(map(normalise_path, self.packages_path))
+
         if packages_path in paths:
             paths.remove(packages_path)
 
