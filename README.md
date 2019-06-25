@@ -1,7 +1,7 @@
 
-![image](https://user-images.githubusercontent.com/2152766/56459362-3eb1ff00-638a-11e9-9db4-6ae83f6dc70f.png)
+<img width=300 src=https://user-images.githubusercontent.com/2152766/59975170-e925e880-95ac-11e9-9751-c37ff554b5f1.png>
 
-Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged, editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
+A [Rez](https://github.com/nerdvegas/rez) superset, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged, editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
 
 <br>
 
@@ -21,6 +21,25 @@ Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branch
         <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/dev.svg?label=MacOS></a></td>
     </tr>
 </table>
+
+![](https://badge.fury.io/py/bleeding-rez.svg)
+
+<br>
+
+### Companion Projects
+
+Elevate your Rez with these.
+
+- `rez-installz` - Native package manager for bleeding-rez
+- [`rez-localz`](https://github.com/mottosso/rez-localz/issues/1) - Package localisation from network or cloud storage
+- [`rez-scoopz`](https://github.com/mottosso/rez-scoopz) - Install from [500+ system packages](https://github.com/ScoopInstaller/Main/tree/master/bucket) for Windows as a Rez package
+- [`rez-pipz`](https://github.com/mottosso/rez-pipz) - Build and install any [PyPI](https://pypi.org) compatible project as a Rez package
+- `rez-cmakez` - Build your projects using CMake
+- `rez-yumz` - Install from a selection of [80,000+ RPM packages](https://centos.pkgs.org/7/centos-x86_64/) and counting
+- `rez-vcpkgz` - Install any of the [1000+ C++ libraries](https://github.com/Microsoft/vcpkg/tree/master/ports) as a Rez package
+- `rez-conanz` - Install any of the [200+ C++ libraries](https://conan.io/) as a Rez package
+- `rez-allspark` - Visual application launcher and Rez debugging tool
+- [`rez-for-projects`](https://github.com/mottosso/rez-for-projects) - A set of example packages for use of Rez (and Allspark) with project and application configurations
 
 <br>
 
@@ -468,39 +487,33 @@ disable_rez_1_compatibility = False
 
 <br>
 
-### Safe Mode
+### FAQ
 
-Per default, Rez forwards your full environment into each new Rez context, which means that if you've got something on PATH you'll still have it from within a context.
+> Should I use nerdvegas/rez or bleeding-rez?
 
-```bash
-$ rez env
-> $ python
->>>
-```
+Rez isn't for everyone, and neither is bleeding-rez.
 
-This is sometimes undesirable, you may instead want the new context to contain *only* the requested.
+- If you've already committed to nerdvegas/rez and have built your pipeline on it, stick with nerdvegas/rez
+- If you've just gotten started using Rez, use bleeding-rez
 
-```bash
-$ rez env
-> $ python
-'python' is not recognized as an internal or external command,
-operable program or batch file.
-> $ exit
-$ rez env python
-> $ python
->>>
-```
+That said, bleeding-rez is a *superset* of nerdvegas/rez, meaning everything you've built works in both.
 
-To achieve this, you can enable a so-called "safe mode".
+> Why does bleeding-rez exist?
+
+As the name suggests, bleeding-rez moves faster than nerdvegas/rez. Both projects aim for stability and function, except nerdvegas/rez doesn't run tests on pull-requests, doesn't test on Windows and prioritises existing and advanced users over adoption and small company use.
+
+For stability, this project relies on pre-releases for unstable releases and releases for stable ones, such that you can try the latest features in a sandboxed manner.
+
+You can install a pre-release using the `--pre` flag of `pip install`.
 
 ```bash
-$ export REZ_SAFEMODE=1
-$ rez env
-> $ python
-'python' is not recognized as an internal or external command,
-operable program or batch file.
+# Stable
+pip install bleeding-rez
+
+# Latest
+pip install bleeding-rez --pre
 ```
 
-This will include a subset of your environment into the context and exclude PYTHONPATH and most of PATH.
+It also favours contributions and encourages learning from ones mistakes; a pull-request may break a feature and may get released into the wild, as a pre-release. As a result, contributors are encouraged to experiment with ideas and advance Rez into new territory.
 
-You can query whether you are in a "patched" environment via the `_REZ_PATCHED_ENV=1` environment variable.
+Speaking of new territory, one of the primariy differences between nerdvegas/rez and bleeding-rez (at the time of this writing) is encouraging use for production configurations and assets, in addition to software. See [rez-for-projects](https://github.com/mottosso/rez-for-projects) for an example.
