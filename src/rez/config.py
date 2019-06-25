@@ -535,9 +535,16 @@ class Config(object):
     @property
     def nonlocal_packages_path(self):
         """Returns package search paths with local path removed."""
+        packages_path = self.local_packages_path
+
+        # Account for relative paths and varying or duplicate slashes
+        packages_path = os.path.abspath(packages_path)
+        packages_path = os.path.normpath(self.packages_path)
+
         paths = self.packages_path[:]
-        if self.local_packages_path in paths:
-            paths.remove(self.local_packages_path)
+        if packages_path in paths:
+            paths.remove(packages_path)
+
         return paths
 
     def get_completions(self, prefix):
