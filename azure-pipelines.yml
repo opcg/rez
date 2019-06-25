@@ -32,7 +32,7 @@ jobs:
 
   - job: Ubuntu
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-16.04'  # Xenial
     strategy:
       matrix:
         Python27:
@@ -88,7 +88,7 @@ jobs:
 
   - job: MacOS
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: 'macOS-10.13'  # High-Sierra
     strategy:
       matrix:
         Python27:
