@@ -210,12 +210,10 @@ class PowerShell(Shell):
 
     def info(self, value):
         for line in value.split('\n'):
-            self._addline('Write-Output %s' % line)
+            self._addline('Write-Host %s' % line)
 
-            # Prefer Write-Output to Write-Host, as Write-Output
-            # is designed for console output, whereas Write-Host
-            # is a lower-level print mechanism that doesn't work
-            # well with non-String types
+            # Prefer Write-Host to Write-Output
+            # See https://github.com/mottosso/bleeding-rez/issues/48
 
     def error(self, value):
         for line in value.split('\n'):
