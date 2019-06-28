@@ -7,7 +7,7 @@ from rez.cli._util import subcommands, LazyArgumentParser, _env_var_true
 from rez.utils.logging_ import print_error
 from rez.exceptions import RezError, RezSystemError, RezUncatchableError
 from rez.utils.logging_ import setup_logging
-from rez import __version__
+from rez import __version__, __project__
 
 
 class SetupRezSubParser(object):
@@ -166,7 +166,7 @@ def run(command=None):
     parser.add_argument("-i", "--info", action=InfoAction,
                         help="print information about rez and exit")
     parser.add_argument("-V", "--version", action="version",
-                        version="bleeding-rez %s" % __version__)
+                        version="%s %s" % (__project__, __version__))
 
     # add args common to all subcommands... we add them both to the top parser,
     # AND to the subparsers, for two reasons:
