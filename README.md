@@ -507,20 +507,21 @@ Yes, to some extent. Have a look at these.
 
 | Project | Scope | Shared Packages | Commercial
 |:--------|:------|:----------------|:-----------------
-| [bleeding-rez]()                        | ESAP | x
-| [rez]()                                 | ES | x
-| [Stash]()                               | ESAP | x | x
-| [be]()                                  | ESAP | x
-| [Ecosystem]()                           | E | x
-| [add]()                                 | E | x
-| [avalon]()                              | EA | x
-| [miniconda]()                           | S |
-| [virtualenv]()                          | S | 
-| [venv]()                                | S |
-| [pipenv]()                              | S |
+| [bleeding-rez](https://github.com/mottosso/bleeding-rez) | ESAP | x
+| [rez](https://github.com/nerdvegas/rez) | ES | x
+| [Stash](http://stashsoftware.com) | ESAP | x | x
+| [be](https://github.com/mottosso/be) | ESAP | x
+| [Ecosystem](https://github.com/PeregrineLabs/Ecosystem) | E | x
+| [add](https://github.com/mottosso/add) | E | x
+| [avalon](http://getavalon.github.io) | EA | x
+| [miniconda](https://conda.io/en/latest/) | S |
+| [virtualenv](https://github.com/pypa/virtualenv) | S | 
+| [venv](https://docs.python.org/3/library/venv.html) | S |
+| [pipenv](https://docs.pipenv.org/en/latest/) | S |
+| [poetry](https://github.com/sdispater/poetry) | S |
 | [hatch](https://github.com/ofek/hatch)  | S |
 | [nixpkgs](https://nixos.org/nixpkgs/)   | S | x
-| [scoop]()                               | S | 
+| [scoop](https://scoop.sh)               | S | 
 
 - **Project** Name of project
 - **Shared** Whether packages are re-installed per environment, or shared amongst them
