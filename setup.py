@@ -41,9 +41,6 @@ _rez_version = None  # just to keep linting happy
 exec(code)  # inits _rez_version
 version = _rez_version
 
-with open(os.path.join(dirname, "README.md")) as f:
-    README = f.read()
-
 
 scripts = [
     "rez-config",
@@ -76,7 +73,6 @@ setup(
                  "install multiple version of packages, and dynamically "
                  "configure resolved environments at runtime."),
     keywords="package resolve version build install software management",
-    long_description=README,
     url="https://github.com/mottosso/bleeding-rez",
     author="Marcus Ottosson",
     author_email="konstruktion@gmail.com",
