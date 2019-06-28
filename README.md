@@ -26,12 +26,12 @@ A [Rez](https://github.com/nerdvegas/rez) superset, with all [feature branches](
 
 <br>
 
-### Companion Projects
+### Ecosystem
 
-Elevate your Rez with these.
+A small but growing number of companion projects for bleeding- and nerdvegas-rez.
 
 - `rez-installz` - Native package manager for bleeding-rez
-- [`rez-localz`](https://github.com/mottosso/rez-localz/issues/1) - Package localisation from network or cloud storage
+- [`rez-localz`](https://github.com/mottosso/rez-localz) - Package localisation from network or cloud storage
 - [`rez-scoopz`](https://github.com/mottosso/rez-scoopz) - Install from [500+ system packages](https://github.com/ScoopInstaller/Main/tree/master/bucket) for Windows as a Rez package
 - [`rez-pipz`](https://github.com/mottosso/rez-pipz) - Build and install any [PyPI](https://pypi.org) compatible project as a Rez package
 - `rez-cmakez` - Build your projects using CMake
@@ -40,6 +40,11 @@ Elevate your Rez with these.
 - `rez-conanz` - Install any of the [200+ C++ libraries](https://conan.io/) as a Rez package
 - `rez-allspark` - Visual application launcher and Rez debugging tool
 - [`rez-for-projects`](https://github.com/mottosso/rez-for-projects) - A set of example packages for use of Rez (and Allspark) with project and application configurations
+- `rez-performance` - Test the impact of x-number of packages with y-level of complexity in your network environment to make better integration and deployment decisions.
+- `rez-releaz` - Secure package releases with Git integration
+- `rez-guiz` - Old-school visual editor of Rez contexts
+- `rez-flowchartz` - Visualise package dependencies as a flowchart, useful for debugging
+- `rez-...` Your project here!
 
 <br>
 
@@ -240,13 +245,9 @@ Every commit is run against each supported platform and version of Python.
 
 **OS's**
 
-- Windows 7
 - Windows 10
-- Ubuntu 16
-- Ubuntu 18
-- CentOS 6
-- CentOS 7
-- MacOS Mojave
+- Ubuntu 16 (Xenial)
+- MacOS 10.13 (Mojave)
 
 **Python's**
 
@@ -489,31 +490,67 @@ disable_rez_1_compatibility = False
 
 ### FAQ
 
-> Should I use nerdvegas/rez or bleeding-rez?
+##### <blockquote>Should I use nerdvegas/rez or bleeding-rez?</blockquote>
 
 Rez isn't for everyone, and neither is bleeding-rez.
 
 - If you've already committed to nerdvegas/rez and have built your pipeline on it, stick with nerdvegas/rez
-- If you've just gotten started using Rez, use bleeding-rez
+- If you've just gotten started using Rez, use bleeding-rez.
 
-That said, bleeding-rez is a *superset* of nerdvegas/rez, meaning everything you've built works in both.
+##### <blockquote>Why does bleeding-rez exist?</blockquote>
 
-> Why does bleeding-rez exist?
+bleeding-rez started off as a fork from which to make PRs to nerdvegas/rez, but eventually started to diverge. Now it's meant as a fire up the butt of the project. Competition breeds innovation.
 
-As the name suggests, bleeding-rez moves faster than nerdvegas/rez. Both projects aim for stability and function, except nerdvegas/rez doesn't run tests on pull-requests, doesn't test on Windows and prioritises existing and advanced users over adoption and small company use.
+##### <blockquote>Are there any similar projects to bleeding-rez?</blockquote>
 
-For stability, this project relies on pre-releases for unstable releases and releases for stable ones, such that you can try the latest features in a sandboxed manner.
+Yes, to some extent. Have a look at these.
 
-You can install a pre-release using the `--pre` flag of `pip install`.
+| Project | Scope | Shared Packages | Commercial
+|:--------|:------|:----------------|:-----------------
+| [bleeding-rez]()                        | ESAP | x
+| [rez]()                                 | ES | x
+| [Stash]()                               | ESAP | x | x
+| [be]()                                  | ESAP | x
+| [Ecosystem]()                           | E | x
+| [add]()                                 | E | x
+| [avalon]()                              | EA | x
+| [miniconda]()                           | S |
+| [virtualenv]()                          | S | 
+| [venv]()                                | S |
+| [pipenv]()                              | S |
+| [hatch](https://github.com/ofek/hatch)  | S |
+| [nixpkgs](https://nixos.org/nixpkgs/)   | S | x
+| [scoop]()                               | S | 
 
-```bash
-# Stable
-pip install bleeding-rez
+- **Project** Name of project
+- **Shared** Whether packages are re-installed per environment, or shared amongst them
+- **Scope** Usecases covered by project
+    - **E** Environment management, per-package control over what is should look like when requested
+    - **S** Software builds, e.g. via cmake
+    - **A** Application versioning, along with associated dependencies
+    - **P** Project versioning, with associated software and application dependencies
 
-# Latest
-pip install bleeding-rez --pre
-```
+##### <blockquote>How can I get involved?</blockquote>
 
-It also favours contributions and encourages learning from ones mistakes; a pull-request may break a feature and may get released into the wild, as a pre-release. As a result, contributors are encouraged to experiment with ideas and advance Rez into new territory.
+If you would like to contribute code you can do so through GitHub by forking the repository and sending a pull request. Please follow these guidelines:
 
-Speaking of new territory, one of the primariy differences between nerdvegas/rez and bleeding-rez (at the time of this writing) is encouraging use for production configurations and assets, in addition to software. See [rez-for-projects](https://github.com/mottosso/rez-for-projects) for an example.
+1.  Always retain backwards compatibility, unless a breaking change is necessary. If it is necessary, the associated release notes must make this explicit and obvious
+2.  Make every effort to follow existing conventions and style
+3.  Follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
+4.  Follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
+    for docstrings
+5.  Use *spaces*, not *tabs*
+6.  Update the [bleeding-rez version](https://github.com/mottosso/bleeding-rez/blob/master/src/bleeding-rez/utils/_version.py) appropriately, and follow [semantic versioning](https://semver.org/);
+7.  Update [the changelog](https://github.com/mottosso/bleeding-rez/blob/master/CHANGELOG.md); see the section below for more details
+8.  Use [this format](https://help.github.com/articles/closing-issues-using-keywords/) to mention the issue(s) your PR closes
+9.  Add relevant tests to demonstrate that your changes work
+10. Add relevant documentation (see [here](https://github.com/mottosso/bleeding-rez/blob/master/wiki/README.md)) to document your changes, if applicable.
+
+##### <blockquote>How do I report a bug?</blockquote>
+
+If you report a bug, please ensure to specify the following:
+
+1.  Rez version (e.g. 2.18.0);
+2.  Platform and operating system you were using;
+3.  Contextual information (what were you trying to do using Rez);
+4.  Simplest possible steps to reproduce.
