@@ -68,7 +68,7 @@ class InfoAction(_StoreTrueAction):
         sys.exit(0)
 
 
-def safe_environment():
+def isolated_environment():
     import os
     from rez.backport.shutilwhich import which
 
@@ -85,6 +85,10 @@ def safe_environment():
                     "OS",
                     "TMP",
                     "Temp",
+
+                    # For platform_.arch()
+                    "PROCESSOR_ARCHITEW6432",
+                    "PROCESSOR_ARCHITECTURE",
 
                     # Linux
                     "DISPLAY")
@@ -105,8 +109,12 @@ def safe_environment():
             whichdir("bash"),
         ])
 
-    # Prevent __pycache__ folders from being picked up as packages
-    environ["PYTHONDONOTWRITEBYTECODE"] = "1"
+    # Include REZ_ variables
+    for key, value in os.environ.items():
+        if not key.startswith("REZ_"):
+            continue
+
+        environ[key] = value
 
     return environ
 
@@ -117,13 +125,20 @@ def run(command=None):
     # For safety, replace the current session with one
     # that doesn't include PYTHONPATH.
 
-    safe = os.getenv("REZ_SAFEMODE")
     patched = "_REZ_PATCHED_ENV" in os.environ
+
+    try:
+        sys.argv.remove("--isolated")
+    except ValueError:
+        safe = False
+    else:
+        safe = True
+
     if safe and not patched:
         # Re-spawn Python with safe environment
 
         import subprocess
-        environ = safe_environment()
+        environ = isolated_environment()
 
         # Prevent subsequent session from spawing new session
         environ["_REZ_PATCHED_ENV"] = "1"
@@ -138,7 +153,25 @@ def run(command=None):
         #   with this command, followed by the arguments. On Windows
         #   however, this executable does not include its extension,
         #   ".exe" which causes it not to be found.
-        argv = [sys.executable, "-m", "rez"] + sys.argv[1:]
+        argv = [
+            sys.executable,
+            "-S",  # Do not `import site`
+            "-B",  # Do not generate .pyc or __pycache__
+        ]
+
+        if sys.version > (2, 7):
+            argv += [
+                "-I",  # Isolate Python from the user's environment
+            ]
+        else:
+            argv += [
+                "-E",  # Ignore PYTHON* variables
+                "-s",  # Do not load user site dir
+            ]
+
+        argv += [
+            "-m", "rez"
+        ] + sys.argv[1:]
 
         rezdir = os.path.join(__file__, "..", "..", "..")
         popen = subprocess.Popen(

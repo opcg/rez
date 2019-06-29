@@ -76,20 +76,20 @@ class PowerShell(Shell):
             cls.syspaths = config.standard_system_paths
             return cls.syspaths
 
-        # Vanilla PATH, before user interference
+        def whichdir(cmd):
+            try:
+                return os.path.dirname(which(cmd))
+            except TypeError:
+                # No path found
+                return None
+
         cls.syspaths = [
-            os.path.dirname(which("cmd")),  # e.g. System32/
-            os.path.dirname(which("powershell")),
-            os.path.dirname(which("scrcons")),
+            whichdir("cmd"),  # e.g. System32/
+            whichdir("powershell"),
+            whichdir("scrcons"),
         ]
 
-        # And Rez itself, for making rez calls
-        # within the resulting context
-        cls.syspaths += [
-            os.path.dirname(which("rez")),
-        ]
-
-        return cls.syspaths
+        return list(filter(None, cls.syspaths))
 
     def _bind_interactive_rez(self):
         if config.set_prompt and self.settings.prompt:
@@ -109,7 +109,8 @@ class PowerShell(Shell):
             if bind_rez:
                 ex.interpreter._bind_interactive_rez()
             if print_msg and not quiet:
-                ex.command("rez context")
+                # Rez may not be available
+                ex.command("Try { rez context } Catch { }")
 
         executor = RexExecutor(interpreter=self.new_shell(),
                                parent_environ={},
