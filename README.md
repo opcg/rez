@@ -50,57 +50,19 @@ A small but growing number of companion projects for bleeding- and nerdvegas-rez
 
 ### Quickstart
 
-Choose your installation method.
-
-<details>
-  <summary>Simple</summary>
-<table>
-<tr><td>
-<br>
-
-**Simple** The simple approach is well suited for beginners and those looking to learn more about Rez and whether it is suited to their problem and environment.
-
-</td></tr>
-<tr><td>
+Here's how to install and use bleeding-rez on your machine.
 
 ```bash
 $ pip install bleeding-rez
+$ rez bind --quickstart
 $ rez --version
-2.31.0
-```
-</td></tr>
-<tr><td>
-
-<br>
-
-**Advantages**
-
-- **User-friendly and familiar installation method** Everybody loves pip
-- **Inception** Make `bleeding-rez` a Rez package with [pipz](https://github.com/mottosso/rez-pipz)
-
-</td></tr>
-</table>
-
-</details>
-<details>
-  <summary>Recommended</summary>
-
-<table>
-<tr><td>
-<br>
-
-**Recommended** The recommended approach is better suited for live production, where you've committed to Rez and want precision and control.
-
-</td></tr>
-<tr><td>
-
-```bash
-$ python -m virtualenv rez
-$ rez\Scripts\activate  # *
-(rez) $ pip install bleeding-rez
+2.33.0
+$ rez env
+> $ echo Hello World!
+Hello World!
 ```
 
-> Use `source rez/bin/activate` on Linux and OSX
+The `>` character denotes that you are in a resolved environment, great job!
 
 **Advanced**
 
@@ -112,64 +74,9 @@ $ pip install git+https://github.com/mottosso/bleeding-rez.git@dev
 $ pip install git+https://github.com/mottosso/bleeding-rez.git@feature/windows-alias-additional-argument
 ```
 
-</td></tr>
-<tr><td>
-<br>
+**Developer**
 
-**Optional**
-
-Virtualenv exposes a `python` and `pip` binary on your `PATH` which make them available from within a Rez context despite no `python` or `pip` package having been included. For additional protection, you can create a separate directory with only Rez binaries and expose this on your `PATH` instead.
-
-<details>
-  <summary>Windows</summary>
-
-```bash
-(rez) $ mkdir rez\Scripts\rez
-(rez) $ cp rez\Scripts\rez*.exe rez\Scripts\rez\
-(rez) $ deactivate
-$ set PATH=%cd%\rez\Scripts\rez
-$ rez env
-> $ python
-'python' is not recognized as an internal or external command,
-operable program or batch file.
-```
-</details>
-
-<details>
-  <summary>Linux and MacOS</summary>
-
-```bash
-(rez) $ mkdir rez\bin\rez
-(rez) $ cp rez\bin\rez* rez\bin\rez\
-(rez) $ deactivate
-$ export PATH=$(pwd)\rez\bin\rez
-$ rez env
-> $ python
--bash: python: command not found
-```
-
-</details>
-<br>
-
-**Advantages**
-
-- **Isolated PATH** No interference from external binaries in your `Scripts/` Python directory.
-- **Isolated site-packages** No interference from system-wide Python packages
-
-</td></tr>
-</table>
-</details>
-<details>
-  <summary>Developer</summary>
-
-<table>
-<tr><td>
-<br>
-
-**Developer** The developer approach maintains Git history and enables you to contribute back to this project (yay!)
-
-</td></tr>
-<tr><td>
+The developer approach maintains Git history and enables you to contribute back to this project (yay!)
 
 ```bash
 $ python -m virtualenv rez-dev
@@ -180,39 +87,6 @@ $ rez-dev\Scripts\activate
 ```
 
 > Use `. rez-dev\bin\activate` on Linux and MacOS
-
-</td></tr>
-<tr><td>
-<br>
-
-**Advantages**
-
-- **Git history** History is maintained and you're all set to contribute back to the project
-
-</td></tr>
-</table>
-</details>
-<br>
-
-This installs the Rez command line tools.
-
-Next, you'll need to create some essential Rez packages.
-
-```bash
-$ rez bind platform
-$ rez bind arch
-$ rez bind os
-```
-
-Now try creating an empty environment.
-
-```bash
-$ rez env
-> $ echo Hello World!
-Hello World!
-```
-
-The `>` character denotes that you are in a resolved environment, great job!
 
 <br>
 
