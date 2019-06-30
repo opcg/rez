@@ -62,6 +62,7 @@ jobs:
 
       - script: |
           rez bind --quickstart
+          rez env rez python -- exit
           rez selftest -vv
         displayName: 'selftest'
 
@@ -110,6 +111,7 @@ jobs:
 
       - script: |
           rez bind --quickstart
+          rez env rez python -- exit
           rez selftest -vv
         displayName: 'selftest'
 
@@ -142,6 +144,7 @@ jobs:
         displayName: 'pip install'
       - powershell: |
           rez bind --quickstart
+          rez env rez python -- exit
           rez selftest -vv
         displayName: 'selftest'
 

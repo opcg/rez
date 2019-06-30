@@ -2,6 +2,10 @@
 Binds a python executable as a rez package.
 """
 from __future__ import absolute_import
+
+import os
+import stat
+
 from rez.bind._utils import check_version, find_exe, extract_version, \
     make_dirs, log
 from rez.package_maker__ import make_package
@@ -15,8 +19,19 @@ def setup_parser(parser):
 
 
 def commands():
-    global alias
-    alias("python", "{this.exe}")
+    global env
+    env.PATH.prepend("{root}/bin")
+
+
+bat = """\
+@echo off
+call {python} %*
+"""
+
+sh = """\
+#!/usr/bin/env bash
+{python} $*
+"""
 
 
 def bind(path, version_range=None, opts=None, parser=None):
@@ -29,7 +44,21 @@ def bind(path, version_range=None, opts=None, parser=None):
     log("binding python: %s" % exepath)
 
     def make_root(variant, root):
-        make_dirs(root, "python")
+        bindir = make_dirs(root, "bin")
+
+        if os.name == "nt":
+            fname = os.path.join(bindir, "python.bat")
+            with open(fname, "w") as f:
+                f.write(bat.format(python=exepath))
+
+        else:
+            fname = os.path.join(bindir, "python")
+            with open(fname, "w") as f:
+                f.write(sh.format(python=exepath))
+
+            # Make executable
+            st = os.stat(fname)
+            os.chmod(fname, st.st_mode | stat.S_IEXEC)
 
     with make_package("python", path, make_root=make_root) as pkg:
         pkg.version = version
