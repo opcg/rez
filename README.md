@@ -22,7 +22,7 @@ A [Rez](https://github.com/nerdvegas/rez) superset, with all [feature branches](
     </tr>
 </table>
 
-![](https://badge.fury.io/py/bleeding-rez.svg)
+[![](https://badge.fury.io/py/bleeding-rez.svg)](https://pypi.org/project/bleeding-rez/)
 
 <br>
 
@@ -154,23 +154,10 @@ bleeding-rez is now a standard pip package and available on PyPI.
 $ pip install bleeding-rez
 ```
 
-`--target` is supported with one caveat on Windows; the destination must be available on your PYTHONPATH either globally or for the user. It cannot be added from within a console, as Rez is looking at your registry for where to find it.
-
-```bash
-$ pip install bleeding-rez --target ./some_dir
-$ setx PYTHONPATH=some_dir
-```
 </td>
         <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
     <tr></tr>
     </tr>
-        <td>Preprocess function</td>
-        <td>
-
-`rezconfig.py` can take a `preprocess` function, rather than having to create and manage a separate module and `PYTHONPATH`</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
-    </tr>
-    <tr></tr>
     <tr>
         <td>Windows Tests</td>
         <td>Tests now run on both Windows and Linux</td>
@@ -184,14 +171,14 @@ $ setx PYTHONPATH=some_dir
 Now you can use `rez-2.28|2.29` on Windows, like you can on Linux.
 
 </td>
-        <td><a href=https://github.com/nerdvegas/rez/pull/647><i>PR</i></a></td>
+        <td><a href=https://github.com/nerdvegas/rez/pull/647><i>PR (Merged)</i></a></td>
     </tr>
     <tr>
         <td>Preprocess function</td>
         <td>
 
 `rezconfig.py` can take a `preprocess` function, rather than having to create and manage a separate module and `PYTHONPATH`</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
+        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link (Merged)</i></a></td>
     </tr>
     <tr>
         <td>Aliases & Windows</td>
@@ -205,7 +192,11 @@ The `package.py:commands()` function `alias` didn't let Windows-users pass addit
         <td>Pip & Usability</td>
         <td>
 
-As it happens, no one is actually using the `rez pip` command. It has some severe flaws which makes it unusable on anything other than a testing environment on a local machine you don't update.</td>
+As it happens, no one is actually using the `rez pip` command. It has some severe flaws which makes it unusable on anything other than a testing environment on a local machine you don't update.
+
+- See [rez-pipz](https://github.com/mottosso/rez-pipz)
+
+</td>
         <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/useful-pip><i>link</i></a></td>
     </tr>
     <tr></tr>
@@ -214,45 +205,22 @@ As it happens, no one is actually using the `rez pip` command. It has some sever
         <td>
 
 You can now iterate over `request` and `resolve` from within your `package.py:commands()` section, e.g. `for req in request: print(req)`
-<td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/iterate-over-request><i>link</i></a></td>
+<td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/iterate-over-request><i>link (Merged)</i></a></td>
     </tr>
     <tr></tr>
-    <tr>
-        <td>Pip & Wheels</td>
-        <td>
-
-`rez pip` now uses wheels when available, avoiding needless a build step</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-wheels-windows><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Pip & Multi-install</td>
-        <td>
-
-`rez pip` can now take multiple packages, e.g. `rez pip --install six requests`</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-multipleinstall><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Pip & `--prefix`</td>
-        <td>
-
-`rez pip` can now take a `--prefix` argument, letting you install packages wherever</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-prefix><i>link</i></a></td>
-    </tr>
     <tr>
         <td>PyYAML and Python 3</td>
         <td>
 
 Prior to this, you couldn't use PyYAML and Python 3 as Rez packages.</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-multipleinstall><i>link</i></a></td>
+        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-multipleinstall><i>link (Merged)</i></a></td>
     </tr>
     <tr>
         <td>Auto-create missing repository dir</td>
         <td>
 
 New users no longer have to worry about creating their default package repository directory at `~/packages`, which may seem minor but was the resulting traceback was the first thing any new user would experience with Rez.</td>
-        <td><a href=https://github.com/nerdvegas/rez/pull/623><i>PR</i></a></td>
+        <td><a href=https://github.com/nerdvegas/rez/pull/623><i>PR (Merged)</i></a></td>
     </tr>
     <tr>
         <td>Cross-platform rez-bind python</td>
