@@ -120,7 +120,10 @@ def _run_command(args):
     cmd_str = ' '.join(quote(x) for x in args)
     log("running: %s" % cmd_str)
 
-    p = popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = popen(args,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.PIPE,
+              universal_newlines=True)
     stdout, stderr = p.communicate()
     return stdout, stderr, p.returncode
 
