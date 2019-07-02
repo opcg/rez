@@ -62,9 +62,11 @@ $ rez env
 Hello World!
 ```
 
-The `>` character denotes that you are in a resolved environment, great job!
+> The `>` character denotes that you are in a resolved environment, great job!
 
-**Advanced**
+Now head over to the [**Quickstart Guide**](https://github.com/mottosso/bleeding-rez/wiki/Quickstart) for your first look at what it can do!
+
+<details><summary><b>Advanced</b></summary>
 
 You may alternatively install directly from the GitHub repository using one of the following commands.
 
@@ -74,7 +76,9 @@ $ pip install git+https://github.com/mottosso/bleeding-rez.git@dev
 $ pip install git+https://github.com/mottosso/bleeding-rez.git@feature/windows-alias-additional-argument
 ```
 
-**Developer**
+</details>
+
+<details><summary><b>Developer</b></summary>
 
 The developer approach maintains Git history and enables you to contribute back to this project (yay!)
 
@@ -87,6 +91,8 @@ $ rez-dev\Scripts\activate
 ```
 
 > Use `. rez-dev\bin\activate` on Linux and MacOS
+
+</details>
 
 <br>
 
