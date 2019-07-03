@@ -1,7 +1,7 @@
 
 <img width=300 src=https://user-images.githubusercontent.com/2152766/59975170-e925e880-95ac-11e9-9751-c37ff554b5f1.png>
 
-A [Rez](https://github.com/nerdvegas/rez) superset, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged, editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
+A [Rez](https://github.com/nerdvegas/rez) superset, on PyPI, for Python 2 and 3, editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
 
 <br>
 
@@ -38,7 +38,7 @@ A small but growing number of companion projects for bleeding- and nerdvegas-rez
 - `rez-yumz` - Install from a selection of [80,000+ RPM packages](https://centos.pkgs.org/7/centos-x86_64/) and counting
 - `rez-vcpkgz` - Install any of the [1000+ C++ libraries](https://github.com/Microsoft/vcpkg/tree/master/ports) as a Rez package
 - `rez-conanz` - Install any of the [200+ C++ libraries](https://conan.io/) as a Rez package
-- `rez-allspark` - Visual application launcher and Rez debugging tool
+- [`rez-allspark`](https://allspark.sh) - Visual application launcher and Rez debugging tool
 - [`rez-for-projects`](https://github.com/mottosso/rez-for-projects) - A set of example packages for use of Rez (and Allspark) with project and application configurations
 - `rez-performance` - Test the impact of x-number of packages with y-level of complexity in your network environment to make better integration and deployment decisions.
 - `rez-releaz` - Secure package releases with Git integration
@@ -340,14 +340,11 @@ disable_rez_1_compatibility = False
 
 ##### <blockquote>Should I use nerdvegas/rez or bleeding-rez?</blockquote>
 
-Rez isn't for everyone, and neither is bleeding-rez.
-
-- If you've already committed to nerdvegas/rez and have built your pipeline on it, stick with nerdvegas/rez
-- If you've just gotten started using Rez, use bleeding-rez.
+If you need to use Rez on Windows with Python 2 and 3, and prefer a simplified installation procedure via PyPI, then bleeding-rez is for you.
 
 ##### <blockquote>Why does bleeding-rez exist?</blockquote>
 
-bleeding-rez started off as a fork from which to make PRs to nerdvegas/rez, but eventually started to diverge. Now it's meant as a fire up the butt of the project. Competition breeds innovation.
+bleeding-rez started off as a fork from which to make PRs to nerdvegas/rez, but eventually started to diverge. Now it's meant as a fire up the butt of the project :) Competition breeds innovation.
 
 ##### <blockquote>Are there any similar projects to bleeding-rez?</blockquote>
 
