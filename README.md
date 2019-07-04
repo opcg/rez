@@ -1,7 +1,7 @@
 
 <img width=300 src=https://user-images.githubusercontent.com/2152766/59975170-e925e880-95ac-11e9-9751-c37ff554b5f1.png>
 
-A [Rez](https://github.com/nerdvegas/rez) superset, on PyPI, for Python 2 and 3, editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
+A [Rez](https://github.com/nerdvegas/rez) superset, on PyPI, for Python 2 and 3, with editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
 
 <br>
 
