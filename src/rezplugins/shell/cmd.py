@@ -81,7 +81,20 @@ class CMD(Shell):
             cls.syspaths = config.standard_system_paths
             return cls.syspaths
 
-        return os.getenv("PATH", "").split(os.pathsep)
+        def whichdir(cmd):
+            try:
+                return os.path.dirname(which(cmd))
+            except TypeError:
+                # No path found
+                return None
+
+        cls.syspaths = list(filter(None, [
+            whichdir("cmd"),  # e.g. System32/
+            whichdir("powershell"),
+            whichdir("scrcons"),
+        ]))
+
+        return cls.syspaths
 
     def _bind_interactive_rez(self):
         if config.set_prompt and self.settings.prompt:

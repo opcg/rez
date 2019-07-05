@@ -83,13 +83,13 @@ class PowerShell(Shell):
                 # No path found
                 return None
 
-        cls.syspaths = [
+        cls.syspaths = list(filter(None, [
             whichdir("cmd"),  # e.g. System32/
             whichdir("powershell"),
             whichdir("scrcons"),
-        ]
+        ]))
 
-        return list(filter(None, cls.syspaths))
+        return cls.syspaths
 
     def _bind_interactive_rez(self):
         if config.set_prompt and self.settings.prompt:
@@ -150,6 +150,7 @@ class PowerShell(Shell):
             cmd.insert(1, "-noexit")
 
         p = popen(cmd,
+                  # env=isolated_environment(),
                   env=env,
                   universal_newlines=True,
                   **Popen_args)
