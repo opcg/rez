@@ -151,11 +151,10 @@ def run(command=None):
 
         argv = [
             sys.executable,
-            "-S",  # Do not `import site`
             "-B",  # Do not generate .pyc or __pycache__
         ]
 
-        if sys.version > (2, 7):
+        if sys.version_info[0] >= 3:
             argv += [
                 "-I",  # Isolate Python from the user's environment
             ]
