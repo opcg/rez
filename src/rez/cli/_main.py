@@ -76,6 +76,7 @@ def isolated_environment():
         key: os.getenv(key)
         for key in ("USERNAME",
                     "SYSTEMROOT",
+                    "SYSTEMDRIVE",
 
                     # Windows
                     "ComSpec",
@@ -85,6 +86,7 @@ def isolated_environment():
                     "OS",
                     "TMP",
                     "Temp",
+                    "USERPROFILE",
 
                     # For platform_.arch()
                     "PROCESSOR_ARCHITEW6432",
@@ -147,12 +149,6 @@ def run(command=None):
         # countering the `cwd=rezdir` below.
         environ["_REZ_INITIAL_CWD"] = os.getcwd()
 
-        # Replace absolute path to executable with python
-        # Why not use sys.argv as-is?
-        #   The first argument is the absolute path to the executable
-        #   with this command, followed by the arguments. On Windows
-        #   however, this executable does not include its extension,
-        #   ".exe" which causes it not to be found.
         argv = [
             sys.executable,
             "-S",  # Do not `import site`
@@ -169,6 +165,12 @@ def run(command=None):
                 "-s",  # Do not load user site dir
             ]
 
+        # Replace absolute path to executable with python
+        # Why not use sys.argv as-is?
+        #   The first argument is the absolute path to the executable
+        #   with this command, followed by the arguments. On Windows
+        #   however, this executable does not include its extension,
+        #   ".exe" which causes it not to be found.
         argv += [
             "-m", "rez"
         ] + sys.argv[1:]
