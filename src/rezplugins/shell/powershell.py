@@ -9,7 +9,6 @@ from rez.backport.shutilwhich import which
 from functools import partial
 import os
 import re
-import subprocess
 
 try:
     basestring
@@ -120,7 +119,9 @@ class PowerShell(Shell):
             _record_shell(executor, files=startup_sequence["files"])
             shell_command = startup_sequence["command"]
         else:
-            _record_shell(executor, files=startup_sequence["files"], print_msg=(not quiet))
+            _record_shell(executor,
+                          files=startup_sequence["files"],
+                          print_msg=(not quiet))
 
         if shell_command:
             executor.command(shell_command)
@@ -150,7 +151,6 @@ class PowerShell(Shell):
             cmd.insert(1, "-noexit")
 
         p = popen(cmd,
-                  # env=isolated_environment(),
                   env=env,
                   universal_newlines=True,
                   **Popen_args)
