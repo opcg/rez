@@ -3,7 +3,9 @@ import logging
 import logging.config
 import os
 import time
-from rez import module_root_path
+# from rez import module_root_path
+
+from rez.vendor.importlib_resources import ResourceReader
 
 
 logger = logging.getLogger(__name__)
