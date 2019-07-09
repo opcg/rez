@@ -1,8 +1,8 @@
 from __future__ import print_function
 
 from rez.utils._version import _rez_version
-import logging.config
-import atexit
+# import logging.config
+# import atexit
 import os
 
 
@@ -11,13 +11,13 @@ __author__ = "Allan Johns"
 __license__ = "LGPL"
 
 
-module_root_path = __path__[0]
+# module_root_path = __path__[0]
 
 
-logging_conf_file = os.environ.get(
-    'REZ_LOGGING_CONF',
-    os.path.join(module_root_path, 'utils', 'logging.conf'))
-logging.config.fileConfig(logging_conf_file, disable_existing_loggers=False)
+# logging_conf_file = os.environ.get(
+#     'REZ_LOGGING_CONF',
+#     os.path.join(module_root_path, 'utils', 'logging.conf'))
+# logging.config.fileConfig(logging_conf_file, disable_existing_loggers=False)
 
 
 # actions registered on SIGUSR1
