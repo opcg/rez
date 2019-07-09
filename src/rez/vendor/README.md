@@ -29,7 +29,7 @@ Note that the latest versions column is just to give us an idea of how far back 
 | sortedcontainers            | 1.5.7 (Dec 22, 2016)       | 2.1.0 (Mar 5, 2019)                     | Used in the resolver. Updating would possibly give us some speed improvements.                                                                                                                                                        |
 | version                     | ?                          |                                         | This is actually part of rez. It's here because I've been intending on releasing it separately for ages.                                                                                                                                                                                                                  |
 | yaml (PyYAML)               | 3.10 (May 30, 2011)        | 5.1 (Mar 13, 2019)                      | Not much changes, mostly broken releases that never made it. Between 3.10 and 5.1 there is only 3 versions that made it to the public (3.11 and 3.12, 3.13), the rest were all removed or marked as pre-release. It's safe to update. |
-
+| importlib_resources         | 1.0.2                      |                                         |                                                                                                                                                                                                                                       |
 
 # Development
 
