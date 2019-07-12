@@ -93,7 +93,49 @@ def isolated_environment():
                     "PROCESSOR_ARCHITECTURE",
 
                     # Linux
-                    "DISPLAY")
+                    "DISPLAY",
+                    "GROUPS",
+                    "HOME",
+                    "HOSTNAME",
+                    "HOSTTYPE",
+                    "PWD",
+
+                    # Unused, from CentOS vanilla
+                    # "BASH",
+                    # "BASHOPTS",
+                    # "BASH_ALIASES",
+                    # "BASH_ARGC",
+                    # "BASH_ARGV",
+                    # "BASH_CMDS",
+                    # "BASH_LINENO",
+                    # "BASH_SOURCE",
+                    # "BASH_VERSINFO",
+                    # "BASH_VERSION",
+                    # "COLUMNS",
+                    # "DIRSTACK",
+                    # "EUID",
+                    # "HISTFILE",
+                    # "HISTFILESIZE",
+                    # "HISTSIZE",
+                    # "IFS",
+                    # "LINES",
+                    # "LS_COLORS",
+                    # "MACHTYPE",
+                    # "MAILCHECK",
+                    # "OPTERR",
+                    # "OPTIND",
+                    # "OSTYPE",
+                    # "PIPESTATUS",
+                    # "PPID",
+                    # "PROMPT_COMMAND",
+                    # "PS1",
+                    # "PS2",
+                    # "PS4",
+                    # "SHELL",
+                    # "SHELLOPTS",
+                    # "SHLVL",
+                    # "TERM",
+                    )
         if os.getenv(key)
     }
 
@@ -109,6 +151,9 @@ def isolated_environment():
     else:
         environ["PATH"] = os.pathsep.join([
             whichdir("bash"),
+
+            # For platform_.arch()
+            whichdir("lsb_release"),
         ])
 
     # Include REZ_ variables
@@ -125,7 +170,8 @@ def run(command=None):
     import os
 
     # For safety, replace the current session with one
-    # that doesn't include PYTHONPATH.
+    # that doesn't include PYTHONPATH or much of the parent
+    # environment at all
 
     patched = "_REZ_PATCHED_ENV" in os.environ
 
@@ -140,7 +186,14 @@ def run(command=None):
         # Re-spawn Python with safe environment
 
         import subprocess
-        environ = isolated_environment()
+
+        # Optional override of base environment, as JSON
+        if os.getenv("REZ_ENVIRONMENT"):
+            import json
+            environ = json.loads(os.getenv("REZ_ENVIRONMENT"))
+
+        else:
+            environ = isolated_environment()
 
         # Prevent subsequent session from spawing new session
         environ["_REZ_PATCHED_ENV"] = "1"
@@ -164,17 +217,16 @@ def run(command=None):
                 "-s",  # Do not load user site dir
             ]
 
-        # Replace absolute path to executable with python
-        # Why not use sys.argv as-is?
-        #   The first argument is the absolute path to the executable
-        #   with this command, followed by the arguments. On Windows
-        #   however, this executable does not include its extension,
-        #   ".exe" which causes it not to be found.
+        # Replace absolute path of executable with python
+        # At this point, we're in a `rez-env` binary file,
+        # but need to call `python` such that it can be passed
+        # the above flags.
         argv += [
             "-m", "rez"
         ] + sys.argv[1:]
 
         rezdir = os.path.join(__file__, "..", "..", "..")
+        rezdir = os.path.abspath(rezdir)
         popen = subprocess.Popen(
             argv,
 
