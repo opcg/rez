@@ -617,8 +617,11 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
     def _create_main_config(cls, overrides=None):
         """See comment block at top of 'rezconfig' describing how the main
         config is assembled."""
-        filepaths = []
-        filepaths.append(get_module_root_config())
+
+        import rez.rezconfig as rezconfig
+
+        filepaths = [rezconfig]
+        # filepaths.append(get_module_root_config())
         filepath = os.getenv("REZ_CONFIG_FILE")
         if filepath:
             filepaths.extend(filepath.split(os.pathsep))
