@@ -26,6 +26,17 @@ A [Rez](https://github.com/nerdvegas/rez) superset, on PyPI, for Python 2 and 3,
 
 <br>
 
+### What is Rez
+
+Rez is a command-line utility for Windows, Linux and MacOS, solving the problem of creating a reproducible environment for your software projects, by resolving a request into a deterministic selection of "packages" - versioned collections of files with metadata in a self-hosted location - and dynamically generating a corresponding environment.
+
+```bash
+$ rez env Python-3.7 PySide2-5.12 six requests
+> $ echo Hello reproducible environment!
+```
+
+<br>
+
 ### Ecosystem
 
 A small but growing number of companion projects for bleeding- and nerdvegas-rez.
@@ -38,7 +49,7 @@ A small but growing number of companion projects for bleeding- and nerdvegas-rez
 - `rez-yumz` - Install from a selection of [80,000+ RPM packages](https://centos.pkgs.org/7/centos-x86_64/) and counting
 - `rez-vcpkgz` - Install any of the [1000+ C++ libraries](https://github.com/Microsoft/vcpkg/tree/master/ports) as a Rez package
 - `rez-conanz` - Install any of the [200+ C++ libraries](https://conan.io/) as a Rez package
-- [`rez-allspark`](https://allspark.sh) - Visual application launcher and Rez debugging tool
+- [`rez-allzpark`](https://allzpark.sh) - Visual application launcher and Rez debugging tool
 - [`rez-for-projects`](https://github.com/mottosso/rez-for-projects) - A set of example packages for use of Rez (and Allspark) with project and application configurations
 - `rez-performance` - Test the impact of x-number of packages with y-level of complexity in your network environment to make better integration and deployment decisions.
 - `rez-releaz` - Secure package releases with Git integration
