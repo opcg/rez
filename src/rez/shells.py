@@ -255,7 +255,11 @@ class UnixShell(Shell):
                 ex.info('')
                 ex.info('You are now in a rez-configured environment.')
                 ex.info('')
-                ex.command('rezolve context')
+                ex.command(
+                    # Call rez, if it's there
+                    'command -v rezolve >/dev/null 2>&1 '
+                    '&& rezolve context'
+                )
 
         def _write_shell(ex, filename):
             code = ex.get_output()
