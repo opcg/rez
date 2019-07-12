@@ -6,11 +6,8 @@ from rez.utils.formatting import expandvars, expanduser
 from rez.utils.logging_ import get_debug_printer
 from rez.utils.scope import scoped_format
 from rez.exceptions import ConfigurationError
-from rez import module_root_path
 from rez.system import system
 from rez.vendor.schema.schema import Schema, SchemaError, And, Or, Use
-from rez.vendor import yaml
-from rez.vendor.yaml.error import YAMLError
 from rez.vendor.six import six
 from rez.backport.lru_cache import lru_cache
 from contextlib import contextmanager
@@ -19,6 +16,9 @@ import os
 import sys
 import os.path
 import copy
+
+from rez.vendor import yaml
+from rez.vendor.yaml import YAMLError
 
 PY3 = sys.version_info >= (3, 0, 0)
 
@@ -409,6 +409,7 @@ _plugin_config_dict = {
 # Config
 # -----------------------------------------------------------------------------
 
+# TODO: Bake rez.rezconfig defaults into this class
 class Config(six.with_metaclass(LazyAttributeMeta, object)):
     """Rez configuration settings.
 
@@ -802,6 +803,7 @@ def _replace_config(other):
         config._swap(other)  # revert config
 
 
+# TODO: Update to remove __file__ assumption
 @lru_cache()
 def _load_config_py(filepath):
     from rez.vendor.six.six import exec_
@@ -853,6 +855,7 @@ def _load_config_yaml(filepath):
     return doc
 
 
+# TODO: This is the key to removing __file__ reliance in the config object
 def _load_config_from_filepaths(filepaths):
     data = {}
     sourced_filepaths = []
@@ -878,8 +881,8 @@ def _load_config_from_filepaths(filepaths):
     return data, sourced_filepaths
 
 
-def get_module_root_config():
-    return os.path.join(module_root_path, "rezconfig.py")
+# def get_module_root_config():
+#     return os.path.join(module_root_path, "rezconfig.py")
 
 
 # singleton

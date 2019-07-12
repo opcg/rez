@@ -5,15 +5,15 @@ import os
 import time
 # from rez import module_root_path
 
-from rez.vendor.importlib_resources import ResourceReader
+from rez.utils.pycompat import read_text
 
 
 logger = logging.getLogger(__name__)
 
 
 def setup_logging():
-    fname = os.path.join(module_root_path, 'utils', 'logging.conf')
-    logging_conf_file = os.environ.get('REZ_LOGGING_CONF', fname)
+    config = read_text('.', 'logging.conf')
+    logging_conf_file = os.environ.get('REZ_LOGGING_CONF', config)
     logging.config.fileConfig(
         logging_conf_file, disable_existing_loggers=False)
 

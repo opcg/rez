@@ -1,6 +1,6 @@
 from __future__ import print_function
 from rez.vendor.six import six
-from rez import __version__, module_root_path
+from rez import __version__
 from rez.package_repository import package_repository_manager
 from rez.solver import SolverCallbackReturn
 from rez.resolver import Resolver, ResolverStatus
