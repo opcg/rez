@@ -791,7 +791,8 @@ def _create_locked_config(overrides=None):
     Returns:
         `Config` object.
     """
-    return Config([get_module_root_config()], overrides=overrides, locked=True)
+    import rez.rezconfig as root_config
+    return Config([root_config], overrides=overrides, locked=True)
 
 
 @contextmanager
@@ -804,6 +805,35 @@ def _replace_config(other):
         yield
     finally:
         config._swap(other)  # revert config
+
+
+@lru_cache()
+def _load_config_imp(module):
+
+    reserved = dict(
+        # Standard Python module variables
+        # Made available from within the module,
+        # and later excluded from the `Config` class
+        __name__=module.__name__,
+        __file__=module.__file__,
+
+        rez_version=__version__,
+        ModifyList=ModifyList
+    )
+
+    globs = reserved.copy()
+    result = {}
+
+    for k in dir(module):
+        globs[k] = getattr(module, k)
+
+    for k, v in globs.items():
+        if k != '__builtins__' \
+                and not ismodule(v) \
+                and k not in reserved:
+            result[k] = v
+
+    return result
 
 
 # TODO: Update to remove __file__ assumption
@@ -866,6 +896,13 @@ def _load_config_from_filepaths(filepaths):
                ("", _load_config_yaml))
 
     for filepath in filepaths:
+
+        if ismodule(filepath):
+            data_ = _load_config_imp(filepath)
+            deep_update(data, data_)
+            sourced_filepaths.append(filepath.__name__)
+            continue
+
         for extension, loader in loaders:
             if extension:
                 no_ext = os.path.splitext(filepath)[0]

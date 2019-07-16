@@ -5,37 +5,55 @@ import os
 import time
 # from rez import module_root_path
 
-from rez.utils.pycompat import read_text
+import rez.utils
+from rez.utils.pycompat import open_text
 
 
 logger = logging.getLogger(__name__)
 
 
+def _prevent_logging_typeerror(msg, func, *nargs):
+
+    count = msg.count('%s')
+    arg_num = len(nargs)
+    if count == arg_num:
+        func(msg, *nargs)
+    elif not arg_num:
+        func(msg.replace('%s', '').rstrip())
+    elif count < arg_num:
+        fix_msg = msg + ' --- ' + "%s " * (arg_num - count)
+        func(fix_msg.rstrip(), *nargs)
+    else:
+        fix_msg = msg.replace('%s', '').rstrip() + ' --- ' + "%s " * arg_num
+        func(fix_msg.rstrip(), *nargs)
+
+
 def setup_logging():
-    config = read_text('.', 'logging.conf')
-    logging_conf_file = os.environ.get('REZ_LOGGING_CONF', config)
-    logging.config.fileConfig(
-        logging_conf_file, disable_existing_loggers=False)
+
+    with open_text(rez.utils.__name__, 'logging.conf') as config:
+        logging_conf_file = os.environ.get('REZ_LOGGING_CONF', config)
+        logging.config.fileConfig(
+            logging_conf_file, disable_existing_loggers=False)
 
 
 def print_debug(msg, *nargs):
-    logger.debug(msg, *nargs)
+    _prevent_logging_typeerror(msg, logger.debug, *nargs)
 
 
 def print_info(msg, *nargs):
-    logger.info(msg, *nargs)
+    _prevent_logging_typeerror(msg, logger.info, *nargs)
 
 
 def print_warning(msg, *nargs):
-    logger.warning(msg, *nargs)
+    _prevent_logging_typeerror(msg, logger.warning, *nargs)
 
 
 def print_error(msg, *nargs):
-    logger.error(msg, *nargs)
+    _prevent_logging_typeerror(msg, logger.error, *nargs)
 
 
 def print_critical(msg, *nargs):
-    logger.critical(msg, *nargs)
+    _prevent_logging_typeerror(msg, logger.critical, *nargs)
 
 
 def get_debug_printer(enabled=True):
