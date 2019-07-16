@@ -3,15 +3,14 @@ Pluggable API for creating subshells using different programs, such as bash.
 """
 from rez.rex import RexExecutor, ActionInterpreter, OutputStyle
 from rez.util import shlex_join
+from rez import util
 from rez.backport.shutilwhich import which
 from rez.utils.logging_ import print_warning
 from rez.utils.system import popen
-from rez.system import system
 from rez.exceptions import RezSystemError
 from rez.rex import EscapedString
 from rez.config import config
 from rez.vendor.six import six
-import subprocess
 import os
 import os.path
 import pipes
@@ -256,7 +255,11 @@ class UnixShell(Shell):
                 ex.info('')
                 ex.info('You are now in a rez-configured environment.')
                 ex.info('')
-                ex.command('rezolve context')
+                ex.command(
+                    # Call rez, if it's there
+                    'command -v rezolve >/dev/null 2>&1 '
+                    '&& rezolve context'
+                )
 
         def _write_shell(ex, filename):
             code = ex.get_output()
@@ -360,7 +363,10 @@ class UnixShell(Shell):
         cmd.extend([self.executable, target_file])
 
         try:
-            p = popen(cmd, env=env, **Popen_args)
+            p = popen(cmd,
+                      env=env,
+                      universal_newlines=True,  # text-mode
+                      **Popen_args)
         except Exception as e:
             cmd_str = ' '.join(map(pipes.quote, cmd))
             raise RezSystemError("Error running command:\n%s\n%s"
@@ -382,7 +388,7 @@ class UnixShell(Shell):
 
     # escaping is allowed in args, but not in program string
     def command(self, value):
-        if hasattr(value, '__iter__'):
+        if util.iterable(value):
             it = iter(value)
             cmd = EscapedString.disallow(next(it))
             args_str = ' '.join(self.escape_string(x) for x in it)

@@ -11,9 +11,25 @@ from rez.build_process_ import create_build_process
 from rez.build_system import create_build_system
 from rez.resolved_context import ResolvedContext
 from rez.packages_ import get_latest_package
-from rez.package_copy import copy_package
+from rez.package_copy import copy_package as _copy_package
 from rez.vendor.version.version import VersionRange
 from rez.tests.util import TestBase, TempdirMixin
+
+
+def copy_package(*args, **kwargs):
+    """Protect against copies being made too fast
+
+    On fast-enough disks, and especially cloud-based CI like Azure,
+    copying a package can take so little time that comparing it with
+    the current time afterwards can yield identical results, causing
+    the test to fail.
+
+    """
+
+    try:
+        return _copy_package(*args, **kwargs)
+    finally:
+        time.sleep(1)
 
 
 class TestCopyPackage(TestBase, TempdirMixin):

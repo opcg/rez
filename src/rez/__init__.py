@@ -7,9 +7,9 @@ import os
 
 
 __version__ = _rez_version
-__author__ = "Allan Johns"
+__author__ = "Marcus Ottosson"
 __license__ = "LGPL"
-
+__project__ = "bleeding-rez"
 
 # module_root_path = __path__[0]
 

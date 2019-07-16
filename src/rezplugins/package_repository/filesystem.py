@@ -489,7 +489,12 @@ class FileSystemPackageRepository(PackageRepository):
         t = ["filesystem", self.location]
         if os.path.exists(self.location):
             st = os.stat(self.location)
-            t.append(st.st_ino)
+
+            # Convert from long() to int() in Python 2,
+            # to align with Python 3
+            st = int(st.st_ino)
+
+            t.append(st)
         return tuple(t)
 
     def get_package_family(self, name):
@@ -593,7 +598,7 @@ class FileSystemPackageRepository(PackageRepository):
                 variant_version == variant_resource.version:
             return variant_resource
 
-        # create repo path on disk if it doesn't exist
+        # check repo exists on disk
         path = self.location
 
         try:
@@ -675,7 +680,7 @@ class FileSystemPackageRepository(PackageRepository):
     def _get_family_dirs__key(self):
         if os.path.isdir(self.location):
             st = os.stat(self.location)
-            return str(("listdir", self.location, st.st_ino, st.st_mtime))
+            return str(("listdir", self.location, int(st.st_ino), st.st_mtime))
         else:
             return str(("listdir", self.location))
 
@@ -702,7 +707,7 @@ class FileSystemPackageRepository(PackageRepository):
 
     def _get_version_dirs__key(self, root):
         st = os.stat(root)
-        return str(("listdir", root, st.st_ino, st.st_mtime))
+        return str(("listdir", root, int(st.st_ino), st.st_mtime))
 
     @memcached(servers=config.memcached_uri if config.cache_listdir else None,
                min_compress_len=config.memcached_listdir_min_compress_len,

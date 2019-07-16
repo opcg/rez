@@ -118,10 +118,6 @@ class OptionalStr(Str):
     schema = Or(None, str_type)
 
 
-class OptionalObject(Str):
-    schema = Or(None, object)
-
-
 class StrList(Setting):
     schema = Schema([str_type])
     sep = ','
@@ -247,6 +243,14 @@ class RezToolsVisibility_(Str):
         return Or(*(x.name for x in RezToolsVisibility))
 
 
+class OptionalStrOrFunction(Setting):
+    schema = Or(None, str_type, callable)
+
+    def _parse_env_var(self, value):
+        # note: env-var override only supports string, eg 'mymodule.preprocess_func'
+        return value
+
+
 class BuildThreadCount_(Setting):
     # may be a positive int, or the values "physical" or "logical"
 
@@ -329,7 +333,7 @@ config_schema = Schema({
     "implicit_back":                                OptionalStr,
     "alias_fore":                                   OptionalStr,
     "alias_back":                                   OptionalStr,
-    "package_preprocess_function":                  OptionalObject,
+    "package_preprocess_function":                  OptionalStrOrFunction,
     "context_tracking_host":                        OptionalStr,
     "variant_shortlinks_dirname":                   OptionalStr,
     "build_thread_count":                           BuildThreadCount_,
@@ -540,9 +544,19 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
     @property
     def nonlocal_packages_path(self):
         """Returns package search paths with local path removed."""
-        paths = self.packages_path[:]
-        if self.local_packages_path in paths:
-            paths.remove(self.local_packages_path)
+
+        def normalise_path(path):
+            # Account for relative paths and varying or duplicate slashes
+            path = os.path.abspath(path)
+            path = os.path.normpath(path)
+            return path
+
+        packages_path = normalise_path(self.local_packages_path)
+        paths = list(map(normalise_path, self.packages_path))
+
+        if packages_path in paths:
+            paths.remove(packages_path)
+
         return paths
 
     def get_completions(self, prefix):

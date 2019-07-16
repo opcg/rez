@@ -211,8 +211,16 @@ def replacing_copy(src, dest, follow_symlinks=False):
     Note that this behavior is different to `shutil.copy`, which copies src
     into dest if dest is an existing dir.
     """
+
+    # Supported on Linux since Python 2.6, but Windows since 3.2
+    copy_symlink = (
+        not follow_symlinks
+        and hasattr(os, "readlink")
+        and os.path.islink(src)
+    )
+
     with make_tmp_name(dest) as tmp_dest:
-        if os.path.islink(src) and not follow_symlinks:
+        if copy_symlink:
             # special case - copy just a symlink
             src_ = os.readlink(src)
             os.symlink(src_, tmp_dest)
