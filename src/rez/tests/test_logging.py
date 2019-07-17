@@ -3,7 +3,7 @@ Test importing logging modules.
 """
 from rez.tests.util import TestBase
 import unittest
-from  rez.utils import logging_
+from rez.utils import logging_
 
 
 class TestLogging(TestBase):

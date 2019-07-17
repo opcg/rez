@@ -1,6 +1,6 @@
 from __future__ import print_function
 from rez.exceptions import RezBindError, RezUncatchableError
-from rez import module_root_path
+# from rez import module_root_path
 from rez.util import get_close_pkgs
 from rez.utils.formatting import columnise
 from rez.utils.logging_ import print_error
@@ -17,8 +17,10 @@ def get_bind_modules(verbose=False):
     Returns:
         dict: Map of (name, filepath) listing all bind modules.
     """
-    builtin_path = os.path.join(module_root_path, "bind")
-    searchpaths = config.bind_module_path + [builtin_path]
+    # TODO: Alternate bind package location?
+    # builtin_path = os.path.join(module_root_path, "bind")
+    # searchpaths = config.bind_module_path + [builtin_path]
+    searchpaths = config.bind_module_path
     bindnames = {}
 
     for path in searchpaths:
