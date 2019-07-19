@@ -12,8 +12,8 @@ import tempfile
 import warnings
 
 try:
-    from rez.vendor.pydot import dot_parser
-except Exception as e:
+    from . import dot_parser
+except Exception:
     warnings.warn(
         "Couldn't import dot_parser, "
         "loading of dot files will not be possible.")
