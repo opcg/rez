@@ -212,19 +212,25 @@ def save_graph(graph_str, dest_file, fmt=None, image_ratio=None):
     Returns:
         String representing format that was written, such as 'png'.
     """
-    g = pydot.graph_from_dot_data(graph_str)
+
+    try:
+        g = pydot.graph_from_dot_data(graph_str)[0]
+    except IndexError:
+        import traceback
+        traceback.print_exc()
+        raise Exception("Could not produce graph")
 
     # determine the dest format
-    if fmt is None:
-        fmt = os.path.splitext(dest_file)[1].lower().strip('.') or "png"
-    if hasattr(g, "write_" + fmt):
-        write_fn = getattr(g, "write_" + fmt)
-    else:
+    fmt = os.path.splitext(dest_file)[1].lower().strip('.') or "png"
+
+    if fmt not in g.formats:
         raise Exception("Unsupported graph format: '%s'" % fmt)
 
     if image_ratio:
         g.set_ratio(str(image_ratio))
-    write_fn(dest_file)
+
+    g.write(dest_file, format=fmt)
+
     return fmt
 
 
