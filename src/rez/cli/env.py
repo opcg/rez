@@ -17,6 +17,9 @@ def setup_parser(parser, completions=False):
         default=config.default_shell or system.shell,
         help="target shell type (default: %(default)s)")
     parser.add_argument(
+        "--isolated", action="store_true",
+        help="Whether or not to inherit the parent environment")
+    parser.add_argument(
         "--rcfile", type=str,
         help="source this file instead of the target shell's standard startup "
         "scripts, if possible")
@@ -148,6 +151,10 @@ def command(opts, parser, extra_arg_groups=None):
     context = None
     request = opts.PKG
     t = get_epoch_time_from_str(opts.time) if opts.time else None
+
+    if opts.isolated:
+        print("Not inheriting anything!")
+        config.inherit_parent_environment = False
 
     if opts.paths is None:
         pkg_paths = (config.nonlocal_packages_path

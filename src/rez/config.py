@@ -312,6 +312,7 @@ config_schema = Schema({
     "documentation_url":                            Str,
     "suite_visibility":                             SuiteVisibility_,
     "rez_tools_visibility":                         RezToolsVisibility_,
+    "inherit_parent_environment":                   Bool,
     "suite_alias_prefix_char":                      Char,
     "package_definition_python_path":               OptionalStr,
     "tmpdir":                                       OptionalStr,

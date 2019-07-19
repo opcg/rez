@@ -6,7 +6,6 @@ from rez.rex import RexExecutor, literal, OutputStyle, EscapedString
 from rez.shells import Shell
 from rez.utils.system import popen
 from rez.utils.platform_ import platform_
-from rez.backport.shutilwhich import which
 from functools import partial
 import os
 import re
@@ -73,6 +72,50 @@ class CMD(Shell):
         )
 
     @classmethod
+    def environment(cls):
+        environ = {
+            key: os.getenv(key)
+            for key in ("USERNAME",
+                        "SYSTEMROOT",
+                        "SYSTEMDRIVE",
+
+                        # Windows
+                        "ComSpec",
+                        "windir",
+                        "PROMPT",
+                        "PathExt",
+                        "OS",
+                        "TMP",
+                        "Temp",
+                        "USERPROFILE",
+
+                        # For platform_.arch()
+                        "PROCESSOR_ARCHITEW6432",
+                        "PROCESSOR_ARCHITECTURE",
+                        )
+            if os.getenv(key)
+        }
+
+        # From docker run -ti --rm windows/iis
+        environ["PATH"] = os.pathsep.join([
+            r"C:\Windows",
+            r"C:\Windows\system32",
+            r"C:\Windows\System32\Wbem",
+            r"C:\Windows\System32\WindowsPowerShell\v1.0",
+        ])
+
+        # Inherit REZ_ variables
+        # TODO: This is a leak, but I can't think of another
+        # way of preserving e.g. `REZ_PACKAGES_PATH`
+        for key, value in os.environ.items():
+            if not key.startswith("REZ_"):
+                continue
+
+            environ[key] = value
+
+        return environ
+
+    @classmethod
     def get_syspaths(cls):
         if cls.syspaths is not None:
             return cls.syspaths
@@ -81,19 +124,64 @@ class CMD(Shell):
             cls.syspaths = config.standard_system_paths
             return cls.syspaths
 
-        def whichdir(cmd):
-            try:
-                return os.path.dirname(which(cmd))
-            except TypeError:
-                # No path found
-                return None
+        # detect system paths using registry
+        def gen_expected_regex(parts):
+            whitespace = "[\s]+"
+            return whitespace.join(parts)
 
-        cls.syspaths = list(filter(None, [
-            whichdir("cmd"),  # e.g. System32/
-            whichdir("powershell"),
-            whichdir("scrcons"),
-        ]))
+        paths = []
 
+        cmd = [
+            "REG",
+            "QUERY",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
+            "/v",
+            "PATH"
+        ]
+
+        expected = gen_expected_regex([
+            "HKEY_LOCAL_MACHINE\\\\SYSTEM\\\\CurrentControlSet\\\\Control\\\\Session Manager\\\\Environment",
+            "PATH",
+            "REG_(EXPAND_)?SZ",
+            "(.*)"
+        ])
+
+        p = popen(cmd, stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE, shell=True)
+        out_, _ = p.communicate()
+        out_ = out_.strip()
+
+        if p.returncode == 0:
+            match = re.match(expected, out_)
+            if match:
+                paths.extend(match.group(2).split(os.pathsep))
+
+        cmd = [
+            "REG",
+            "QUERY",
+            "HKCU\\Environment",
+            "/v",
+            "PATH"
+        ]
+
+        expected = gen_expected_regex([
+            "HKEY_CURRENT_USER\\\\Environment",
+            "PATH",
+            "REG_(EXPAND_)?SZ",
+            "(.*)"
+        ])
+
+        p = popen(cmd, stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE, shell=True)
+        out_, _ = p.communicate()
+        out_ = out_.strip()
+
+        if p.returncode == 0:
+            match = re.match(expected, out_)
+            if match:
+                paths.extend(match.group(2).split(os.pathsep))
+
+        cls.syspaths = set([x for x in paths if x])
         return cls.syspaths
 
     def _bind_interactive_rez(self):
@@ -123,11 +211,10 @@ class CMD(Shell):
             if bind_rez:
                 ex.interpreter._bind_interactive_rez()
             if print_msg and not quiet:
-                # previously this was called with the /K flag, however
-                # that would leave spawn_shell hung on a blocked call
-                # waiting for the user to type "exit" into the shell that
-                # was spawned to run the rez context printout
-                ex.command("cmd /Q /C rez context")
+                ex.info('You are now in a rez-configured environment.')
+
+                # Output, if Rez is present
+                ex.command("rez context 2>nul")
 
         def _create_ex():
             return RexExecutor(interpreter=self.new_shell(),
@@ -180,6 +267,10 @@ class CMD(Shell):
             cmd += ["& " + shell_command]
 
         is_detached = (cmd[0] == 'START')
+
+        # No environment was explicity passed
+        if not env and not config.inherit_parent_environment:
+            env = self.environment()
 
         p = popen(cmd,
                   env=env,

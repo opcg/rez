@@ -67,6 +67,10 @@ class Shell(ActionInterpreter):
     def get_syspaths(cls):
         raise NotImplementedError
 
+    @classmethod
+    def environment(cls):
+        raise NotImplementedError
+
     def __init__(self):
         self._lines = []
         self.settings = config.plugins.shell[self.name()]

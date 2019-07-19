@@ -1257,9 +1257,6 @@ class ResolvedContext(object):
         with open(context_file, 'w') as f:
             f.write(context_code)
 
-        quiet = quiet or \
-            (RezToolsVisibility[config.rez_tools_visibility] == RezToolsVisibility.never)
-
         # spawn the shell subprocess
         p = sh.spawn_shell(context_file,
                            tmpdir,
@@ -1695,16 +1692,17 @@ class ResolvedContext(object):
         # append suite paths based on suite visibility setting
         self._append_suite_paths(executor)
 
-        # append system paths
-        executor.append_system_paths()
+        if config.inherit_parent_environment:
+            # append system paths
+            executor.append_system_paths()
 
-        # add rez path so that rez commandline tools are still available within
-        # the resolved environment
-        mode = RezToolsVisibility[config.rez_tools_visibility]
-        if mode == RezToolsVisibility.append:
-            executor.append_rez_path()
-        elif mode == RezToolsVisibility.prepend:
-            executor.prepend_rez_path()
+            # add rez path so that rez commandline tools are still available within
+            # the resolved environment
+            mode = RezToolsVisibility[config.rez_tools_visibility]
+            if mode == RezToolsVisibility.append:
+                executor.append_rez_path()
+            elif mode == RezToolsVisibility.prepend:
+                executor.prepend_rez_path()
 
     def _append_suite_paths(self, executor):
         from rez.suite import Suite

@@ -332,9 +332,11 @@ this function.
 
 ### Backwards Compatibility
 
-Some deprecated features have been disabled by default. If you encounter any issues, here is how can re-enable them.
+Some features have been disabled by default. If you encounter any issues, here is how can re-enable them.
 
 **rezconfig.py**
+
+Apply all of these for full compatibility with nerdvegas/rez
 
 ```python
 # bleeding-rez does not affect file permissions at all
@@ -343,6 +345,11 @@ make_package_temporarily_writable = True
 
 # bleeding-rez does not support Rez 1 or below
 disable_rez_1_compatibility = False
+
+# nerdvegas/rez inherits all values,
+# except under special circumstances.
+# See https://github.com/mottosso/bleeding-rez/issues/70
+inherit_parent_environment = True
 ```
 
 <br>

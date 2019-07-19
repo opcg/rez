@@ -5,10 +5,8 @@ from rez.rex import RexExecutor, OutputStyle, EscapedString
 from rez.shells import Shell
 from rez.utils.system import popen
 from rez.utils.platform_ import platform_
-from rez.backport.shutilwhich import which
-from functools import partial
+from rezplugins.shell.cmd import CMD
 import os
-import re
 
 try:
     basestring
@@ -17,14 +15,9 @@ except NameError:
     basestring = str
 
 
-class PowerShell(Shell):
+class PowerShell(CMD):
     syspaths = None
     _executable = None
-
-    # Regex to aid with escaping of Windows-specific special chars:
-    # http://ss64.com/nt/syntax-esc.html
-    _escape_re = re.compile(r'(?<!\^)[&<>]|(?<!\^)\^(?![&<>\^])')
-    _escaper = partial(_escape_re.sub, lambda m: '^' + m.group(0))
 
     @property
     def executable(cls):
@@ -66,30 +59,6 @@ class PowerShell(Shell):
             source_bind_files=(not norc)
         )
 
-    @classmethod
-    def get_syspaths(cls):
-        if cls.syspaths is not None:
-            return cls.syspaths
-
-        if config.standard_system_paths:
-            cls.syspaths = config.standard_system_paths
-            return cls.syspaths
-
-        def whichdir(cmd):
-            try:
-                return os.path.dirname(which(cmd))
-            except TypeError:
-                # No path found
-                return None
-
-        cls.syspaths = list(filter(None, [
-            whichdir("cmd"),  # e.g. System32/
-            whichdir("powershell"),
-            whichdir("scrcons"),
-        ]))
-
-        return cls.syspaths
-
     def _bind_interactive_rez(self):
         if config.set_prompt and self.settings.prompt:
             self._addline('Function prompt {"%s"}' % self.settings.prompt)
@@ -108,6 +77,8 @@ class PowerShell(Shell):
             if bind_rez:
                 ex.interpreter._bind_interactive_rez()
             if print_msg and not quiet:
+                ex.info('You are now in a rez-configured environment.')
+
                 # Rez may not be available
                 ex.command("Try { rez context } Catch { }")
 
@@ -150,6 +121,10 @@ class PowerShell(Shell):
         if shell_command is None:
             cmd.insert(1, "-noexit")
 
+        # No environment was explicity passed
+        if not env and not config.inherit_parent_environment:
+            env = self.environment()
+
         p = popen(cmd,
                   env=env,
                   universal_newlines=True,
@@ -184,12 +159,6 @@ class PowerShell(Shell):
         if isinstance(value, EscapedString):
             return value.formatted(self._escaper)
         return self._escaper(value)
-
-    def _saferefenv(self, key):
-        pass
-
-    def shebang(self):
-        pass
 
     def setenv(self, key, value):
         value = self.escape_string(value)
