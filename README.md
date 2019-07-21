@@ -28,12 +28,14 @@ A [Rez](https://github.com/nerdvegas/rez) superset, on PyPI, for Python 2 and 3,
 
 ### What is Rez
 
-Rez is a command-line utility for Windows, Linux and MacOS, solving the problem of creating a reproducible environment for your software projects, by resolving a request into a deterministic selection of "packages" - versioned collections of files with metadata in a self-hosted location - and dynamically generating a corresponding environment.
+Rez is a command-line utility for Windows, Linux and MacOS, solving the problem of creating a reproducible environment for your software projects on any machine in any pre-existing environment. It does so by resolving a "request" into a deterministic selection of "packages". Each package is a versioned collection of files with some metadata that you self-host and the resulting "context" is dynamica generated whenever the request is resolved.
 
 ```bash
 $ rez env Python-3.7 PySide2-5.12 six requests
 > $ echo Hello reproducible environment!
 ```
+
+- [Comparisons](#comparisons)
 
 <br>
 
@@ -420,3 +422,37 @@ If you report a bug, please ensure to specify the following:
 2.  Platform and operating system you were using;
 3.  Contextual information (what were you trying to do using Rez);
 4.  Simplest possible steps to reproduce.
+
+<br>
+
+### Comparisons
+
+In addition to the high-level comparisons [above](https://github.com/mottosso/bleeding-rez#are-there-any-similar-projects-to-bleeding-rez), these are a few more in-depth comparisons with projects of particular interest.
+
+<br>
+
+#### Docker
+
+Like a container using Docker, or most other containerisation platforms, the environment within is completely independent of the environment from which it was entered.
+
+```bash
+$ export MY_VARIABLE=true
+$ docker run -ti --rm centos:7
+> $ echo $MY_VARIABLE
+$MY_VARIABLE
+```
+
+Like `docker run`, environment variables can be passed into a resolved context like this.
+
+```bash
+$ docker run -e key=value centos:7
+$ rez env -e key=value python-3.7
+```
+
+<br>
+
+#### Nerdvegas
+
+- Pip first
+- Production configuration
+- Opt-in environment inheritance
