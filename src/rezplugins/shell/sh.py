@@ -101,6 +101,9 @@ class SH(UnixShell):
 
             environ[key] = value
 
+        if config.additional_environment:
+            environ.update(config.additional_environment)
+
         return environ
 
     @classmethod

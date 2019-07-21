@@ -73,6 +73,10 @@ def setup_parser(parser, completions=False):
         help="add package exclusion filters, eg '*.beta'. Note that these are "
         "added to the globally configured exclusions")
     parser.add_argument(
+        "-e", "--env", action='append', metavar="KEY=VALUE",
+        help="inject a KEY=VALUE pair into the resulting context. "
+             "Keeps reading key=value pairs until the next argument is passed")
+    parser.add_argument(
         "--include", type=str, nargs='+', metavar="RULE",
         help="add package inclusion filters, eg 'mypkg', 'boost-*'. Note that "
         "these are added to the globally configured inclusions")
@@ -153,7 +157,6 @@ def command(opts, parser, extra_arg_groups=None):
     t = get_epoch_time_from_str(opts.time) if opts.time else None
 
     if opts.isolated:
-        print("Not inheriting anything!")
         config.inherit_parent_environment = False
 
     if opts.paths is None:
@@ -233,6 +236,15 @@ def command(opts, parser, extra_arg_groups=None):
 
     if not success:
         sys.exit(1)
+
+    if opts.env:
+        env = {}
+
+        for pair in opts.env:
+            key, value = pair.split("=")
+            env[key.upper()] = value
+
+        config.additional_environment = env
 
     # generally shells will behave as though the '-s' flag was not present when
     # no stdin is available. So here we replicate this behaviour.

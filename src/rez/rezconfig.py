@@ -472,6 +472,11 @@ rez_tools_visibility = "append"
 # The `rez_tools_visibility` has no effect unless this is set to True
 inherit_parent_environment = True
 
+# Append this environment onto whatever is provided by a resolved
+# context. This takes precedence and can be used to override or
+# inject variables into an environment.
+additional_environment = None
+
 # Defines when package commands are sourced during the startup sequence of an
 # interactive shell. If True, package commands are sourced before startup
 # scripts (such as .bashrc). If False, package commands are sourced after.
