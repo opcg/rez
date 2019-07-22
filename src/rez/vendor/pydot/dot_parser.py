@@ -22,7 +22,7 @@ from rez.vendor.pyparsing.pyparsing import (
     QuotedString)
 
 try:
-    import pydot
+    from . import pydot
 except ImportError:
     try:
         # Circular dependency, if pydot was imported first
