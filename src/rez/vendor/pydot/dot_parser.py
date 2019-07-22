@@ -21,7 +21,16 @@ from rez.vendor.pyparsing.pyparsing import (
     ParseException, ParseResults, CharsNotIn,
     QuotedString)
 
-import pydot
+try:
+    import pydot
+except ImportError:
+    try:
+        # Circular dependency, if pydot was imported first
+        pydot = sys.modules["rez.vendor.pydot.pydot"]
+    except KeyError:
+        raise ImportError(
+            "Circular dependency to pydot could not be resolved"
+        )
 
 __author__ = ['Michael Krause', 'Ero Carrera']
 __license__ = 'MIT'
