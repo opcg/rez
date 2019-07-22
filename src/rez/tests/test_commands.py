@@ -6,6 +6,7 @@ from rez.rex import Comment, EnvAction, Shebang, Setenv, Alias, Appendenv
 from rez.resolved_context import ResolvedContext
 import unittest
 from rez.tests.util import TestBase
+from rez.config import config
 import os
 
 
@@ -42,7 +43,11 @@ class TestCommands(TestBase):
         # this environ should not have changed
         self.assertEqual(orig_environ, os.environ)
 
+        # Test expects 1.0 compatibility
+        config.disable_rez_1_compatibility = False
         commands = r.get_actions(parent_environ=env)
+        config.disable_rez_1_compatibility = True
+
         commands_ = []
 
         # ignore some commands that don't matter or change depending on system

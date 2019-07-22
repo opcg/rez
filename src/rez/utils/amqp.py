@@ -11,7 +11,7 @@ from rez.vendor.six.six.moves import queue
 
 
 _lock = threading.Lock()
-_queue = queue()
+_queue = queue.Queue()
 _thread = None
 _num_pending = 0
 

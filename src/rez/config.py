@@ -6,11 +6,8 @@ from rez.utils.formatting import expandvars, expanduser
 from rez.utils.logging_ import get_debug_printer
 from rez.utils.scope import scoped_format
 from rez.exceptions import ConfigurationError
-from rez import module_root_path
 from rez.system import system
 from rez.vendor.schema.schema import Schema, SchemaError, And, Or, Use
-from rez.vendor import yaml
-from rez.vendor.yaml.error import YAMLError
 from rez.vendor.six import six
 from rez.backport.lru_cache import lru_cache
 from contextlib import contextmanager
@@ -19,6 +16,9 @@ import os
 import sys
 import os.path
 import copy
+
+from rez.vendor import yaml
+from rez.vendor.yaml import YAMLError
 
 PY3 = sys.version_info >= (3, 0, 0)
 
@@ -116,10 +116,6 @@ class Char(Setting):
 
 class OptionalStr(Str):
     schema = Or(None, str_type)
-
-
-class OptionalObject(Str):
-    schema = Or(None, object)
 
 
 class StrList(Setting):
@@ -247,6 +243,21 @@ class RezToolsVisibility_(Str):
         return Or(*(x.name for x in RezToolsVisibility))
 
 
+class OptionalStrOrFunction(Setting):
+    schema = Or(None, str_type, callable)
+
+    def _parse_env_var(self, value):
+        # note: env-var override only supports string, eg 'mymodule.preprocess_func'
+        return value
+
+
+class PreprocessMode_(Str):
+    @cached_class_property
+    def schema(cls):
+        from rez.developer_package import PreprocessMode
+        return Or(*(x.name for x in PreprocessMode))
+
+
 class BuildThreadCount_(Setting):
     # may be a positive int, or the values "physical" or "logical"
 
@@ -329,7 +340,8 @@ config_schema = Schema({
     "implicit_back":                                OptionalStr,
     "alias_fore":                                   OptionalStr,
     "alias_back":                                   OptionalStr,
-    "package_preprocess_function":                  OptionalObject,
+    "package_preprocess_function":                  OptionalStrOrFunction,
+    "package_preprocess_mode":                      PreprocessMode_,
     "context_tracking_host":                        OptionalStr,
     "variant_shortlinks_dirname":                   OptionalStr,
     "build_thread_count":                           BuildThreadCount_,
@@ -409,6 +421,7 @@ _plugin_config_dict = {
 # Config
 # -----------------------------------------------------------------------------
 
+# TODO: Bake rez.rezconfig defaults into this class
 class Config(six.with_metaclass(LazyAttributeMeta, object)):
     """Rez configuration settings.
 
@@ -539,9 +552,19 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
     @property
     def nonlocal_packages_path(self):
         """Returns package search paths with local path removed."""
-        paths = self.packages_path[:]
-        if self.local_packages_path in paths:
-            paths.remove(self.local_packages_path)
+
+        def normalise_path(path):
+            # Account for relative paths and varying or duplicate slashes
+            path = os.path.abspath(path)
+            path = os.path.normpath(path)
+            return path
+
+        packages_path = normalise_path(self.local_packages_path)
+        paths = list(map(normalise_path, self.packages_path))
+
+        if packages_path in paths:
+            paths.remove(packages_path)
+
         return paths
 
     def get_completions(self, prefix):
@@ -616,8 +639,11 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
     def _create_main_config(cls, overrides=None):
         """See comment block at top of 'rezconfig' describing how the main
         config is assembled."""
-        filepaths = []
-        filepaths.append(get_module_root_config())
+
+        import rez.rezconfig as rezconfig
+
+        filepaths = [rezconfig]
+        # filepaths.append(get_module_root_config())
         filepath = os.getenv("REZ_CONFIG_FILE")
         if filepath:
             filepaths.extend(filepath.split(os.pathsep))
@@ -787,7 +813,8 @@ def _create_locked_config(overrides=None):
     Returns:
         `Config` object.
     """
-    return Config([get_module_root_config()], overrides=overrides, locked=True)
+    import rez.rezconfig as root_config
+    return Config([root_config], overrides=overrides, locked=True)
 
 
 @contextmanager
@@ -802,6 +829,36 @@ def _replace_config(other):
         config._swap(other)  # revert config
 
 
+@lru_cache()
+def _load_config_imp(module):
+
+    reserved = dict(
+        # Standard Python module variables
+        # Made available from within the module,
+        # and later excluded from the `Config` class
+        __name__=module.__name__,
+        __file__=module.__file__,
+
+        rez_version=__version__,
+        ModifyList=ModifyList
+    )
+
+    globs = reserved.copy()
+    result = {}
+
+    for k in dir(module):
+        globs[k] = getattr(module, k)
+
+    for k, v in globs.items():
+        if k != '__builtins__' \
+                and not ismodule(v) \
+                and k not in reserved:
+            result[k] = v
+
+    return result
+
+
+# TODO: Update to remove __file__ assumption
 @lru_cache()
 def _load_config_py(filepath):
     from rez.vendor.six.six import exec_
@@ -853,6 +910,7 @@ def _load_config_yaml(filepath):
     return doc
 
 
+# TODO: This is the key to removing __file__ reliance in the config object
 def _load_config_from_filepaths(filepaths):
     data = {}
     sourced_filepaths = []
@@ -860,6 +918,13 @@ def _load_config_from_filepaths(filepaths):
                ("", _load_config_yaml))
 
     for filepath in filepaths:
+
+        if ismodule(filepath):
+            data_ = _load_config_imp(filepath)
+            deep_update(data, data_)
+            sourced_filepaths.append(filepath.__name__)
+            continue
+
         for extension, loader in loaders:
             if extension:
                 no_ext = os.path.splitext(filepath)[0]
@@ -878,8 +943,8 @@ def _load_config_from_filepaths(filepaths):
     return data, sourced_filepaths
 
 
-def get_module_root_config():
-    return os.path.join(module_root_path, "rezconfig.py")
+# def get_module_root_config():
+#     return os.path.join(module_root_path, "rezconfig.py")
 
 
 # singleton

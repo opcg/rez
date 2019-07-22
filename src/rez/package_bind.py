@@ -1,6 +1,6 @@
 from __future__ import print_function
-from rez.exceptions import RezBindError
-from rez import module_root_path
+from rez.exceptions import RezBindError, RezUncatchableError
+# from rez import module_root_path
 from rez.util import get_close_pkgs
 from rez.utils.formatting import columnise
 from rez.utils.logging_ import print_error
@@ -17,8 +17,10 @@ def get_bind_modules(verbose=False):
     Returns:
         dict: Map of (name, filepath) listing all bind modules.
     """
-    builtin_path = os.path.join(module_root_path, "bind")
-    searchpaths = config.bind_module_path + [builtin_path]
+    # TODO: Alternate bind package location?
+    # builtin_path = os.path.join(module_root_path, "bind")
+    # searchpaths = config.bind_module_path + [builtin_path]
+    searchpaths = config.bind_module_path
     bindnames = {}
 
     for path in searchpaths:
@@ -100,7 +102,7 @@ def bind_package(name, path=None, version_range=None, no_deps=False,
     while pending:
         pending_ = pending
         pending = set()
-        exc_type = None
+        exc_type = RezUncatchableError
 
         for name_ in pending_:
             # turn error on binding of dependencies into a warning - we don't
@@ -149,9 +151,9 @@ def _bind_package(name, path=None, version_range=None, bind_args=None,
         raise RezBindError("Bind module not found for '%s'" % name)
 
     # load the bind module
-    stream = open(bindfile)
     namespace = {}
-    exec(stream, namespace)
+    with open(bindfile) as stream:
+        exec(compile(stream.read(), stream.name, 'exec'), namespace)
 
     # parse bind module params
     bind_parser = argparse.ArgumentParser(prog="rez bind %s" % name,

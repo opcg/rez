@@ -1,5 +1,102 @@
 # Change Log
 
+## [2.36.2](https://github.com/nerdvegas/rez/tree/2.36.2) (2019-07-16)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.36.1...2.36.2)
+
+**Merged pull requests:**
+
+[Feature] Pure python package detection [\#628](https://github.com/nerdvegas/rez/pull/628) ([lambdaclan](https://github.com/lambdaclan))
+
+## [2.36.1](https://github.com/nerdvegas/rez/tree/2.36.1) (2019-07-16)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.36.0...2.36.1)
+
+**Merged pull requests:**
+
+- [Fix] Sh failing in `test_shells.TeshShells.text_rex_code_alias` [\#663](https://github.com/nerdvegas/rez/pull/663) ([bfloch](https://github.com/bfloch))
+
+## [2.36.0](https://github.com/nerdvegas/rez/tree/2.36.0) (2019-07-16)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.35.0...2.36.0)
+
+**Merged pull requests:**
+
+- Add a package_preprocess_mode [\#651](https://github.com/nerdvegas/rez/pull/651) ([JeanChristopheMorinPerso](https://github.com/JeanChristopheMorinPerso))
+
+**Closed issues:**
+
+- Support "additive" preprocess functions [\#609](https://github.com/nerdvegas/rez/issues/609)
+
+## [2.35.0](https://github.com/nerdvegas/rez/tree/2.35.0) (2019-07-10)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.34.0...2.35.0)
+
+**Backwards Compatibility Issues**
+
+Please note that this update alters the process hierarchy of a resolved rez environment,
+for Windows users. This does not necessarily represent a compatibility issue, but please
+be on the lookout for unintended side effects and report them if they arise.
+
+**Merged pull requests:**
+
+- WIP No more "Terminate Batch Job? (Y/N)" - Take 2 [\#627](https://github.com/nerdvegas/rez/pull/627) ([mottosso](https://github.com/mottosso))
+
+**Closed issues:**
+
+- Shell history not working in cmd.exe or PowerShell [\#616](https://github.com/nerdvegas/rez/issues/616)
+
+## [2.34.0](https://github.com/nerdvegas/rez/tree/2.34.0) (2019-07-10)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.33.0...2.34.0)
+
+**Merged pull requests:**
+
+- [Fix] Wheel pip regressions [\#656](https://github.com/nerdvegas/rez/pull/656) ([lambdaclan](https://github.com/lambdaclan))
+
+## [2.33.0](https://github.com/nerdvegas/rez/tree/2.33.0) (2019-06-26)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.32.1...2.33.0)
+
+**Merged pull requests:**
+
+- Update distlib vendor library [\#654](https://github.com/nerdvegas/rez/pull/654) ([lambdaclan](https://github.com/lambdaclan))
+- [WIP] Feature/pip install modern [\#602](https://github.com/nerdvegas/rez/pull/602) ([lambdaclan](https://github.com/lambdaclan))
+
+## [2.32.1](https://github.com/nerdvegas/rez/tree/2.32.1) (2019-06-24)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.32.0...2.32.1)
+
+**Merged pull requests:**
+
+- Support for external PyYAML and Python 3 [\#622](https://github.com/nerdvegas/rez/pull/622) ([mottosso](https://github.com/mottosso))
+- Fix escaping backslashes in tcsh on Mac OS [\#497](https://github.com/nerdvegas/rez/pull/497) ([skral](https://github.com/skral))
+
+## [2.32.0](https://github.com/nerdvegas/rez/tree/2.32.0) (2019-06-23)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.4...2.32.0)
+
+**Merged pull requests:**
+
+- Implement preprocess function support for rezconfig.py (takeover) [\#650](https://github.com/nerdvegas/rez/pull/650) ([JeanChristopheMorinPerso](https://github.com/JeanChristopheMorinPerso))
+
+## [2.31.4](https://github.com/nerdvegas/rez/tree/2.31.4) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.3...2.31.4)
+
+**Merged pull requests:**
+
+- Expose Python standard module __file__ and __name__ to rezconfig [\#636](https://github.com/nerdvegas/rez/pull/636) ([mottosso](https://github.com/mottosso))
+
+## [2.31.3](https://github.com/nerdvegas/rez/tree/2.31.3) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.2...2.31.3)
+
+**Merged pull requests:**
+
+- Bugfix for alias() on Windows [\#607](https://github.com/nerdvegas/rez/pull/607) ([mottosso](https://github.com/mottosso))
+
+## [2.31.2](https://github.com/nerdvegas/rez/tree/2.31.2) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.1...2.31.2)
+
+**Merged pull requests:**
+
+- Fix #558 [\#647](https://github.com/nerdvegas/rez/pull/647) ([mottosso](https://github.com/mottosso))
+
+**Closed issues:**
+
+- rez-build breaks if "|" in a required package's version on Windows [\#558](https://github.com/nerdvegas/rez/issues/558)
+
 ## [2.31.1](https://github.com/nerdvegas/rez/tree/2.31.1) (2019-06-18)
 [Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.0...2.31.1)
 

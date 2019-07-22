@@ -67,16 +67,15 @@ scripts = [
 
 
 setup(
-    name=os.getenv("REZ_PYPI_NAME", "rez"),  # for development on fork
+    name="bleeding-rez",
     version=version,
     description=("A cross-platform packaging system that can build and "
                  "install multiple version of packages, and dynamically "
                  "configure resolved environments at runtime."),
     keywords="package resolve version build install software management",
-    long_description=None,
-    url="https://github.com/nerdvegas/rez",
-    author="Allan Johns",
-    author_email="nerdvegas@gmail.com",
+    url="https://github.com/mottosso/bleeding-rez",
+    author="Marcus Ottosson",
+    author_email="konstruktion@gmail.com",
     license="LGPL",
     entry_points={
         "console_scripts": [
@@ -112,7 +111,7 @@ setup(
             find_files('*', 'icons', root='rezgui')
     },
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",

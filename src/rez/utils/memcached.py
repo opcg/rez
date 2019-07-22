@@ -168,7 +168,12 @@ class Client(object):
         return "%s:%s:%s" % (cache_interface_version, self.current, key)
 
     def _get_stats(self, stat_args=None):
-        return self.client.get_stats(stat_args=stat_args)
+        try:
+            return self.client.get_stats(stat_args=stat_args)
+        except IndexError:
+            # Client didn't contain any stats at all
+            # Can happen after a .flush()
+            pass
 
     @classmethod
     def _key_hash(cls, key):

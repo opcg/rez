@@ -16,4 +16,9 @@ coverage.xml
 htmlcov
 
 .idea/
+!.idea/misc.xml
+!.idea/modules.xml
+!.idea/rez.iml
+!.idea/vcs.iml
+
 venv/

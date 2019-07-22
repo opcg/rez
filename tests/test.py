@@ -10,8 +10,8 @@ def load_tests(loader, standard_tests, pattern):
 
     if not pattern:
         pattern = 'test_*.py'
-    suite = loader.discover(src_test_dir, pattern=pattern,
-                            top_level_dir=src_dir)
+
+    suite = loader.discover(src_test_dir, pattern=pattern)
     if standard_tests:
         suite.addTests(standard_tests)
     return suite

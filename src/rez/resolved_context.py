@@ -1,6 +1,6 @@
 from __future__ import print_function
 from rez.vendor.six import six
-from rez import __version__, module_root_path
+from rez import __version__
 from rez.package_repository import package_repository_manager
 from rez.solver import SolverCallbackReturn
 from rez.resolver import Resolver, ResolverStatus
@@ -218,7 +218,9 @@ class ResolvedContext(object):
 
         # info about env the resolve occurred in
         self.rez_version = __version__
-        self.rez_path = module_root_path
+
+        # TODO: fix self.rez_path usages
+        # self.rez_path = module_root_path
         self.user = getpass.getuser()
         self.host = system.hostname
         self.platform = system.platform
@@ -1335,7 +1337,7 @@ class ResolvedContext(object):
             default_patch_lock=self.default_patch_lock.name,
 
             rez_version=self.rez_version,
-            rez_path=self.rez_path,
+            # rez_path=self.rez_path,
             user=self.user,
             host=self.host,
             platform=self.platform,
@@ -1403,7 +1405,7 @@ class ResolvedContext(object):
         r.package_paths = d["package_paths"]
 
         r.rez_version = d["rez_version"]
-        r.rez_path = d["rez_path"]
+        # r.rez_path = d["rez_path"]
         r.user = d["user"]
         r.host = d["host"]
         r.platform = d["platform"]
@@ -1595,7 +1597,7 @@ class ResolvedContext(object):
         package_paths_str = os.pathsep.join(self.package_paths)
 
         _heading("system setup")
-        executor.setenv("REZ_USED", self.rez_path)
+        # executor.setenv("REZ_USED", self.rez_path)
         executor.setenv("REZ_USED_VERSION", self.rez_version)
         executor.setenv("REZ_USED_TIMESTAMP", str(self.timestamp))
         executor.setenv("REZ_USED_REQUESTED_TIMESTAMP",
@@ -1613,7 +1615,7 @@ class ResolvedContext(object):
                 not config.disable_rez_1_compatibility:
             request_str_ = " ".join([request_str, implicit_str]).strip()
             executor.setenv("REZ_VERSION", self.rez_version)
-            executor.setenv("REZ_PATH", self.rez_path)
+            # executor.setenv("REZ_PATH", self.rez_path)
             executor.setenv("REZ_REQUEST", request_str_)
             executor.setenv("REZ_RESOLVE", resolve_str)
             executor.setenv("REZ_RAW_REQUEST", request_str_)

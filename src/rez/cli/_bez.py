@@ -37,9 +37,9 @@ def run():
     # because we're in a python env configured for rez, not the build
     code = """\
     from __future__ import print_function
-    stream=open("%(buildfile)s")
-    env={}
-    exec(compile(stream.read(), stream.name, 'exec'), env)
+    with open("%(buildfile)s") as stream:
+        env={}
+        exec(compile(stream.read(), stream.name, 'exec'), env)
 
     buildfunc = env.get("build")
     if not buildfunc:

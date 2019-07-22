@@ -4,19 +4,23 @@ test configuration settings
 import unittest
 from rez.tests.util import TestBase
 from rez.exceptions import ConfigurationError
-from rez.config import Config, get_module_root_config, _replace_config
+from rez.config import Config, _replace_config
 from rez.system import system
 from rez.utils.data_utils import RO_AttrDictWrapper
 from rez.packages_ import get_developer_package
 import os
 import os.path
 
+import rez.rezconfig as module_root_config
+
 
 class TestConfig(TestBase):
     @classmethod
     def setUpClass(cls):
         cls.settings = {}
-        cls.root_config_file = get_module_root_config()
+
+        # TODO: Adapt to module based config
+        cls.root_config_file = module_root_config
         path = os.path.dirname(__file__)
         cls.config_path = os.path.join(path, "data", "config")
 

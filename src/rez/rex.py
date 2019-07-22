@@ -8,7 +8,7 @@ from string import Formatter
 from rez.system import system
 from rez.config import config
 from rez.exceptions import RexError, RexUndefinedVariableError, RezSystemError
-from rez.util import shlex_join
+from rez.util import shlex_join, iterable
 from rez.utils import reraise
 from rez.utils.system import popen
 from rez.utils.sourcecode import SourceCode, SourceCodeError
@@ -623,7 +623,7 @@ class Python(ActionInterpreter):
         if self.passive:
             return
 
-        if hasattr(value, '__iter__'):
+        if iterable(value):
             it = iter(value)
             cmd = EscapedString.disallow(next(it))
             value = [cmd] + [self.escape_string(x) for x in it]

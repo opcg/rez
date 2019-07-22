@@ -81,76 +81,18 @@ class CMD(Shell):
             cls.syspaths = config.standard_system_paths
             return cls.syspaths
 
-        # detect system paths using registry
-        def gen_expected_regex(parts):
-            whitespace = r"[\s]+"
-            return whitespace.join(parts)
+        def whichdir(cmd):
+            try:
+                return os.path.dirname(which(cmd))
+            except TypeError:
+                # No path found
+                return None
 
-        paths = []
-
-        cmd = [
-            "REG",
-            "QUERY",
-            "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
-            "/v",
-            "PATH"
-        ]
-
-        expected = gen_expected_regex([
-            "HKEY_LOCAL_MACHINE\\\\SYSTEM\\\\CurrentControlSet\\\\Control\\\\Session Manager\\\\Environment",
-            "PATH",
-            "REG_(EXPAND_)?SZ",
-            "(.*)"
-        ])
-
-        p = popen(cmd,
-                  stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE,
-                  universal_newlines=True,
-                  shell=True)
-        out_, _ = p.communicate()
-        out_ = out_.strip()
-
-        if p.returncode == 0:
-            match = re.match(expected, out_)
-            if match:
-                paths.extend(match.group(2).split(os.pathsep))
-
-        cmd = [
-            "REG",
-            "QUERY",
-            "HKCU\\Environment",
-            "/v",
-            "PATH"
-        ]
-
-        expected = gen_expected_regex([
-            "HKEY_CURRENT_USER\\\\Environment",
-            "PATH",
-            "REG_(EXPAND_)?SZ",
-            "(.*)"
-        ])
-
-        p = popen(cmd,
-                  stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE,
-                  universal_newlines=True,
-                  shell=True)
-        out_, _ = p.communicate()
-        out_ = out_.strip()
-
-        if p.returncode == 0:
-            match = re.match(expected, out_)
-            if match:
-                paths.extend(match.group(2).split(os.pathsep))
-
-        cls.syspaths = list(set([x for x in paths if x]))
-
-        # add Rez binaries
-        exe = which("rez-env")
-        assert exe, "Could not find rez binary, this is a bug"
-        rez_bin_dir = os.path.dirname(exe)
-        cls.syspaths.insert(0, rez_bin_dir)
+        cls.syspaths = list(filter(None, [
+            whichdir("cmd"),  # e.g. System32/
+            whichdir("powershell"),
+            whichdir("scrcons"),
+        ]))
 
         return cls.syspaths
 
