@@ -94,6 +94,7 @@ class RezPluginType(object):
         self.plugin_classes[plugin_name] = plugin_class
         self.plugin_modules[plugin_name] = plugin_module
 
+    # TODO: This whole approach probably needs to be redesigned to no rely on the filesystem
     def load_plugins(self):
         import pkgutil
         from rez.backport.importlib import import_module
@@ -152,7 +153,8 @@ class RezPluginType(object):
                             print_debug(out.getvalue())
 
             # load config
-            data, _ = _load_config_from_filepaths([os.path.join(path, "rezconfig")])
+            # data, _ = _load_config_from_filepaths([os.path.join(path, "rezconfig")])
+            data, _ = _load_config_from_filepaths([package])
             deep_update(self.config_data, data)
 
     def get_plugin_class(self, plugin_name):
