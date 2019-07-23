@@ -20,7 +20,7 @@ import copy
 from rez.vendor import yaml
 from rez.vendor.yaml import YAMLError
 
-from rez.utils.pycompat import open_text
+from rez.utils.pycompat import read_text
 
 PY3 = sys.version_info >= (3, 0, 0)
 
@@ -915,15 +915,16 @@ def _load_config_yaml(filepath):
 @lru_cache()
 def _load_config_yaml_resource(package, name):
 
-    with open_text(package, name) as f:
-        try:
-            doc = yaml.safe_load(f)
-        except YAMLError as e:
-            raise ConfigurationError("Error loading configuration from %s, %s: %s"
-                                     % (package, name, str(e)))
-        if not isinstance(doc, dict):
-            raise ConfigurationError("Error loading configuration from %s, %s: Expected "
-                                     "dict, got %s" % (package, name, type(doc).__name__))
+    f = read_text(package, name)
+
+    try:
+        doc = yaml.safe_load(f)
+    except YAMLError as e:
+        raise ConfigurationError("Error loading configuration from %s, %s: %s"
+                                 % (package, name, str(e)))
+    if not isinstance(doc, dict):
+        raise ConfigurationError("Error loading configuration from %s, %s: Expected "
+                                 "dict, got %s" % (package, name, type(doc).__name__))
     return doc
 
 
