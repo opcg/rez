@@ -18,7 +18,7 @@ htmlcov
 .idea/
 !.idea/misc.xml
 !.idea/modules.xml
-!.idea/opz.iml
+!.idea/rez.iml
 !.idea/vcs.iml
 
 venv/

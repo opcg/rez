@@ -1633,7 +1633,6 @@ class ResolvedContext(object):
         #
 
         _heading("package variables")
-        error_class = SourceCodeError if config.catch_rex_errors else None
 
         # set basic package variables and create per-package bindings
         bindings = {}
@@ -1678,7 +1677,10 @@ class ResolvedContext(object):
 
                 try:
                     executor.execute_code(commands, isolate=True)
-                except error_class as e:
+                except SourceCodeError as e:
+                    if not config.catch_rex_errors:
+                        raise
+
                     exc = e
 
                 if exc:

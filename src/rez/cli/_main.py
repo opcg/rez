@@ -140,21 +140,21 @@ def isolated_environment():
     }
 
     def whichdir(exe):
-        return os.path.dirname(which(exe))
+        return os.path.dirname(which(exe) or "")
 
     if os.name == "nt":
-        environ["PATH"] = os.pathsep.join([
+        environ["PATH"] = os.pathsep.join(filter(None, [
             whichdir("cmd"),
             whichdir("powershell"),
-        ])
+        ]))
 
     else:
-        environ["PATH"] = os.pathsep.join([
+        environ["PATH"] = os.pathsep.join(filter(None, [
             whichdir("bash"),
 
             # For platform_.arch()
             whichdir("lsb_release"),
-        ])
+        ]))
 
     # Include REZ_ variables
     for key, value in os.environ.items():
