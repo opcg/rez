@@ -154,7 +154,7 @@ class RezPluginType(object):
 
             # load config
             # data, _ = _load_config_from_filepaths([os.path.join(path, "rezconfig")])
-            data, _ = _load_config_from_filepaths([package])
+            data, _ = _load_config_from_filepaths([(package, 'rezconfig')])
             deep_update(self.config_data, data)
 
     def get_plugin_class(self, plugin_name):

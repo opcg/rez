@@ -20,6 +20,8 @@ import copy
 from rez.vendor import yaml
 from rez.vendor.yaml import YAMLError
 
+from rez.utils.pycompat import open_text
+
 PY3 = sys.version_info >= (3, 0, 0)
 
 if PY3:
@@ -910,6 +912,21 @@ def _load_config_yaml(filepath):
     return doc
 
 
+@lru_cache()
+def _load_config_yaml_resource(package, name):
+
+    with open_text(package, name) as f:
+        try:
+            doc = yaml.safe_load(f)
+        except YAMLError as e:
+            raise ConfigurationError("Error loading configuration from %s, %s: %s"
+                                     % (package, name, str(e)))
+        if not isinstance(doc, dict):
+            raise ConfigurationError("Error loading configuration from %s, %s: Expected "
+                                     "dict, got %s" % (package, name, type(doc).__name__))
+    return doc
+
+
 # TODO: This is the key to removing __file__ reliance in the config object
 def _load_config_from_filepaths(filepaths):
     data = {}
@@ -923,6 +940,13 @@ def _load_config_from_filepaths(filepaths):
             data_ = _load_config_imp(filepath)
             deep_update(data, data_)
             sourced_filepaths.append(filepath.__name__)
+            continue
+
+        if isinstance(filepath, tuple) or isinstance(filepath, list):
+            module, file_name = filepath
+            data_ = _load_config_yaml_resource(module, file_name)
+            deep_update(data, data_)
+            sourced_filepaths.append(module.__name__ + '.' + file_name)
             continue
 
         for extension, loader in loaders:
