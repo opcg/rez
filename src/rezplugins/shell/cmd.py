@@ -149,8 +149,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -174,8 +177,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
