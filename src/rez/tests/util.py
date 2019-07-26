@@ -51,7 +51,15 @@ class TestBase(unittest.TestCase):
     def setup_config(self):
         # to make sure config changes from one test don't affect another, copy
         # the overrides dict...
-        self._config = _create_locked_config(dict(self.settings))
+        self._config = _create_locked_config(dict(self.settings, **{
+
+            # All tests have been written with this enabled
+            # TODO: Refactor tests to either take or not take this
+            # into account. Currently, no tests are made with this
+            # setting *disabled*.
+            "inherit_parent_environment": True,
+        }))
+
         config._swap(self._config)
 
     def teardown_config(self):
