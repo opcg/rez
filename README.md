@@ -28,7 +28,7 @@ A [Rez](https://github.com/nerdvegas/rez) superset, on PyPI, for Python 2 and 3,
 
 ### What is Rez
 
-Rez is a command-line utility for Windows, Linux and MacOS, solving the problem of creating a reproducible environment for your software projects on any machine in any pre-existing environment. It does so by resolving a "request" into a deterministic selection of "packages". Each package is a versioned collection of files with some metadata that you self-host and the resulting "context" is dynamica generated whenever the request is resolved.
+Rez is a command-line utility for Windows, Linux and MacOS, solving the problem of creating a reproducible environment for your software projects on any machine in any pre-existing environment. It does so by resolving a "request" into a deterministic selection of "packages". Each package is a versioned collection of files with some metadata that you self-host and the resulting "context" is generated on-demand.
 
 ```bash
 $ rez env Python-3.7 PySide2-5.12 six requests
@@ -341,6 +341,8 @@ Some features have been disabled by default. If you encounter any issues, here i
 Apply all of these for full compatibility with nerdvegas/rez
 
 ```python
+import os
+
 # bleeding-rez does not affect file permissions at all
 # as it can cause issues on SMB/CIFS shares
 make_package_temporarily_writable = True
@@ -352,6 +354,13 @@ disable_rez_1_compatibility = False
 # except under special circumstances.
 # See https://github.com/mottosso/bleeding-rez/issues/70
 inherit_parent_environment = True
+
+# bleeding-rez simplifies the map for Windows
+# You can undo this simplification like this.
+platform_map = {}
+
+# On Windows, the default shell for bleeding-rez is PowerShell
+default_shell = "cmd" if os.name == "nt" else None
 ```
 
 <br>
