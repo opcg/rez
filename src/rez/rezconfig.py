@@ -304,7 +304,15 @@ implicit_packages = [
 #             "amd64": "64bit",
 #         },
 #     }
-platform_map = {}
+platform_map = {
+    "os": {
+
+        # Other operating systems are more sensitive
+        # to differences between versions.
+        r"windows-6(.*)": r"windows-10",
+        r"windows-10(.*)": r"windows-10",
+    },
+}
 
 # If true, then when a resolve graph is generated during a failed solve, packages
 # unrelated to the failure are pruned from the graph. An "unrelated" package is
