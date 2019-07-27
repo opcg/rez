@@ -63,9 +63,7 @@ def command(opts, parser, extra_arg_groups=None):
                  "python",
                  "rez",
                  "bleeding_rez",
-                 "rezgui",
-                 "setuptools",
-                 "pip"]
+                 "rezgui"]
 
         variants = []
 
