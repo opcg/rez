@@ -365,6 +365,12 @@ default_shell = "cmd" if os.name == "nt" else None
 
 <br>
 
+### Known Issues
+
+- The (deprecated) `rezbuild.py` build system doesn't appear to work without `inherit_parent_environment = True`
+
+<br>
+
 ### FAQ
 
 ##### <blockquote>Should I use nerdvegas/rez or bleeding-rez?</blockquote>

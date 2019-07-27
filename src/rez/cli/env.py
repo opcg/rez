@@ -18,7 +18,10 @@ def setup_parser(parser, completions=False):
         help="target shell type (default: %(default)s)")
     parser.add_argument(
         "--isolated", action="store_true",
-        help="Whether or not to inherit the parent environment")
+        help="Do not inherit the parent environment")
+    parser.add_argument(
+        "--inherited", action="store_true",
+        help="Inherit the parent environment")
     parser.add_argument(
         "--rcfile", type=str,
         help="source this file instead of the target shell's standard startup "
@@ -158,6 +161,9 @@ def command(opts, parser, extra_arg_groups=None):
 
     if opts.isolated:
         config.inherit_parent_environment = False
+
+    if opts.inherited:
+        config.inherit_parent_environment = True
 
     if opts.paths is None:
         pkg_paths = (config.nonlocal_packages_path

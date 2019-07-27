@@ -225,6 +225,80 @@ class UnixShell(Shell):
         """
         raise NotImplementedError
 
+    @classmethod
+    def environment(cls):
+        environ = {
+            key: os.getenv(key)
+            for key in ("DISPLAY",
+                        "GROUPS",
+                        "HOME",
+                        "HOSTNAME",
+                        "HOSTTYPE",
+                        "PWD",
+
+                        # Unused, from CentOS vanilla
+                        # "BASH",
+                        # "BASHOPTS",
+                        # "BASH_ALIASES",
+                        # "BASH_ARGC",
+                        # "BASH_ARGV",
+                        # "BASH_CMDS",
+                        # "BASH_LINENO",
+                        # "BASH_SOURCE",
+                        # "BASH_VERSINFO",
+                        # "BASH_VERSION",
+                        # "COLUMNS",
+                        # "DIRSTACK",
+                        # "EUID",
+                        # "HISTFILE",
+                        # "HISTFILESIZE",
+                        # "HISTSIZE",
+                        # "IFS",
+                        # "LINES",
+                        # "LS_COLORS",
+                        # "MACHTYPE",
+                        # "MAILCHECK",
+                        # "OPTERR",
+                        # "OPTIND",
+                        # "OSTYPE",
+                        # "PIPESTATUS",
+                        # "PPID",
+                        # "PROMPT_COMMAND",
+                        # "PS1",
+                        # "PS2",
+                        # "PS4",
+                        # "SHELL",
+                        # "SHELLOPTS",
+                        # "SHLVL",
+                        # "TERM",
+                        )
+            if os.getenv(key)
+        }
+
+        # From docker run -ti --rm centos:7
+        environ["PATH"] = os.pathsep.join([
+            "/usr/local/sbin",
+            "/usr/local/bin",
+            "/usr/sbin",
+            "/usr/bin",
+            "/sbin",
+            "/bin",
+        ])
+
+        # Inherit REZ_ variables
+        # TODO: This is a leak, but I can't think of another
+        # way of preserving e.g. `REZ_PACKAGES_PATH`
+        for key, value in os.environ.items():
+            if not key.startswith("REZ_"):
+                continue
+
+            environ[key] = value
+
+        if config.additional_environment:
+            environ.update(config.additional_environment)
+
+        return environ
+
     def spawn_shell(self, context_file, tmpdir, rcfile=None, norc=False,
                     stdin=False, command=None, env=None, quiet=False,
                     pre_command=None, add_rez=True,
@@ -365,6 +439,10 @@ class UnixShell(Shell):
             else:
                 cmd = pre_command
         cmd.extend([self.executable, target_file])
+
+        # No environment was explicity passed
+        if not env and not config.inherit_parent_environment:
+            env = self.environment()
 
         try:
             p = popen(cmd,
