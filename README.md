@@ -350,9 +350,11 @@ make_package_temporarily_writable = True
 # bleeding-rez does not support Rez 1 or below
 disable_rez_1_compatibility = False
 
-# nerdvegas/rez inherits all values,
-# except under special circumstances.
+# nerdvegas/rez inherits all values, except under special circumstances.
 # See https://github.com/mottosso/bleeding-rez/issues/70
+# Can also be passed interactively, to override whatever is set here.
+#   $ rez env --inherited  # = True
+#   $ rez env --isolated   # = False
 inherit_parent_environment = True
 
 # bleeding-rez simplifies the map for Windows
