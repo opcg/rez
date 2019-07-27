@@ -6,13 +6,15 @@ import rez
 from rez.package_maker__ import make_package
 from rez.bind._utils import check_version
 from rez.system import system
-from rez.utils.lint_helper import env
 import shutil
 import os.path
 
 
 def commands():
+    global env
+    global alias
     env.PYTHONPATH.append('{this.root}')
+    alias("rez", "python -m rez")
 
 
 def bind(path, version_range=None, opts=None, parser=None):
