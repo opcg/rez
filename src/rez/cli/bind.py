@@ -62,6 +62,7 @@ def command(opts, parser, extra_arg_groups=None):
                  "os",
                  "python",
                  "rez",
+                 "bleeding_rez",
                  "rezgui",
                  "setuptools",
                  "pip"]
