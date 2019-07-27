@@ -79,8 +79,11 @@ class PowerShell(CMD):
             if print_msg and not quiet:
                 ex.info('You are now in a rez-configured environment.')
 
-                # Rez may not be available
-                ex.command("Try { rez context } Catch { }")
+                # Rez may not be available.
+                # Or it may not have an associated Python interpreter
+                # available, in which case the command will succeed
+                # but output to stderr, muted with 2>$null
+                ex.command("Try { rez context 2>$null } Catch { }")
 
         executor = RexExecutor(interpreter=self.new_shell(),
                                parent_environ={},
@@ -115,11 +118,24 @@ class PowerShell(CMD):
             if not isinstance(cmd, (tuple, list)):
                 cmd = pre_command.rstrip().split()
 
-        cmd += [self.executable]
-        cmd += ['. "{}"'.format(target_file)]
+        cmd += [
+            self.executable,
+            "-NoLogo ",
+
+            # Prevent custom user profile from leaking into
+            # the resulting environment.
+            "-NoProfile ",
+
+            # Establish a session within which arbitrary
+            # PowerShell scripts may be run.
+            "-ExecutionPolicy", "Unrestricted",
+
+            # Start from this script
+            '. "{}"'.format(target_file)
+        ]
 
         if shell_command is None:
-            cmd.insert(1, "-noexit")
+            cmd.insert(1, "-NoExit")
 
         # No environment was explicity passed
         if not env and not config.inherit_parent_environment:
