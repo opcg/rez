@@ -92,6 +92,9 @@ class CMD(Shell):
                         # For platform_.arch()
                         "PROCESSOR_ARCHITEW6432",
                         "PROCESSOR_ARCHITECTURE",
+
+                        # For multiprocessing.__init__
+                        "NUMBER_OF_PROCESSORS",
                         )
             if os.getenv(key)
         }
