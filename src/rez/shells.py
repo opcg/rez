@@ -289,7 +289,12 @@ class UnixShell(Shell):
         # TODO: This is a leak, but I can't think of another
         # way of preserving e.g. `REZ_PACKAGES_PATH`
         for key, value in os.environ.items():
-            if not key.startswith("REZ_"):
+            if not any([key.startswith("REZ_"),
+
+                        # Used internally
+                        key.startswith("_REZ_"),
+                        key.startswith("__REZ_"),
+                        ]):
                 continue
 
             environ[key] = value

@@ -75,31 +75,62 @@ class CMD(Shell):
     def environment(cls):
         environ = {
             key: os.getenv(key)
+
+            # From newly installed Windows 10, 17763
             for key in ("USERNAME",
                         "SYSTEMROOT",
                         "SYSTEMDRIVE",
+                        "USERDOMAIN",  # DESKTOP-6M8G46A
+                        "USERDOMAIN_ROAMINGPROFILE",  # DESKTOP-6M8G46A
+                        "USERNAME",  # marcus
 
                         # Windows
-                        "ComSpec",
-                        "windir",
+                        "WINDIR",  # C:\Windows
                         "PROMPT",
-                        "PathExt",
+                        "PATHEXT",
                         "OS",
                         "TMP",
-                        "Temp",
-                        "USERPROFILE",
+                        "TEMP",
 
-                        # For platform_.arch()
-                        "PROCESSOR_ARCHITEW6432",
-                        "PROCESSOR_ARCHITECTURE",
+                        # Locations for user files and settings
+                        "ALLUSERSPROFILE",  # C:\ProgramData
+                        "PROGRAMDATA",  # C:\ProgramData
+                        "USERPROFILE",  # C:\Users\marcus\AppData\Roaming
+                        "APPDATA",  # C:\Users\marcus\AppData\Roaming
 
                         # For multiprocessing.__init__
                         "NUMBER_OF_PROCESSORS",
+
+                        # For platform_.arch()
+                        "PROCESSOR_ARCHITEW6432",
+
+                        "PROCESSOR_ARCHITECTURE",
+                        "PROCESSOR_IDENTIFIER",  # Intel64 Family 6
+                                                 # Model 142 Stepping 10
+                                                 # GenuineIntel
+                        "PROCESSOR_LEVEL",  # 4
+                        "PROCESSOR_REVISION",  # 8e0a
+
+                        "COMMONPROGRAMFILES",  # C:\Program Files\Common Files
+                        "COMMONPROGRAMFILES(x86)",  # C:\...\Common Files
+                        "COMMONPROGRAMW6432",  # C:\Program Files\Common Files
+                        "COMPUTERNAME",  # DESKTOP-6M8G46A
+                        "COMSPEC",  # C:\Windows\system32\cmd.exe
+                        "DRIVERDATA",  # C:\Windows\System32\Drivers\DriverData
+                        "HOMEDRIVE",  # C:
+                        "HOMEPATH",  # \Users\marcus
+                        "LOCALAPPDATA",  # C:\Users\marcus\AppData\Local
+                        "LOGONSERVER",  # \\DESKTOP-6M8G46A
+                        "PROGRAMFILES",  # C:\Program Files
+                        "PROGRAMFILES(x86)",  # C:\Program Files (x86)
+                        "PROGRAMW6432",  # C:\Program Files
+                        "PSMODULEPATH",  # C:\Program Files\...\Modules
+                        "PUBLIC",  # C:\Users\Public
+                        "SESSIONNAME",  # Console
                         )
             if os.getenv(key)
         }
 
-        # From docker run -ti --rm windows/iis
         environ["PATH"] = os.pathsep.join([
             r"C:\Windows",
             r"C:\Windows\system32",
@@ -111,7 +142,12 @@ class CMD(Shell):
         # TODO: This is a leak, but I can't think of another
         # way of preserving e.g. `REZ_PACKAGES_PATH`
         for key, value in os.environ.items():
-            if not key.startswith("REZ_"):
+            if not any([key.startswith("REZ_"),
+
+                        # Used internally
+                        key.startswith("_REZ_"),
+                        key.startswith("__REZ_"),
+                        ]):
                 continue
 
             environ[key] = value
