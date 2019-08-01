@@ -188,7 +188,6 @@ class PowerShell(CMD):
 
     def alias(self, key, value):
         value = EscapedString.disallow(value)
-        value = value.replace(" ", "` ")
         cmd = "function {key}() {{ {value} $args }}"
         self._addline(cmd.format(key=key, value=value))
 
