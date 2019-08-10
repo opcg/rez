@@ -117,6 +117,11 @@ def setup_parser(parser, completions=False):
         help="only print actions that affect the solve (has an effect only "
         "when verbosity is enabled)")
     parser.add_argument(
+        "--self", action="store_true", help=(
+            "Include requirement for the version of bleeding-rez "
+            "that's being called, useful for gaining access to "
+            "rez commands from within a rez context."))
+    parser.add_argument(
         "--stats", action="store_true",
         help="print advanced solver stats")
     parser.add_argument(
@@ -191,6 +196,11 @@ def command(opts, parser, extra_arg_groups=None):
                                               strict=opts.strict,
                                               rank=opts.patch_rank)
         context = None
+
+    if opts.self:
+        from rez.utils._version import _rez_version
+        request += ["bleeding_rez==%s" % _rez_version]
+        request += ["python"]  # Required by Rez
 
     if context is None:
         # create package filters
