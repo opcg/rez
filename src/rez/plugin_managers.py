@@ -1,7 +1,7 @@
-from rez.vendor.six import six
 """
 Manages loading of all types of Rez plugins.
 """
+from rez.vendor.six import six
 from rez.config import config, expand_system_vars, _load_config_from_filepaths
 from rez.utils.formatting import columnise
 from rez.utils.schema import dict_to_schema
@@ -49,13 +49,13 @@ def extend_path(path, name):
     init_py = "__init__" + os.extsep + "py"
     path = path[:]
 
-    for dir in config.plugin_path:
-        if not os.path.isdir(dir):
+    for dir_ in config.plugin_path:
+        if not os.path.isdir(dir_):
             if config.debug("plugins"):
-                print_debug("skipped nonexistant rez plugin path: %s" % dir)
+                print_debug("skipped nonexistant rez plugin path: %s" % dir_)
             continue
 
-        subdir = os.path.join(dir, pname)
+        subdir = os.path.join(dir_, pname)
         # XXX This may still add duplicate entries to path on
         # case-insensitive filesystems
         initfile = os.path.join(subdir, init_py)
@@ -105,51 +105,62 @@ class RezPluginType(object):
         # extend_path, above). this means that `walk_packages` will walk over all
         # modules on the search path at the same level (.e.g in a
         # 'rezplugins/type_name' sub-directory).
-        paths = [package.__path__] if isinstance(package.__path__, six.string_types) \
+        paths = (
+            [package.__path__]
+            if isinstance(package.__path__, six.string_types)
             else package.__path__
+        )
+
+        # reverse plugin path order, so that custom plugins have a chance to
+        # override the builtin plugins (from /rezplugins).
+        paths = reversed(paths)
+
         for path in paths:
             for loader, modname, ispkg in pkgutil.walk_packages(
                     [path], package.__name__ + '.'):
-                if loader is not None:
-                    plugin_name = modname.split('.')[-1]
-                    if plugin_name.startswith('_'):
-                        continue
-                    if config.debug("plugins"):
-                        print_debug("loading %s plugin at %s: %s..."
-                                    % (self.type_name, path, modname))
-                    try:
-                        # load_module will force reload the module if it's
-                        # already loaded, so check for that
-                        module = sys.modules.get(modname)
-                        if module is None:
-                            module = loader.find_module(modname).load_module(modname)
-                        if hasattr(module, 'register_plugin') and \
-                                hasattr(module.register_plugin, '__call__'):
-                            plugin_class = module.register_plugin()
-                            if plugin_class != None:
-                                self.register_plugin(plugin_name, plugin_class, module)
-                            else:
-                                if config.debug("plugins"):
-                                    print_warning(
-                                        "'register_plugin' function at %s: %s did not return a class."
-                                        % (path, modname))
+
+                if loader is None:
+                    continue
+
+                plugin_name = modname.split('.')[-1]
+                if plugin_name.startswith('_'):
+                    continue
+                if config.debug("plugins"):
+                    print_debug("loading %s plugin at %s: %s..."
+                                % (self.type_name, path, modname))
+                try:
+                    # load_module will force reload the module if it's
+                    # already loaded, so check for that
+                    module = sys.modules.get(modname)
+                    if module is None:
+                        module = loader.find_module(modname).load_module(modname)
+                    if hasattr(module, 'register_plugin') and \
+                            hasattr(module.register_plugin, '__call__'):
+                        plugin_class = module.register_plugin()
+                        if plugin_class != None:
+                            self.register_plugin(plugin_name, plugin_class, module)
                         else:
                             if config.debug("plugins"):
                                 print_warning(
-                                    "no 'register_plugin' function at %s: %s"
+                                    "'register_plugin' function at %s: %s did not return a class."
                                     % (path, modname))
-
-                            # delete from sys.modules?
-
-                    except Exception as e:
-                        nameish = modname.split('.')[-1]
-                        self.failed_plugins[nameish] = str(e)
+                    else:
                         if config.debug("plugins"):
-                            import traceback
-                            from rez.vendor.six.six.moves import StringIO
-                            out = StringIO()
-                            traceback.print_exc(file=out)
-                            print_debug(out.getvalue())
+                            print_warning(
+                                "no 'register_plugin' function at %s: %s"
+                                % (path, modname))
+
+                        # delete from sys.modules?
+
+                except Exception as e:
+                    nameish = modname.split('.')[-1]
+                    self.failed_plugins[nameish] = str(e)
+                    if config.debug("plugins"):
+                        import traceback
+                        from StringIO import StringIO
+                        out = StringIO()
+                        traceback.print_exc(file=out)
+                        print_debug(out.getvalue())
 
             # load config
             data, _ = _load_config_from_filepaths([os.path.join(path, "rezconfig")])
@@ -267,14 +278,14 @@ class RezPluginManager(object):
 
     def get_plugin_types(self):
         """Return a list of the registered plugin types."""
-        return list(self._plugin_types.keys())
+        return self._plugin_types.keys()
 
     # -- plugins
 
     def get_plugins(self, plugin_type):
         """Return a list of the registered names available for the given plugin
         type."""
-        return list(self._get_plugin_type(plugin_type).plugin_classes.keys())
+        return self._get_plugin_type(plugin_type).plugin_classes.keys()
 
     def get_plugin_class(self, plugin_type, plugin_name):
         """Return the class registered under the given plugin name."""

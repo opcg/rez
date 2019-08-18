@@ -66,9 +66,9 @@ class TestPackages(TestBase, TempdirMixin):
 
         path = os.path.realpath(os.path.dirname(__file__))
         cls.solver_packages_path = os.path.join(path, "data", "solver", "packages")
-        cls.packages_base_path = os.path.join(path, "data", "packages")
-        cls.yaml_packages_path = os.path.join(cls.packages_base_path, "yaml_packages")
-        cls.py_packages_path = os.path.join(cls.packages_base_path, "py_packages")
+        cls.packages_base_path = os.path.join(path, "data", "packages").lower()
+        cls.yaml_packages_path = os.path.join(cls.packages_base_path, "yaml_packages").lower()
+        cls.py_packages_path = os.path.join(cls.packages_base_path, "py_packages").lower()
 
         cls.package_definition_build_python_paths = [
             os.path.join(path, "data", "python", "early_bind"),
