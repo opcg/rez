@@ -66,9 +66,9 @@ class TestPackages(TestBase, TempdirMixin):
 
         path = os.path.realpath(os.path.dirname(__file__))
         cls.solver_packages_path = os.path.join(path, "data", "solver", "packages")
-        cls.packages_base_path = os.path.join(path, "data", "packages").lower()
-        cls.yaml_packages_path = os.path.join(cls.packages_base_path, "yaml_packages").lower()
-        cls.py_packages_path = os.path.join(cls.packages_base_path, "py_packages").lower()
+        cls.packages_base_path = os.path.join(path, "data", "packages")
+        cls.yaml_packages_path = os.path.join(cls.packages_base_path, "yaml_packages")
+        cls.py_packages_path = os.path.join(cls.packages_base_path, "py_packages")
 
         cls.package_definition_build_python_paths = [
             os.path.join(path, "data", "python", "early_bind"),
@@ -128,6 +128,11 @@ class TestPackages(TestBase, TempdirMixin):
             base=os.path.join(self.py_packages_path, "versioned", "3.0"),
             commands=SourceCode('env.PATH.append("{root}/bin")'))
         data = package.validated_data()
+
+        # Account for case-insensitive paths
+        for d in (expected_data, data):
+            d["base"] = d["base"].lower()
+
         self.assertDictEqual(data, expected_data)
 
         # a yaml-based package
@@ -317,11 +322,12 @@ class TestPackages(TestBase, TempdirMixin):
             requires=[PackageRequest("python-2.7")],
             commands=SourceCode('env.PATH.append("{root}/bin")'))
 
-        requires_ = ["platform-linux", "platform-osx"]
+        expected_data["base"] = expected_data["base"].lower()
 
         package = get_package("variants_py", "2.0")
         for i, variant in enumerate(package.iter_variants()):
             data = variant.validated_data()
+            data["base"] = data["base"].lower()
             self.assertDictEqual(data, expected_data)
             self.assertEqual(variant.index, i)
             self.assertEqual(variant.parent, package)

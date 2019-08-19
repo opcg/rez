@@ -16,7 +16,6 @@ import shutil
 import os
 import re
 import stat
-import platform
 
 
 # Backwards compatibility with Python 2

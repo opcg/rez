@@ -19,7 +19,7 @@ class TestCommands(TestBase):
     @classmethod
     def get_packages_path(cls):
         path = os.path.realpath(os.path.dirname(__file__))
-        return os.path.join(path, "data", "commands", "packages").lower()
+        return os.path.join(path, "data", "commands", "packages")
 
     @classmethod
     def setUpClass(cls):
