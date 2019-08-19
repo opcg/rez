@@ -54,7 +54,7 @@ def run():
                   build_args=%(build_args)s)
 
     import inspect
-    args = inspect.getfullargspec(buildfunc).args
+    args = inspect.getargspec(buildfunc).args
     kwargs = {k: v for k, v in kwargs.items() if k in args}
 
     buildfunc(**kwargs)

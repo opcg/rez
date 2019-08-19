@@ -54,7 +54,7 @@ def command(opts, parser, extra_arg_groups=None):
         module = plugin_manager.get_plugin_module(plugin_type, plugin_name)
 
     target_func = getattr(module, func_name)
-    func_args = inspect.getfullargspec(target_func).args
+    func_args = inspect.getargspec(target_func).args
     if "_script" in func_args:
         kwargs["_script"] = yaml_file
     if "_cli_args" in func_args:

@@ -2,7 +2,7 @@
 Read and write data from file. File caching via a memcached server is supported.
 """
 from contextlib import contextmanager
-from inspect import isfunction, ismodule, getfullargspec
+from inspect import isfunction, ismodule, getargspec
 from rez.vendor.six.six.moves import StringIO
 import sys
 import stat
@@ -317,7 +317,7 @@ def process_python_objects(data, filepath=None):
                 fn.__globals__.update(get_objects())
 
                 # execute the function
-                spec = getfullargspec(func)
+                spec = getargspec(func)
                 args = spec.args or []
                 if len(args) not in (0, 1):
                     raise ResourceError("@early decorated function must "
