@@ -2,12 +2,10 @@
 Misc useful stuff.
 """
 import stat
-import sys
 import collections
 import atexit
 import os
 import os.path
-import copy
 from rez.exceptions import RezError
 from rez.utils.yaml import dump_yaml
 from rez.vendor.progress.bar import Bar
@@ -97,7 +95,7 @@ def shlex_join(value):
     def quote(s):
         return pipes.quote(s) if '$' not in s else s
 
-    if is_non_string_iterable(value):
+    if iterable(value):
         return ' '.join(quote(x) for x in value)
     else:
         return str(value)
@@ -177,8 +175,19 @@ def _atexit():
         pass
 
 
-def is_non_string_iterable(arg):
-    """Python 2 and 3 compatible non-string iterable identifier"""
+def iterable(arg):
+    """Python 2 and 3 compatible iterable identifier
+
+    Under Python 2, an iterable could be determined by merely asking
+    for `hasattr(arg, "__iter__")`. However since Python 3 even strings
+    have this member which is why we must apply additional logic to
+    determine whether an argument really is iterable or not.
+
+    NOTE: An iterable argument is not the same as an *iterator*
+        An iterator supports next(), a list() does not but
+        is still iterable.
+
+    """
 
     return (
         isinstance(arg, collections.Iterable)

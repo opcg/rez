@@ -1,5 +1,4 @@
-from __future__ import print_function, with_statement
-
+from __future__ import with_statement
 import fnmatch
 import os
 import os.path
@@ -9,22 +8,13 @@ import sys
 try:
     from setuptools import setup, find_packages
 except ImportError:
-    print("install failed - requires setuptools", file=sys.stderr)
+    sys.stderr.write("install failed - requires setuptools\n")
     sys.exit(1)
 
 
-if sys.version_info < (2, 7):
-    print("install failed - requires python v2.7 or greater", file=sys.stderr)
+if sys.version_info < (2, 6):
+    sys.stderr.write("install failed - requires python v2.6 or greater\n")
     sys.exit(1)
-
-
-# carefully import some sourcefiles that are standalone
-source_path = os.path.dirname(os.path.realpath(__file__))
-src_path = os.path.join(source_path, "src")
-sys.path.insert(0, src_path)
-
-from rez.utils._version import _rez_version
-from rez.cli._entry_points import get_specifications
 
 
 def find_files(pattern, path=None, root="rez"):
@@ -42,30 +32,73 @@ def find_files(pattern, path=None, root="rez"):
     return paths
 
 
+# get version from source
+dirname = os.path.dirname(__file__)
+version = os.path.join(dirname, "src", "rez", "utils", "_version.py")
+with open(version) as f:
+    code = f.read().strip()
+_rez_version = None  # just to keep linting happy
+exec(code)  # inits _rez_version
+version = _rez_version
+
+
+scripts = [
+    "rez-config",
+    "rez-build",
+    "rez-release",
+    "rez-env",
+    "rez-context",
+    "rez-suite",
+    "rez-interpret",
+    "rez-python",
+    "rez-selftest",
+    "rez-bind",
+    "rez-search",
+    "rez-view",
+    "rez-status",
+    "rez-help",
+    "rez-depends",
+    "rez-memcache",
+    "rez-yaml2py",
+    "_rez_fwd",  # TODO rename this _rez-forward for consistency
+    "_rez-complete",
+    "rez-gui"
+]
+
+
 setup(
-    name="rez",
-    version=_rez_version,
+    name="bleeding-rez",
+    version=version,
     description=("A cross-platform packaging system that can build and "
                  "install multiple version of packages, and dynamically "
                  "configure resolved environments at runtime."),
     keywords="package resolve version build install software management",
-    long_description=None,
-    url="https://github.com/nerdvegas/rez",
-    author="Allan Johns",
-    author_email="nerdvegas@gmail.com",
+    url="https://github.com/mottosso/bleeding-rez",
+    author="Marcus Ottosson",
+    author_email="konstruktion@gmail.com",
     license="LGPL",
     entry_points={
-        "console_scripts": get_specifications().values()
+        "console_scripts": [
+            "rez = rez.cli._main:run",
+            "bez = rez.cli._bez:run",
+
+            # Alias
+            "rezolve = rez.cli._main:run",
+        ] + [
+            "{cmd} = rez.cli._main:{func}".format(
+                cmd=script,
+                func=script.replace("-", "_")
+            )
+            for script in scripts
+        ]
     },
     include_package_data=True,
     zip_safe=False,
-    package_dir = {'': 'src'},
-    packages=find_packages('src', exclude=["build_utils",
-                                           "build_utils.*",
-                                           "tests"]),
-    package_data = {
+    package_dir={'': 'src'},
+    packages=find_packages('src', exclude=["tests"]),
+    package_data={
         'rez':
-            ['utils/logging.conf'] +
+            ['rezconfig', 'utils/logging.conf'] +
             ['README*'] +
             find_files('*', 'completion') +
             find_files('*', 'tests/data'),
@@ -77,14 +110,18 @@ setup(
             find_files('rezguiconfig', root='rezgui') +
             find_files('*', 'icons', root='rezgui')
     },
-    classifiers = [
+    classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Software Development",
         "Topic :: System :: Software Distribution"
     ]

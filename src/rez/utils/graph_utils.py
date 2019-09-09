@@ -107,7 +107,7 @@ def write_compacted(g):
         value = tuple(list(edge) + [label]) if label else edge
         d_edges.setdefault(tuple(attrs), []).append(tuple(value))
 
-    doc = dict(nodes=d_nodes.items(), edges=d_edges.items())
+    doc = dict(nodes=list(d_nodes.items()), edges=list(d_edges.items()))
     contents = str(doc)
     return contents
 
@@ -217,51 +217,24 @@ def save_graph(graph_str, dest_file, fmt=None, image_ratio=None):
         String representing format that was written, such as 'png'.
     """
 
-    # Disconnected edges can result in multiple graphs. We should never see
-    # this - it's a bug in graph generation if we do.
-    #
-    graphs = pydot.graph_from_dot_data(graph_str)
-
-    if not graphs:
-        raise RuntimeError("No graph generated")
-
-    if len(graphs) > 1:
-        path, ext = os.path.splitext(dest_file)
-        dest_files = []
-
-        for i, g in enumerate(graphs):
-            try:
-                dest_file_ = "%s.%d%s" % (path, i + 1, ext)
-                save_graph_object(g, dest_file_, fmt, image_ratio)
-                dest_files.append(dest_file_)
-            except:
-                pass
-
-        raise RuntimeError(
-            "More than one graph was generated; this probably indicates a bug "
-            "in graph generation. Graphs were written to %r" % dest_files
-        )
-
-    # write the graph
-    return save_graph_object(graphs[0], dest_file, fmt, image_ratio)
-
-
-def save_graph_object(g, dest_file, fmt=None, image_ratio=None):
-    """Like `save_graph`, but takes a pydot Dot object.
-    """
+    try:
+        g = pydot.graph_from_dot_data(graph_str)[0]
+    except IndexError:
+        import traceback
+        traceback.print_exc()
+        raise Exception("Could not produce graph")
 
     # determine the dest format
-    if fmt is None:
-        fmt = os.path.splitext(dest_file)[1].lower().strip('.') or "png"
+    fmt = os.path.splitext(dest_file)[1].lower().strip('.') or "png"
 
-    if hasattr(g, "write_" + fmt):
-        write_fn = getattr(g, "write_" + fmt)
-    else:
-        raise RuntimeError("Unsupported graph format: '%s'" % fmt)
+    if fmt not in g.formats:
+        raise Exception("Unsupported graph format: '%s'" % fmt)
 
     if image_ratio:
         g.set_ratio(str(image_ratio))
-    write_fn(dest_file)
+
+    g.write(dest_file, format=fmt)
+
     return fmt
 
 

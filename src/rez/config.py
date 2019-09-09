@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from rez import __version__
 from rez.utils.data_utils import AttrDictWrapper, RO_AttrDictWrapper, \
     convert_dicts, cached_property, cached_class_property, LazyAttributeMeta, \
@@ -11,17 +10,22 @@ from rez import module_root_path
 from rez.system import system
 from rez.vendor.schema.schema import Schema, SchemaError, And, Or, Use
 from rez.vendor import yaml
-from rez.vendor.six import six
 from rez.vendor.yaml.error import YAMLError
+from rez.vendor.six import six
 from rez.backport.lru_cache import lru_cache
 from contextlib import contextmanager
 from inspect import ismodule
 import os
+import sys
 import os.path
 import copy
 
+PY3 = sys.version_info >= (3, 0, 0)
 
-basestring = six.string_types[0]
+if PY3:
+    str_type = str
+else:
+    str_type = basestring
 
 
 # -----------------------------------------------------------------------------
@@ -97,25 +101,25 @@ class Setting(object):
 
 
 class Str(Setting):
-    schema = Schema(basestring)
+    schema = Schema(str_type)
 
     def _parse_env_var(self, value):
         return value
 
 
 class Char(Setting):
-    schema = Schema(basestring, lambda x: len(x) == 1)
+    schema = Schema(str_type, lambda x: len(x) == 1)
 
     def _parse_env_var(self, value):
         return value
 
 
 class OptionalStr(Str):
-    schema = Or(None, basestring)
+    schema = Or(None, str_type)
 
 
 class StrList(Setting):
-    schema = Schema([basestring])
+    schema = Schema([str_type])
     sep = ','
 
     def _parse_env_var(self, value):
@@ -125,7 +129,7 @@ class StrList(Setting):
 
 class OptionalStrList(StrList):
     schema = Or(And(None, Use(lambda x: [])),
-                [basestring])
+                [str_type])
 
 
 class PathList(StrList):
@@ -240,7 +244,7 @@ class RezToolsVisibility_(Str):
 
 
 class OptionalStrOrFunction(Setting):
-    schema = Or(None, basestring, callable)
+    schema = Or(None, str_type, callable)
 
     def _parse_env_var(self, value):
         # note: env-var override only supports string, eg 'mymodule.preprocess_func'
@@ -308,6 +312,8 @@ config_schema = Schema({
     "documentation_url":                            Str,
     "suite_visibility":                             SuiteVisibility_,
     "rez_tools_visibility":                         RezToolsVisibility_,
+    "inherit_parent_environment":                   Bool,
+    "additional_environment":                       OptionalDict,
     "suite_alias_prefix_char":                      Char,
     "package_definition_python_path":               OptionalStr,
     "tmpdir":                                       OptionalStr,
@@ -406,8 +412,8 @@ config_schema = Schema({
 # settings common to each plugin type
 _plugin_config_dict = {
     "release_vcs": {
-        "tag_name":                     basestring,
-        "releasable_branches":          Or(None, [basestring]),
+        "tag_name":                     str_type,
+        "releasable_branches":          Or(None, [str_type]),
         "check_tag":                    bool
     }
 }
@@ -547,9 +553,19 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
     @property
     def nonlocal_packages_path(self):
         """Returns package search paths with local path removed."""
-        paths = self.packages_path[:]
-        if self.local_packages_path in paths:
-            paths.remove(self.local_packages_path)
+
+        def normalise_path(path):
+            # Account for relative paths and varying or duplicate slashes
+            path = os.path.abspath(path)
+            path = os.path.normpath(path)
+            return path
+
+        packages_path = normalise_path(self.local_packages_path)
+        paths = list(map(normalise_path, self.packages_path))
+
+        if packages_path in paths:
+            paths.remove(packages_path)
+
         return paths
 
     def get_completions(self, prefix):
@@ -568,7 +584,7 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
                 return _get_plugin_completions(prefix_)
             return []
         else:
-            keys = ([x for x in self._schema_keys if isinstance(x, basestring)]
+            keys = ([x for x in self._schema_keys if isinstance(x, six.string_types)]
                     + ["plugins"])
             keys = [x for x in keys if x.startswith(prefix)]
             if keys == ["plugins"]:
@@ -636,7 +652,7 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
         return Config(filepaths, overrides)
 
     def __str__(self):
-        keys = (x for x in self.schema._schema if isinstance(x, basestring))
+        keys = (x for x in self.schema._schema if isinstance(x, six.string_types))
         return "%r" % sorted(list(keys) + ["plugins"])
 
     def __repr__(self):
@@ -762,14 +778,14 @@ class _PluginConfigs(object):
 def expand_system_vars(data):
     """Expands any strings within `data` such as '{system.user}'."""
     def _expanded(value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             value = expandvars(value)
             value = expanduser(value)
             return scoped_format(value, system=system)
         elif isinstance(value, (list, tuple, set)):
             return [_expanded(x) for x in value]
         elif isinstance(value, dict):
-            return dict((k, _expanded(v)) for k, v in value.iteritems())
+            return dict((k, _expanded(v)) for k, v in value.items())
         else:
             return value
     return _expanded(data)
@@ -812,6 +828,8 @@ def _replace_config(other):
 
 @lru_cache()
 def _load_config_py(filepath):
+    from rez.vendor.six.six import exec_
+
     reserved = dict(
         # Standard Python module variables
         # Made available from within the module,
@@ -823,18 +841,18 @@ def _load_config_py(filepath):
         ModifyList=ModifyList
     )
 
-    g = reserved.copy()
+    globs = reserved.copy()
     result = {}
 
     with open(filepath) as f:
         try:
             code = compile(f.read(), filepath, 'exec')
-            exec(code, g)
+            exec_(code, globs)
         except Exception as e:
             raise ConfigurationError("Error loading configuration from %s: %s"
                                      % (filepath, str(e)))
 
-    for k, v in g.iteritems():
+    for k, v in globs.items():
         if k != '__builtins__' \
                 and not ismodule(v) \
                 and k not in reserved:
@@ -848,7 +866,7 @@ def _load_config_yaml(filepath):
     with open(filepath) as f:
         content = f.read()
     try:
-        doc = yaml.load(content, Loader=yaml.FullLoader) or {}
+        doc = yaml.load(content) or {}
     except YAMLError as e:
         raise ConfigurationError("Error loading configuration from %s: %s"
                                  % (filepath, str(e)))

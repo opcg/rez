@@ -1,25 +1,20 @@
 from __future__ import print_function
-
+from rez.vendor.six import six
 import os
-import subprocess
 import sys
-import pipes
 import re
-import inspect
 import traceback
 from string import Formatter
 from rez.system import system
 from rez.config import config
 from rez.exceptions import RexError, RexUndefinedVariableError, RezSystemError
-from rez.util import shlex_join, is_non_string_iterable
+from rez.util import shlex_join, iterable
 from rez.utils import reraise
 from rez.utils.system import popen
 from rez.utils.sourcecode import SourceCode, SourceCodeError
 from rez.utils.data_utils import AttrDictWrapper
 from rez.utils.formatting import expandvars
 from rez.vendor.enum import Enum
-from rez.vendor.six import six
-
 
 basestring = six.string_types[0]
 
@@ -322,36 +317,57 @@ class ActionManager(object):
         unexpanded_key, expanded_key = self._key(key)
         unexpanded_value, expanded_value = self._value(value)
 
-        # expose env-vars from parent env if explicitly told to do so
-        if (expanded_key not in self.environ) and \
-                ((self.parent_variables is True) or (expanded_key in self.parent_variables)):
-            self.environ[expanded_key] = self.parent_environ.get(expanded_key, '')
-            if self.interpreter.expand_env_vars:
-                key_ = expanded_key
-            else:
-                key_ = unexpanded_key
-            self.interpreter._saferefenv(key_)
-
-        # *pend or setenv depending on whether this is first reference to the var
-        if expanded_key in self.environ:
+        # When the environment is inherited, variables are *opt-out*
+        # Otherwise, they are explicitly created by packages, with the
+        # exception of variables promoted by the Shell plug-in such as PATH.
+        # For that, we need to explicitly forward this but not anything else.
+        if not config.inherit_parent_environment:
             env_sep = self._env_sep(expanded_key)
             self.actions.append(action(unexpanded_key, unexpanded_value))
 
             values = addfunc(unexpanded_value, [self._keytoken(expanded_key)])
             unexpanded_values = EscapedString.join(env_sep, values)
 
-            parts = self.environ[expanded_key].split(env_sep)
+            parts = self.environ.get(expanded_key, "").split(env_sep)
             values = addfunc(expanded_value, parts)
             expanded_values = EscapedString.join(env_sep, values)
 
-            self.environ[expanded_key] = \
-                env_sep.join(addfunc(str(expanded_value), parts))
+            self.environ[expanded_key] = env_sep.join(
+                addfunc(str(expanded_value), parts)
+            )
+
+        # Backwards compatibility with nerdvegas/rez
         else:
-            self.actions.append(Setenv(unexpanded_key, unexpanded_value))
-            self.environ[expanded_key] = str(expanded_value)
-            unexpanded_values = unexpanded_value
-            expanded_values = expanded_value
-            interpfunc = None
+            # expose env-vars from parent env if explicitly told to do so
+            if (expanded_key not in self.environ) and \
+                    ((self.parent_variables is True) or (expanded_key in self.parent_variables)):
+                self.environ[expanded_key] = self.parent_environ.get(expanded_key, '')
+                if self.interpreter.expand_env_vars:
+                    key_ = expanded_key
+                else:
+                    key_ = unexpanded_key
+                self.interpreter._saferefenv(key_)
+
+            # *pend or setenv depending on whether this is first reference to the var
+            if expanded_key in self.environ:
+                env_sep = self._env_sep(expanded_key)
+                self.actions.append(action(unexpanded_key, unexpanded_value))
+
+                values = addfunc(unexpanded_value, [self._keytoken(expanded_key)])
+                unexpanded_values = EscapedString.join(env_sep, values)
+
+                parts = self.environ[expanded_key].split(env_sep)
+                values = addfunc(expanded_value, parts)
+                expanded_values = EscapedString.join(env_sep, values)
+
+                self.environ[expanded_key] = \
+                    env_sep.join(addfunc(str(expanded_value), parts))
+            else:
+                self.actions.append(Setenv(unexpanded_key, unexpanded_value))
+                self.environ[expanded_key] = str(expanded_value)
+                unexpanded_values = unexpanded_value
+                expanded_values = expanded_value
+                interpfunc = None
 
         applied = False
         if interpfunc:
@@ -617,17 +633,18 @@ class Python(ActionInterpreter):
         if self.manager:
             self.target_environ.update(self.manager.environ)
 
-        shell_mode = not hasattr(args, '__iter__')
+        shell_mode = isinstance(args, basestring)
         return popen(args,
                      shell=shell_mode,
                      env=self.target_environ,
+                     universal_newlines=True,
                      **subproc_kwargs)
 
     def command(self, value):
         if self.passive:
             return
 
-        if is_non_string_iterable(value):
+        if iterable(value):
             it = iter(value)
             cmd = EscapedString.disallow(next(it))
             value = [cmd] + [self.escape_string(x) for x in it]
@@ -736,7 +753,7 @@ class EscapedString(object):
         return "%s(%r)" % (self.__class__.__name__, self.strings)
 
     def __eq__(self, other):
-        if isinstance(other, basestring):
+        if isinstance(other, six.string_types):
             return (str(self) == str(other))
         else:
             return (isinstance(other, EscapedString)
@@ -955,7 +972,7 @@ class EnvironmentDict(dict):
         """
         self.manager = manager
         self._var_cache = dict((k, EnvironmentVariable(k, self))
-                               for k in manager.parent_environ.iterkeys())
+                               for k in manager.parent_environ.keys())
 
     def keys(self):
         return self._var_cache.keys()

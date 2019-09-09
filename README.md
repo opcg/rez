@@ -1,257 +1,294 @@
 
-![image](https://user-images.githubusercontent.com/2152766/56459362-3eb1ff00-638a-11e9-9db4-6ae83f6dc70f.png)
+<img width=300 src=https://user-images.githubusercontent.com/2152766/59975170-e925e880-95ac-11e9-9751-c37ff554b5f1.png>
 
-Rez, with all [feature branches](https://github.com/mottosso/bleeding-rez/branches/all?utf8=%E2%9C%93&query=feature%2F) merged.
+> "Works on *your* machine"
 
-[![](https://ci.appveyor.com/api/projects/status/github/mottosso/bleeding-rez?branch=master&svg=true&passingText=Windows&failingText=Windows&pendingText=Windows)](https://ci.appveyor.com/project/mottosso/bleeding-rez)
-[![](https://ci.appveyor.com/api/projects/status/github/mottosso/bleeding-rez?branch=master&svg=true&passingText=Linux&failingText=Linux&pendingText=Linux)](https://ci.appveyor.com/project/mottosso/bleeding-rez)
-[![](https://img.shields.io/travis/mottosso/bleeding-rez/master.svg?label=MacOS)](https://travis-ci.org/mottosso/bleeding-rez)
-[![](https://img.shields.io/codecov/c/github/mottosso/bleeding-rez.svg)](https://codecov.io/gh/mottosso/bleeding-rez)
+A [Rez](https://github.com/nerdvegas/rez) superset, on PyPI, for Python 2 and 3, with extended support for Windows, an editable [wiki](https://github.com/mottosso/bleeding-rez/wiki) and independent [roadmap](https://github.com/mottosso/bleeding-rez/wiki/Bleeding-Roadmap-2019).
 
 <br>
 
-### Usage
+#### Build Status
 
-There are a few ways you can use this repo.
+<table>
+    <tr>
+        <td><code>master</code></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/master.svg?label=Windows></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/master.svg?label=Linux></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/master.svg?label=MacOS></a></td>
+    </tr>
+    <tr>
+        <td><code>dev</code></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/dev.svg?label=Windows></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/dev.svg?label=Linux></a></td>
+        <td width=150px><a href=https://mottosso.visualstudio.com/bleeding-rez/_build?definitionId=1><img src=https://img.shields.io/azure-devops/build/mottosso/df4341a8-04df-420f-9aa6-91a53513dd14/1/dev.svg?label=MacOS></a></td>
+    </tr>
+</table>
 
-1. Use it in place of Rez, it is entirely backwards compatible with your existing install and package repository
-1. Each feature branch is self-contained and compatible with Rez, you can merge only the ones you like
-2. Most commits are self-contained and well documented, you could cherry-pick only the ones that interest you
+[![](https://badge.fury.io/py/bleeding-rez.svg)](https://pypi.org/project/bleeding-rez/)
 
-**Install**
+<br>
+
+### What is Rez
+
+Rez is a command-line utility for Windows, Linux and MacOS, solving the problem of creating a reproducible environment for your software projects on any machine in any pre-existing environment. It does so by resolving a "request" into a deterministic selection of "packages". Each package is a versioned collection of files with some metadata that you self-host and the resulting "context" is generated on-demand.
+
+```bash
+$ rez env Python-3.7 PySide2-5.12 six requests
+> $ echo Hello reproducible environment!
+```
+
+- [Safety](#safety)
+- [Production Configurations](#production-configurations)
+- [Backwards Compatibility](#backwards-compatibility)
+- [Known Issues](#known-issues)
+- [FAQ](#faq)
+- [Comparisons](#comparisons) (wip)
+
+<br>
+
+### Ecosystem
+
+A small but growing number of companion projects for bleeding- and nerdvegas-rez.
+
+- `rez-installz` - Native package manager for bleeding-rez
+- [`rez-localz`](https://github.com/mottosso/rez-localz) - Package localisation from network or cloud storage
+- [`rez-scoopz`](https://github.com/mottosso/rez-scoopz) - Install from [500+ system packages](https://github.com/ScoopInstaller/Main/tree/master/bucket) for Windows as a Rez package
+- [`rez-pipz`](https://github.com/mottosso/rez-pipz) - Build and install any [PyPI](https://pypi.org) compatible project as a Rez package
+- `rez-cmakez` - Build your projects using CMake
+- `rez-yumz` - Install from a selection of [80,000+ RPM packages](https://centos.pkgs.org/7/centos-x86_64/) and counting
+- `rez-vcpkgz` - Install any of the [1000+ C++ libraries](https://github.com/Microsoft/vcpkg/tree/master/ports) as a Rez package
+- `rez-conanz` - Install any of the [200+ C++ libraries](https://conan.io/) as a Rez package
+- `rez-npm` - Install any of the [1000+ JavaScript libraries](https://www.npmjs.com/get-npm) as a Rez package
+- [`rez-allzpark`](https://allzpark.sh) - Visual application launcher and Rez debugging tool
+- [`rez-for-projects`](https://github.com/mottosso/rez-for-projects) - A set of example packages for use of Rez (and Allspark) with project and application configurations
+- `rez-performance` - Test the impact of x-number of packages with y-level of complexity in your network environment to make better integration and deployment decisions.
+- `rez-releaz` - Secure package releases with Git integration
+- `rez-guiz` - Old-school visual editor of Rez contexts
+- `rez-flowchartz` - Visualise package dependencies as a flowchart, useful for debugging
+- `rez-...` Your project here!
+
+<br>
+
+### Quickstart
+
+Here's how to install and use bleeding-rez on your machine.
 
 ```bash
 $ pip install bleeding-rez
+$ rez bind --quickstart
+$ rez --version
+2.33.0
+$ rez env
+> $ echo Hello World!
+Hello World!
 ```
 
-<details>
-    <summary>Alternative 1 - Latest <code>master</code></summary>
+> The `>` character denotes that you are in a resolved environment, great job!
 
-Each release on PyPI comes from tagged commits on master.
+Now head over to the [**Quickstart Guide**](https://github.com/mottosso/bleeding-rez/wiki/Quickstart) for your first look at what it can do!
+
+<details><summary><b>Advanced</b></summary>
+
+You may alternatively install directly from the GitHub repository using one of the following commands.
 
 ```bash
 $ pip install git+https://github.com/mottosso/bleeding-rez.git
-```
-</details>
-
-
-<details>
-    <summary>Alternative 2 - Latest <code>dev</code></summary>
-
-Where development happens, with commits that are later cherry-picked into `master` and their corresponding feature branch.
-
-```bash
 $ pip install git+https://github.com/mottosso/bleeding-rez.git@dev
-```
-</details>
-
-
-<details>
-    <summary>Alterantive 3 - Specific feature branch</summary>
-
-Each feature works both standalone and together.
-
-```bash
 $ pip install git+https://github.com/mottosso/bleeding-rez.git@feature/windows-alias-additional-argument
 ```
+
+</details>
+
+<details><summary><b>Developer</b></summary>
+
+The developer approach maintains Git history and enables you to contribute back to this project (yay!)
+
+```bash
+$ python -m virtualenv rez-dev
+$ rez-dev\Scripts\activate
+(rez) $ git clone https://github.com/mottosso/bleeding-rez.git
+(rez) $ cd rez
+(rez) $ pip install . -e
+```
+
+> Use `. rez-dev\bin\activate` on Linux and MacOS
+
 </details>
 
 <br>
 
-### Changes
+### Safety
 
-<table>
-    <tr>
-        <th width="25%">Feature</th>
-        <th>Description</th>
-        <th></th>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Rez & PyPI</td>
-        <td>
+How do you test whether your new software runs on another machine? You could run it on another machine. Or you could run it with bleeding-rez.
 
-bleeding-rez is now a standard pip package and available on PyPI.
+In order to guarantee that what works on your machine works everywhere, the environment generated by bleeding-rez is "isolated". Akin to what you get out of a Docker container. It contains only the bare essentials provided with a new install of your OS, everything else being provided by your packages.
 
-```bash
-$ pip install bleeding-rez
+```
+C:\
+ __________   __________   __________
+|          | |          | |          |
+| packageA | | packageB | | packageC |
+|__________| |__________| |__________|
+      |            |            |
+ ____ v __________ v __________ v ___
+|                                    |
+|              Clean OS              |
+|____________________________________|
 ```
 
-`--target` is supported with one caveat on Windows; the destination must be available on your PYTHONPATH either globally or for the user. It cannot be added from within a console, as Rez is looking at your registry for where to find it.
+Conversely, nerdvegas/rez *sometime* inherits the environment of the parent shell, resulting in a mix of variables coming from packages, and some coming from the parent. How does it determine whether to inherit? If a package references a variable, it is overwritten. Otherwise, inherited.
 
-```bash
-$ pip install bleeding-rez --target ./some_dir
-$ setx PYTHONPATH=some_dir
-```
-</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
-    <tr></tr>
-    </tr>
-        <td>Preprocess function</td>
-        <td>
+This is one of the core differences between nerdvegas- and bleeding-rez, and is what makes bleeding-rez safe and predictable.
 
-`rezconfig.py` can take a `preprocess` function, rather than having to create and manage a separate module and `PYTHONPATH`</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
-    </tr>
-    <tr>
-        <td>Windows Tests</td>
-        <td>Tests now run on both Windows and Linux</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
-    <tr></tr>
-    </tr>
-        <td>Preprocess function</td>
-        <td>
+##### Why is that important?
 
-`rezconfig.py` can take a `preprocess` function, rather than having to create and manage a separate module and `PYTHONPATH`</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-appveyor><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Aliases & Windows</td>
-        <td>
-
-The `package.py:commands()` function `alias` didn't let Windows-users pass additional arguments to their aliases (doskeys)</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/windows-alias-additional-arguments><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Pip & Usability</td>
-        <td>
-
-As it happens, no one is actually using the `rez pip` command. It has some severe flaws which makes it unusable on anything other than a testing environment on a local machine you don't update.</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/useful-pip><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>`Request.__iter__`</td>
-        <td>
-
-You can now iterate over `request` and `resolve` from within your `package.py:commands()` section, e.g. `for req in request: print(req)`
-<td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/iterate-over-request><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Pip & Wheels</td>
-        <td>
-
-`rez pip` now uses wheels when available, avoiding needless a build step</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-wheels-windows><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Pip & Multi-install</td>
-        <td>
-
-`rez pip` can now take multiple packages, e.g. `rez pip --install six requests`</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-multipleinstall><i>link</i></a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Pip & `--prefix`</td>
-        <td>
-
-`rez pip` can now take a `--prefix` argument, letting you install packages wherever</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-prefix><i>link</i></a></td>
-    </tr>
-    <tr>
-        <td>PyYAML and Python 3</td>
-        <td>
-
-Prior to this, you couldn't use PyYAML and Python 3 as Rez packages.</td>
-        <td><a href=https://github.com/mottosso/bleeding-rez/tree/feature/pip-multipleinstall><i>link</i></a></td>
-    </tr>
-    <tr>
-        <td>Auto-create missing repository dir</td>
-        <td>
-
-New users no longer have to worry about creating their default package repository directory at `~/packages`, which may seem minor but was the resulting traceback was the first thing any new user would experience with Rez.</td>
-        <td><a href=https://github.com/nerdvegas/rez/pull/623><i>PR</i></a></td>
-    </tr>
-    <tr>
-        <td>Cross-platform rez-bind python</td>
-        <td>
-
-rez-bind previously used features unsupported on Windows to create the default Python package, now it uses the cross-compatible `alias()` command instead.</td>
-        <td><a href=https://github.com/nerdvegas/rez/pull/624><i>PR</i></a></td>
-    </tr>
-    <tr>
-        <td>No more "Terminate Batch Job? (Y/N)"</td>
-        <td>
-
-Rez used to create a .bat file which was later used as the Rez context. Exiting a .bat file using CTRL+C prompts the user for a "Terminate Batch Job? (Y/N)", adding some extra annoyance to exiting a Rez context.</td>
-        <td><a href=https://github.com/nerdvegas/rez/pull/626><i>PR</i></a></td>
-    </tr>
-</table>
+- **Incorrect assumptions** Consider developing a library on your machine that takes the environment variable `MY_VARIABLE` for granted. Everything runs, until it comes time to make a release. Once released, your users complain that your software doesn't work, and yet on your machine it does!
+- **Bad remote environment** A user gets in touch to complain that your Python library doesn't run on his machine. Why? Because his local `PYTHONHOME` is set to his system Python distribution, rather than the one `required` by your package.
+- **Bad local environment** Another user gets in touch saying his Python application complains about not finding PySide2. On your machine it runs just fine, but you later find out that your system Python had PySide2 installed.
+- **Any other experience?** Let [me know](https://github.com/mottosso/bleeding-rez/issues)!
 
 <br>
 
-### PRs
+### Production Configurations
 
-Along with merged pull-requests from the original repository, as they can take a while to get through (some take years!)
+Unlike nerdvegas/rez, bleeding-rez fully supports packaging of production environments, also known as "profiles".
 
-<table>
-    <tr>
-        <th>
+- See [Allzpark](https://allzpark.com/) for an example of what that means to you
 
-Change</th>
-        <th>Description</th>
-        <th></th>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Support for inverse version range</td>
-        <td>E.g. `requires = ["urllib3>=1.21.1,<1.23"]`</td>
-        <td>[#618](https://github.com/nerdvegas/rez/pull/618)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Misc Improvements</td>
-        <td>
+<br>
 
-> Make logging less destructive.
+### Backwards Compatibility
 
-Previously, when configured in rez.__init__ rez's logging (when used as
-an api) would clobber anything set by the calling application.  Push log
-configuration down into the cli only so it's more acceptale to api
-usage.
+Some features have been disabled by default. If you encounter any issues, here is how can re-enable them.
 
-> Allow for packages which have no versions.
+**rezconfig.py**
 
-> Fix typo.
+Apply all of these for full compatibility with nerdvegas/rez
 
-> Catch exception raised on Windows.
+```python
+import os
 
-On Windows it is likely the local packages path is on a different drive
-to the release packages path.  This causes an exception to be raised in
-this function.
+# bleeding-rez does not affect file permissions at all
+# as it can cause issues on SMB/CIFS shares
+make_package_temporarily_writable = True
 
-> Add missing unimplmented methods.
+# bleeding-rez does not support Rez 1 or below
+disable_rez_1_compatibility = False
 
-> Reset to base configuration, some of our site specific configuration …
+# nerdvegas/rez inherits all values, except under special circumstances.
+# See https://github.com/mottosso/bleeding-rez/issues/70
+# Can also be passed interactively, to override whatever is set here.
+#   $ rez env --inherited  # = True
+#   $ rez env --isolated   # = False
+inherit_parent_environment = True
 
-…slipped out on a recent merge.
+# bleeding-rez simplifies the map for Windows
+# You can undo this simplification like this.
+platform_map = {}
 
-> Clean up syntax.
+# On Windows, the default shell for bleeding-rez is PowerShell
+default_shell = "cmd" if os.name == "nt" else None
+```
 
-> This helps external projects (that use FindPackage from CMake) locate…
+<br>
 
-… things installed by rez.
+### Known Issues
 
-> Various improvements to git vcs repository.
+- The (deprecated) `rezbuild.py` build system doesn't appear to work without `inherit_parent_environment = True`
 
-* Handle the case where we might be both ahead of and behind the remote.
-* Fix docstrings.
-* Add a check for untracked files.  This was in rez 1 although does make
-  things more strict
-* Handle if the changelog is broken - if history is rewritten or the
-  repository moves (in our case git to github) the changelog can fail
-  ungracefully.
-* Don't let the export function leave you in a different directory to
-  which you started - that is bad for tests etc.            
+<br>
 
-</td>
-        <td>
+### FAQ
 
-[#204](https://github.com/nerdvegas/rez/pull/204)</td>
-    </tr>
-</table>
+##### <blockquote>Should I use nerdvegas/rez or bleeding-rez?</blockquote>
+
+If you need to use Rez on Windows with Python 2 and 3, and prefer a simplified installation procedure via PyPI along with the protection of an isolated environment then bleeding-rez is for you.
+
+##### <blockquote>Why does bleeding-rez exist?</blockquote>
+
+bleeding-rez started off as a fork from which to make PRs to nerdvegas/rez, but eventually started to diverge, now bleeding-rez is a true fork featuring additional safety and cross-platform compatibility, especially with Windows.
+
+##### <blockquote>Are there any similar projects to bleeding-rez?</blockquote>
+
+Yes, to some extent. Have a look at these.
+
+| Project | Scope | Shared Packages | Commercial
+|:--------|:------|:----------------|:-----------------
+| [bleeding-rez](https://github.com/mottosso/bleeding-rez) | ESAP | x
+| [rez](https://github.com/nerdvegas/rez) | ES | x
+| [Stash](http://stashsoftware.com) | ESAP | x | x
+| [be](https://github.com/mottosso/be) | ESAP | x
+| [Ecosystem](https://github.com/PeregrineLabs/Ecosystem) | E | x
+| [add](https://github.com/mottosso/add) | E | x
+| [avalon](http://getavalon.github.io) | EA | x
+| [miniconda](https://conda.io/en/latest/) | S |
+| [virtualenv](https://github.com/pypa/virtualenv) | S | 
+| [venv](https://docs.python.org/3/library/venv.html) | S |
+| [pipenv](https://docs.pipenv.org/en/latest/) | S |
+| [poetry](https://github.com/sdispater/poetry) | S |
+| [hatch](https://github.com/ofek/hatch)  | S |
+| [nixpkgs](https://nixos.org/nixpkgs/)   | S | x
+| [scoop](https://scoop.sh)               | S | 
+| [fips](https://github.com/floooh/fips)  | S | 
+| [spack](https://spack.io)  | ESA |
+
+- **Project** Name of project
+- **Shared** Whether packages are re-installed per environment, or shared amongst them
+- **Scope** Usecases covered by project
+    - **E** Environment management, per-package control over what is should look like when requested
+    - **S** Software builds, e.g. via cmake
+    - **A** Application versioning, along with associated dependencies
+    - **P** Project versioning, with associated software and application dependencies
+
+##### <blockquote>How can I get involved?</blockquote>
+
+I'm glad you asked! You're welcome to fork this repository and make a pull-request with your additions. Don't worry too much about the details, automated tests will kick in any time you update your PR. You can also contribute by looking through this README or the [wiki](https://github.com/mottosso/bleeding-rez/wiki) for things to improve, and generally just being part of the project. Welcome aboard!
+
+##### <blockquote>How do I report a bug?</blockquote>
+
+You can do that in the [issues section](https://github.com/mottosso/bleeding-rez/issues), try and be specific.
+
+##### <blockquote>What's the advantage of bleeding-rez over Python's virtualenv/venv or Conda?</blockquote>
+
+Aside from those being strictly limited to Python packages and Rez being language agnostic, both venv and Conda couple the installation of packages with their environment, meaning installed packages cannot be shared with other environments. Consider having installed a series of packages, such as PySide2, PyOpenGL, pyglet and other somewhat large libraries. You'll need to spend both time and disk space for each environment you make; essentially once per project.
+
+On the other side of the spectrum, you've got the global installation directory for something like Python, the `site-packages` directory. Why not just install everything there, and let whichever project you work on use what it needs? The problem is version. If one of your projects require PySide2-5.9 but another requires 5.13 there isn't much you can do.
+
+Enter Rez. With Rez, you can install every package under the sun, for all platforms at once, and establish environment dynamically as you either run, build or develop your project.
+
+```bash
+cd my_project
+rez env git-2.1 vs-2017 PySide2-5.13 python-3.7 pyglet-1.1b0 PyOpenGL-3.1 -- python setup.py bdist_wheel
+```
+
+That means, less disk space is used and that every package you install is an investment into future projects. At some point, your repository of packages gets so large that a single computer or disk is not enough to contain them all, and that's exactly the kind of situation Rez excels at solving, with a `memcached` backend for performance and multi-repository support via the `REZ_PACKAGES_PATH` environment variable which works much like `PYTHONPATH` for Python.
+
+Some of the largest consumers of packages, Animal Logic, hosts thousands of gigabytes of actively used packages across thousands of computers within a shared environment.
+
+<br>
+
+### Comparisons
+
+In addition to the high-level comparisons [above](https://github.com/mottosso/bleeding-rez#are-there-any-similar-projects-to-bleeding-rez), these are a few more in-depth comparisons with projects of particular interest.
+
+<br>
+
+#### Docker
+
+Ever wanted to run graphical applications, like Maya, in a Docker container? Now bleeding-rez can give you the next best thing. Full compartmentalisation whilst retaining access to system hardware like your GPU.
+
+Like a Docker container, the environment within is completely independent of the environment from which it was entered.
+
+```bash
+$ export MY_VARIABLE=true
+$ docker run -ti --rm centos:7
+> $ echo $MY_VARIABLE
+$MY_VARIABLE
+```
+
+Like `docker run`, environment variables can be passed into a resolved context like this.
+
+```bash
+$ docker run -e key=value centos:7
+$ rez env -e key=value python-3.7
+```

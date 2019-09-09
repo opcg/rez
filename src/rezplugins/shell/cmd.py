@@ -4,18 +4,18 @@ Windows Command Prompt (DOS) shell.
 from rez.config import config
 from rez.rex import RexExecutor, literal, OutputStyle, EscapedString
 from rez.shells import Shell
-from rez.system import system
 from rez.utils.system import popen
 from rez.utils.platform_ import platform_
-from rez.util import shlex_join
-from rez.vendor.six import six
 from functools import partial
 import os
 import re
 import subprocess
 
-
-basestring = six.string_types[0]
+try:
+    basestring
+except NameError:
+    # Python 3+
+    basestring = str
 
 
 class CMD(Shell):
@@ -72,6 +72,92 @@ class CMD(Shell):
         )
 
     @classmethod
+    def environment(cls):
+        environ = {
+            key: os.getenv(key)
+
+            # From newly installed Windows 10, 17763
+            for key in ("USERNAME",
+                        "SYSTEMROOT",
+                        "SYSTEMDRIVE",
+                        "USERDOMAIN",  # DESKTOP-6M8G46A
+                        "USERDOMAIN_ROAMINGPROFILE",  # DESKTOP-6M8G46A
+                        "USERNAME",  # marcus
+
+                        # Windows
+                        "WINDIR",  # C:\Windows
+                        "PROMPT",
+                        "PATHEXT",
+                        "OS",
+                        "TMP",
+                        "TEMP",
+
+                        # Locations for user files and settings
+                        "ALLUSERSPROFILE",  # C:\ProgramData
+                        "PROGRAMDATA",  # C:\ProgramData
+                        "USERPROFILE",  # C:\Users\marcus\AppData\Roaming
+                        "APPDATA",  # C:\Users\marcus\AppData\Roaming
+
+                        # For multiprocessing.__init__
+                        "NUMBER_OF_PROCESSORS",
+
+                        # For platform_.arch()
+                        "PROCESSOR_ARCHITEW6432",
+
+                        "PROCESSOR_ARCHITECTURE",
+                        "PROCESSOR_IDENTIFIER",  # Intel64 Family 6
+                                                 # Model 142 Stepping 10
+                                                 # GenuineIntel
+                        "PROCESSOR_LEVEL",  # 4
+                        "PROCESSOR_REVISION",  # 8e0a
+
+                        "COMMONPROGRAMFILES",  # C:\Program Files\Common Files
+                        "COMMONPROGRAMFILES(x86)",  # C:\...\Common Files
+                        "COMMONPROGRAMW6432",  # C:\Program Files\Common Files
+                        "COMPUTERNAME",  # DESKTOP-6M8G46A
+                        "COMSPEC",  # C:\Windows\system32\cmd.exe
+                        "DRIVERDATA",  # C:\Windows\System32\Drivers\DriverData
+                        "HOMEDRIVE",  # C:
+                        "HOMEPATH",  # \Users\marcus
+                        "LOCALAPPDATA",  # C:\Users\marcus\AppData\Local
+                        "LOGONSERVER",  # \\DESKTOP-6M8G46A
+                        "PROGRAMFILES",  # C:\Program Files
+                        "PROGRAMFILES(x86)",  # C:\Program Files (x86)
+                        "PROGRAMW6432",  # C:\Program Files
+                        "PSMODULEPATH",  # C:\Program Files\...\Modules
+                        "PUBLIC",  # C:\Users\Public
+                        "SESSIONNAME",  # Console
+                        )
+            if os.getenv(key)
+        }
+
+        environ["PATH"] = os.pathsep.join([
+            r"C:\Windows",
+            r"C:\Windows\system32",
+            r"C:\Windows\System32\Wbem",
+            r"C:\Windows\System32\WindowsPowerShell\v1.0",
+        ])
+
+        # Inherit REZ_ variables
+        # TODO: This is a leak, but I can't think of another
+        # way of preserving e.g. `REZ_PACKAGES_PATH`
+        for key, value in os.environ.items():
+            if not any([key.startswith("REZ_"),
+
+                        # Used internally
+                        key.startswith("_REZ_"),
+                        key.startswith("__REZ_"),
+                        ]):
+                continue
+
+            environ[key] = value
+
+        if config.additional_environment:
+            environ.update(config.additional_environment)
+
+        return environ
+
+    @classmethod
     def get_syspaths(cls):
         if cls.syspaths is not None:
             return cls.syspaths
@@ -102,8 +188,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -127,8 +216,11 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd, stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE, shell=True)
+        p = popen(cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  universal_newlines=True,
+                  shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -167,12 +259,10 @@ class CMD(Shell):
             if bind_rez:
                 ex.interpreter._bind_interactive_rez()
             if print_msg and not quiet:
-                if system.is_production_rez_install:
-                    # previously this was called with the /K flag, however
-                    # that would leave spawn_shell hung on a blocked call
-                    # waiting for the user to type "exit" into the shell that
-                    # was spawned to run the rez context printout
-                    ex.command("cmd /Q /C rez context")
+                ex.info('You are now in a rez-configured environment.')
+
+                # Output, if Rez is present
+                ex.command("rez context 2>nul")
 
         def _create_ex():
             return RexExecutor(interpreter=self.new_shell(),
@@ -226,7 +316,15 @@ class CMD(Shell):
 
         is_detached = (cmd[0] == 'START')
 
-        p = popen(cmd, env=env, shell=is_detached, **Popen_args)
+        # No environment was explicity passed
+        if not env and not config.inherit_parent_environment:
+            env = self.environment()
+
+        p = popen(cmd,
+                  env=env,
+                  shell=is_detached,
+                  universal_newlines=True,
+                  **Popen_args)
         return p
 
     def get_output(self, style=OutputStyle.file):

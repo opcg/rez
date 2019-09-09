@@ -185,6 +185,10 @@ class RezGuiQTImportError(ImportError):
     pass
 
 
+class RezUncatchableError(RezError):
+    """For handling try: except: None in Python 3"""
+
+
 @contextmanager
 def convert_errors(from_, to, msg=None):
     exc = None

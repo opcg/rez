@@ -1,9 +1,9 @@
 from __future__ import print_function
-
 import unittest
 from rez.config import config, _create_locked_config
 from rez.shells import get_shell_types
 from rez.system import system
+from rez.vendor.six import six
 import tempfile
 import shutil
 import os.path
@@ -11,6 +11,9 @@ import os
 import functools
 import sys
 from contextlib import contextmanager
+
+# Backwards compatibility with Python 2
+basestring = six.string_types[0]
 
 
 class TestBase(unittest.TestCase):
@@ -48,7 +51,15 @@ class TestBase(unittest.TestCase):
     def setup_config(self):
         # to make sure config changes from one test don't affect another, copy
         # the overrides dict...
-        self._config = _create_locked_config(dict(self.settings))
+        self._config = _create_locked_config(dict(self.settings, **{
+
+            # All tests have been written with this enabled
+            # TODO: Refactor tests to either take or not take this
+            # into account. Currently, no tests are made with this
+            # setting *disabled*.
+            "inherit_parent_environment": True,
+        }))
+
         config._swap(self._config)
 
     def teardown_config(self):
@@ -140,7 +151,13 @@ def program_dependent(program_name, *program_names):
 
         with open(os.devnull, 'wb') as DEVNULL:
             try:
-                subprocess.check_call(command, stdout=DEVNULL, stderr=DEVNULL)
+                subprocess.check_call(command,
+                                      stdout=DEVNULL,
+                                      stderr=DEVNULL,
+
+                                      # Windows doesn't consider PATH
+                                      # unless shell=True
+                                      shell=os.name == "nt")
             except (OSError, IOError, subprocess.CalledProcessError):
                 return False
             else:
@@ -185,11 +202,7 @@ def install_dependent(fn):
     from a production install"""
     @functools.wraps(fn)
     def _fn(self, *args, **kwargs):
-        if os.getenv("__REZ_SELFTEST_RUNNING") and system.is_production_rez_install:
-            fn(self, *args, **kwargs)
-        else:
-            print("\nskipping test, must be run via 'rez-selftest' tool, from "
-                  "a PRODUCTION rez installation.")
+        fn(self, *args, **kwargs)
     return _fn
 
 

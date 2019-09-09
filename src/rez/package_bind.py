@@ -1,12 +1,11 @@
 from __future__ import print_function
-
-from rez.exceptions import RezBindError
+from rez.exceptions import RezBindError, RezUncatchableError
 from rez import module_root_path
 from rez.util import get_close_pkgs
 from rez.utils.formatting import columnise
 from rez.utils.logging_ import print_error
 from rez.config import config
-import argparse
+from rez.vendor import argparse
 import os.path
 import os
 import sys
@@ -101,7 +100,7 @@ def bind_package(name, path=None, version_range=None, no_deps=False,
     while pending:
         pending_ = pending
         pending = set()
-        exc_type = None
+        exc_type = RezUncatchableError
 
         for name_ in pending_:
             # turn error on binding of dependencies into a warning - we don't

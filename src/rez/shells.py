@@ -2,24 +2,20 @@
 Pluggable API for creating subshells using different programs, such as bash.
 """
 from rez.rex import RexExecutor, ActionInterpreter, OutputStyle
-from rez.util import shlex_join, is_non_string_iterable
+from rez.util import shlex_join
+from rez import util
 from rez.backport.shutilwhich import which
 from rez.utils.logging_ import print_warning
 from rez.utils.system import popen
-from rez.system import system
 from rez.exceptions import RezSystemError
 from rez.rex import EscapedString
 from rez.config import config
 from rez.vendor.six import six
-import subprocess
 import os
 import os.path
 import pipes
 
 # Backwards compatibility with Python 2
-basestring = six.string_types[0]
-
-
 basestring = six.string_types[0]
 
 
@@ -69,6 +65,10 @@ class Shell(ActionInterpreter):
 
     @classmethod
     def get_syspaths(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def environment(cls):
         raise NotImplementedError
 
     def __init__(self):
@@ -225,6 +225,85 @@ class UnixShell(Shell):
         """
         raise NotImplementedError
 
+    @classmethod
+    def environment(cls):
+        environ = {
+            key: os.getenv(key)
+            for key in ("DISPLAY",
+                        "GROUPS",
+                        "HOME",
+                        "HOSTNAME",
+                        "HOSTTYPE",
+                        "PWD",
+
+                        # Unused, from CentOS vanilla
+                        # "BASH",
+                        # "BASHOPTS",
+                        # "BASH_ALIASES",
+                        # "BASH_ARGC",
+                        # "BASH_ARGV",
+                        # "BASH_CMDS",
+                        # "BASH_LINENO",
+                        # "BASH_SOURCE",
+                        # "BASH_VERSINFO",
+                        # "BASH_VERSION",
+                        # "COLUMNS",
+                        # "DIRSTACK",
+                        # "EUID",
+                        # "HISTFILE",
+                        # "HISTFILESIZE",
+                        # "HISTSIZE",
+                        # "IFS",
+                        # "LINES",
+                        # "LS_COLORS",
+                        # "MACHTYPE",
+                        # "MAILCHECK",
+                        # "OPTERR",
+                        # "OPTIND",
+                        # "OSTYPE",
+                        # "PIPESTATUS",
+                        # "PPID",
+                        # "PROMPT_COMMAND",
+                        # "PS1",
+                        # "PS2",
+                        # "PS4",
+                        # "SHELL",
+                        # "SHELLOPTS",
+                        # "SHLVL",
+                        # "TERM",
+                        )
+            if os.getenv(key)
+        }
+
+        # From docker run -ti --rm centos:7
+        environ["PATH"] = os.pathsep.join([
+            "/usr/local/sbin",
+            "/usr/local/bin",
+            "/usr/sbin",
+            "/usr/bin",
+            "/sbin",
+            "/bin",
+        ])
+
+        # Inherit REZ_ variables
+        # TODO: This is a leak, but I can't think of another
+        # way of preserving e.g. `REZ_PACKAGES_PATH`
+        for key, value in os.environ.items():
+            if not any([key.startswith("REZ_"),
+
+                        # Used internally
+                        key.startswith("_REZ_"),
+                        key.startswith("__REZ_"),
+                        ]):
+                continue
+
+            environ[key] = value
+
+        if config.additional_environment:
+            environ.update(config.additional_environment)
+
+        return environ
+
     def spawn_shell(self, context_file, tmpdir, rcfile=None, norc=False,
                     stdin=False, command=None, env=None, quiet=False,
                     pre_command=None, add_rez=True,
@@ -259,7 +338,11 @@ class UnixShell(Shell):
                 ex.info('')
                 ex.info('You are now in a rez-configured environment.')
                 ex.info('')
-                ex.command('rezolve context')
+                ex.command(
+                    # Call rez, if it's there
+                    'command -v rezolve >/dev/null 2>&1 '
+                    '&& rezolve context'
+                )
 
         def _write_shell(ex, filename):
             code = ex.get_output()
@@ -362,8 +445,15 @@ class UnixShell(Shell):
                 cmd = pre_command
         cmd.extend([self.executable, target_file])
 
+        # No environment was explicity passed
+        if not env and not config.inherit_parent_environment:
+            env = self.environment()
+
         try:
-            p = popen(cmd, env=env, **Popen_args)
+            p = popen(cmd,
+                      env=env,
+                      universal_newlines=True,  # text-mode
+                      **Popen_args)
         except Exception as e:
             cmd_str = ' '.join(map(pipes.quote, cmd))
             raise RezSystemError("Error running command:\n%s\n%s"
@@ -385,7 +475,7 @@ class UnixShell(Shell):
 
     # escaping is allowed in args, but not in program string
     def command(self, value):
-        if is_non_string_iterable(value):
+        if util.iterable(value):
             it = iter(value)
             cmd = EscapedString.disallow(next(it))
             args_str = ' '.join(self.escape_string(x) for x in it)

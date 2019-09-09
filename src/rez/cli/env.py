@@ -17,6 +17,12 @@ def setup_parser(parser, completions=False):
         default=config.default_shell or system.shell,
         help="target shell type (default: %(default)s)")
     parser.add_argument(
+        "--isolated", action="store_true",
+        help="Do not inherit the parent environment")
+    parser.add_argument(
+        "--inherited", action="store_true",
+        help="Inherit the parent environment")
+    parser.add_argument(
         "--rcfile", type=str,
         help="source this file instead of the target shell's standard startup "
         "scripts, if possible")
@@ -70,6 +76,10 @@ def setup_parser(parser, completions=False):
         help="add package exclusion filters, eg '*.beta'. Note that these are "
         "added to the globally configured exclusions")
     parser.add_argument(
+        "-e", "--env", action='append', metavar="KEY=VALUE",
+        help="inject a KEY=VALUE pair into the resulting context. "
+             "Keeps reading key=value pairs until the next argument is passed")
+    parser.add_argument(
         "--include", type=str, nargs='+', metavar="RULE",
         help="add package inclusion filters, eg 'mypkg', 'boost-*'. Note that "
         "these are added to the globally configured inclusions")
@@ -106,6 +116,11 @@ def setup_parser(parser, completions=False):
         "--no-passive", action="store_true",
         help="only print actions that affect the solve (has an effect only "
         "when verbosity is enabled)")
+    parser.add_argument(
+        "--self", action="store_true", help=(
+            "Include requirement for the version of bleeding-rez "
+            "that's being called, useful for gaining access to "
+            "rez commands from within a rez context."))
     parser.add_argument(
         "--stats", action="store_true",
         help="print advanced solver stats")
@@ -149,6 +164,12 @@ def command(opts, parser, extra_arg_groups=None):
     request = opts.PKG
     t = get_epoch_time_from_str(opts.time) if opts.time else None
 
+    if opts.isolated:
+        config.inherit_parent_environment = False
+
+    if opts.inherited:
+        config.inherit_parent_environment = True
+
     if opts.paths is None:
         pkg_paths = (config.nonlocal_packages_path
                      if opts.no_local else None)
@@ -175,6 +196,11 @@ def command(opts, parser, extra_arg_groups=None):
                                               strict=opts.strict,
                                               rank=opts.patch_rank)
         context = None
+
+    if opts.self:
+        from rez.utils._version import _rez_version
+        request += ["bleeding_rez==%s" % _rez_version]
+        request += ["python"]  # Required by Rez
 
     if context is None:
         # create package filters
@@ -226,6 +252,15 @@ def command(opts, parser, extra_arg_groups=None):
 
     if not success:
         sys.exit(1)
+
+    if opts.env:
+        env = {}
+
+        for pair in opts.env:
+            key, value = pair.split("=")
+            env[key.upper()] = value
+
+        config.additional_environment = env
 
     # generally shells will behave as though the '-s' flag was not present when
     # no stdin is available. So here we replicate this behaviour.

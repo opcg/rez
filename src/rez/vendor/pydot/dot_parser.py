@@ -11,7 +11,7 @@ from __future__ import division
 from __future__ import print_function
 import sys
 
-from ..pyparsing.pyparsing import (
+from rez.vendor.pyparsing.pyparsing import (
     nestedExpr, Literal, CaselessLiteral,
     Word, OneOrMore,
     Forward,
@@ -21,7 +21,16 @@ from ..pyparsing.pyparsing import (
     ParseException, ParseResults, CharsNotIn,
     QuotedString)
 
-from ..pydot import pydot
+try:
+    from . import pydot
+except ImportError:
+    try:
+        # Circular dependency, if pydot was imported first
+        pydot = sys.modules["rez.vendor.pydot.pydot"]
+    except KeyError:
+        raise ImportError(
+            "Circular dependency to pydot could not be resolved"
+        )
 
 __author__ = ['Michael Krause', 'Ero Carrera']
 __license__ = 'MIT'

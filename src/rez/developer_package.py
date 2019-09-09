@@ -12,6 +12,9 @@ from inspect import isfunction
 import os.path
 import stat
 
+# Python 2 compatibility
+basestring = six.string_types[0]
+
 
 basestring = six.string_types[0]
 

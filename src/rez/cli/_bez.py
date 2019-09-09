@@ -1,12 +1,10 @@
 from __future__ import print_function
-
 import os
 import sys
 import os.path
 import textwrap
 import subprocess
-import argparse
-from rez.vendor import yaml
+from rez.vendor import yaml, argparse
 from rez.utils.filesystem import TempDirs
 from rez.config import config
 
@@ -27,7 +25,7 @@ def run():
             sys.exit(1)
 
     with open(".bez.yaml") as f:
-        doc = yaml.load(f.read(), Loader=yaml.FullLoader)
+        doc = yaml.load(f.read())
 
     source_path = doc["source_path"]
     buildfile = os.path.join(source_path, "rezbuild.py")
@@ -37,16 +35,16 @@ def run():
 
     # run rezbuild.py:build() in python subprocess. Cannot import module here
     # because we're in a python env configured for rez, not the build
-    code = \
-    """
-    env={}
+    code = """\
+    from __future__ import print_function
     with open("%(buildfile)s") as stream:
+        env={}
         exec(compile(stream.read(), stream.name, 'exec'), env)
 
     buildfunc = env.get("build")
     if not buildfunc:
         import sys
-        sys.stderr.write("Did not find function 'build' in rezbuild.py\\n")
+        print("Did not find function 'build' in rezbuild.py", file=sys.stderr)
         sys.exit(1)
 
     kwargs = dict(source_path="%(srcpath)s",
@@ -57,7 +55,7 @@ def run():
 
     import inspect
     args = inspect.getargspec(buildfunc).args
-    kwargs = dict((k, v) for k, v in kwargs.iteritems() if k in args)
+    kwargs = {k: v for k, v in kwargs.items() if k in args}
 
     buildfunc(**kwargs)
 
