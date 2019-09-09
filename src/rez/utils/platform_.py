@@ -3,6 +3,7 @@ import sys
 import os
 import os.path
 import re
+import subprocess
 from rez.util import which
 from rez.utils.system import popen
 from rez.utils.data_utils import cached_property
@@ -105,6 +106,10 @@ class Platform(object):
                 "Error detecting logical core count, defaulting to 1: %s" % e
             )
         return 1
+
+    @property
+    def has_case_sensitive_filesystem(self):
+        return True
 
     # -- implementation
 
@@ -488,6 +493,10 @@ class WindowsPlatform(Platform):
         final_version = str('.').join(toks)
         return "windows-%s" % final_version
 
+    @property
+    def has_case_sensitive_filesystem(self):
+        return False
+
     def _image_viewer(self):
         # os.system("file.jpg") will open default viewer on windows
         return ''
@@ -508,6 +517,11 @@ class WindowsPlatform(Platform):
         # http://stackoverflow.com/questions/6260149/os-symlink-support-in-windows
         if callable(getattr(os, "symlink", None)):
             os.symlink(source, link_name)
+        elif "Windows-10" in platform.platform():
+            # Starting with Windows 10 Insiders build 14972, symlinks can be
+            # created without needing to elevate the console as administrator.
+            # https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/#joC5tFKhdXs2gGml.97
+            subprocess.check_output("mklink %s %s" % (link_name, source), shell=True)
         else:
             import ctypes
             csl = ctypes.windll.kernel32.CreateSymbolicLinkW

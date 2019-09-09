@@ -56,7 +56,7 @@ import threading
 import time
 import zlib
 
-from ..six import six
+from rez.vendor.six import six
 
 if six.PY2:
     # With Python 2, the faster C implementation has to be imported explicitly.
@@ -80,7 +80,7 @@ valid_key_chars_re = re.compile(b'[\x21-\x7e\x80-\xff]+$')
 
 
 #  Original author: Evan Martin of Danga Interactive
-__author__ = "Sean Reifschneider <jafo00@gmail.com>"
+__author__ = "Sean Reifschneider <jafo-memcached@tummy.com>"
 __version__ = "1.59"
 __copyright__ = "Copyright (C) 2003 Danga Interactive"
 #  http://en.wikipedia.org/wiki/Python_Software_Foundation_License

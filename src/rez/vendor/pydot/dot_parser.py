@@ -21,7 +21,7 @@ from ..pyparsing.pyparsing import (
     ParseException, ParseResults, CharsNotIn,
     QuotedString)
 
-from .. import pydot
+from ..pydot import pydot
 
 __author__ = ['Michael Krause', 'Ero Carrera']
 __license__ = 'MIT'

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from rez import __version__
 from rez.utils.data_utils import AttrDictWrapper, RO_AttrDictWrapper, \
     convert_dicts, cached_property, cached_class_property, LazyAttributeMeta, \
@@ -10,22 +11,17 @@ from rez import module_root_path
 from rez.system import system
 from rez.vendor.schema.schema import Schema, SchemaError, And, Or, Use
 from rez.vendor import yaml
-from rez.vendor.yaml.error import YAMLError
 from rez.vendor.six import six
+from rez.vendor.yaml.error import YAMLError
 from rez.backport.lru_cache import lru_cache
 from contextlib import contextmanager
 from inspect import ismodule
 import os
-import sys
 import os.path
 import copy
 
-PY3 = sys.version_info >= (3, 0, 0)
 
-if PY3:
-    str_type = str
-else:
-    str_type = basestring
+basestring = six.string_types[0]
 
 
 # -----------------------------------------------------------------------------
@@ -101,29 +97,25 @@ class Setting(object):
 
 
 class Str(Setting):
-    schema = Schema(str_type)
+    schema = Schema(basestring)
 
     def _parse_env_var(self, value):
         return value
 
 
 class Char(Setting):
-    schema = Schema(str_type, lambda x: len(x) == 1)
+    schema = Schema(basestring, lambda x: len(x) == 1)
 
     def _parse_env_var(self, value):
         return value
 
 
 class OptionalStr(Str):
-    schema = Or(None, str_type)
-
-
-class OptionalObject(Str):
-    schema = Or(None, object)
+    schema = Or(None, basestring)
 
 
 class StrList(Setting):
-    schema = Schema([str_type])
+    schema = Schema([basestring])
     sep = ','
 
     def _parse_env_var(self, value):
@@ -133,7 +125,7 @@ class StrList(Setting):
 
 class OptionalStrList(StrList):
     schema = Or(And(None, Use(lambda x: [])),
-                [str_type])
+                [basestring])
 
 
 class PathList(StrList):
@@ -247,6 +239,21 @@ class RezToolsVisibility_(Str):
         return Or(*(x.name for x in RezToolsVisibility))
 
 
+class OptionalStrOrFunction(Setting):
+    schema = Or(None, basestring, callable)
+
+    def _parse_env_var(self, value):
+        # note: env-var override only supports string, eg 'mymodule.preprocess_func'
+        return value
+
+
+class PreprocessMode_(Str):
+    @cached_class_property
+    def schema(cls):
+        from rez.developer_package import PreprocessMode
+        return Or(*(x.name for x in PreprocessMode))
+
+
 class BuildThreadCount_(Setting):
     # may be a positive int, or the values "physical" or "logical"
 
@@ -329,7 +336,8 @@ config_schema = Schema({
     "implicit_back":                                OptionalStr,
     "alias_fore":                                   OptionalStr,
     "alias_back":                                   OptionalStr,
-    "package_preprocess_function":                  OptionalObject,
+    "package_preprocess_function":                  OptionalStrOrFunction,
+    "package_preprocess_mode":                      PreprocessMode_,
     "context_tracking_host":                        OptionalStr,
     "variant_shortlinks_dirname":                   OptionalStr,
     "build_thread_count":                           BuildThreadCount_,
@@ -398,8 +406,8 @@ config_schema = Schema({
 # settings common to each plugin type
 _plugin_config_dict = {
     "release_vcs": {
-        "tag_name":                     str_type,
-        "releasable_branches":          Or(None, [str_type]),
+        "tag_name":                     basestring,
+        "releasable_branches":          Or(None, [basestring]),
         "check_tag":                    bool
     }
 }
@@ -560,7 +568,7 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
                 return _get_plugin_completions(prefix_)
             return []
         else:
-            keys = ([x for x in self._schema_keys if isinstance(x, six.string_types)]
+            keys = ([x for x in self._schema_keys if isinstance(x, basestring)]
                     + ["plugins"])
             keys = [x for x in keys if x.startswith(prefix)]
             if keys == ["plugins"]:
@@ -628,7 +636,7 @@ class Config(six.with_metaclass(LazyAttributeMeta, object)):
         return Config(filepaths, overrides)
 
     def __str__(self):
-        keys = (x for x in self.schema._schema if isinstance(x, six.string_types))
+        keys = (x for x in self.schema._schema if isinstance(x, basestring))
         return "%r" % sorted(list(keys) + ["plugins"])
 
     def __repr__(self):
@@ -754,14 +762,14 @@ class _PluginConfigs(object):
 def expand_system_vars(data):
     """Expands any strings within `data` such as '{system.user}'."""
     def _expanded(value):
-        if isinstance(value, six.string_types):
+        if isinstance(value, basestring):
             value = expandvars(value)
             value = expanduser(value)
             return scoped_format(value, system=system)
         elif isinstance(value, (list, tuple, set)):
             return [_expanded(x) for x in value]
         elif isinstance(value, dict):
-            return dict((k, _expanded(v)) for k, v in value.items())
+            return dict((k, _expanded(v)) for k, v in value.iteritems())
         else:
             return value
     return _expanded(data)
@@ -804,8 +812,6 @@ def _replace_config(other):
 
 @lru_cache()
 def _load_config_py(filepath):
-    from rez.vendor.six.six import exec_
-
     reserved = dict(
         # Standard Python module variables
         # Made available from within the module,
@@ -817,18 +823,18 @@ def _load_config_py(filepath):
         ModifyList=ModifyList
     )
 
-    globs = reserved.copy()
+    g = reserved.copy()
     result = {}
 
     with open(filepath) as f:
         try:
             code = compile(f.read(), filepath, 'exec')
-            exec_(code, globs)
+            exec(code, g)
         except Exception as e:
             raise ConfigurationError("Error loading configuration from %s: %s"
                                      % (filepath, str(e)))
 
-    for k, v in globs.items():
+    for k, v in g.iteritems():
         if k != '__builtins__' \
                 and not ismodule(v) \
                 and k not in reserved:
@@ -842,7 +848,7 @@ def _load_config_yaml(filepath):
     with open(filepath) as f:
         content = f.read()
     try:
-        doc = yaml.load(content) or {}
+        doc = yaml.load(content, Loader=yaml.FullLoader) or {}
     except YAMLError as e:
         raise ConfigurationError("Error loading configuration from %s: %s"
                                  % (filepath, str(e)))

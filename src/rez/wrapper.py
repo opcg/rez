@@ -32,7 +32,7 @@ class Wrapper(object):
         with open(filepath) as f:
             content = f.read()
         try:
-            doc = yaml.load(content)
+            doc = yaml.load(content, Loader=yaml.FullLoader)
             doc = doc["kwargs"]
             context_name = doc["context_name"]
             tool_name = doc["tool_name"]
@@ -87,7 +87,7 @@ class Wrapper(object):
         return retcode
 
     def _run(self, prefix_char, args):
-        from rez.vendor import argparse
+        import argparse
 
         parser = argparse.ArgumentParser(prog=self.tool_name,
                                          prefix_chars=prefix_char)

@@ -1,4 +1,3 @@
-from rez.vendor.six import six
 from rez.config import config
 from rez.packages_ import Package
 from rez.serialise import load_from_file, FileFormat, set_objects
@@ -7,9 +6,22 @@ from rez.exceptions import PackageMetadataError, InvalidPackageError
 from rez.utils.system import add_sys_paths
 from rez.utils.sourcecode import SourceCode
 from rez.utils.logging_ import print_info, print_error
+from rez.vendor.enum import Enum
+from rez.vendor.six import six
 from inspect import isfunction
 import os.path
 import stat
+
+
+basestring = six.string_types[0]
+
+
+class PreprocessMode(Enum):
+    """Defines when a package preprocess will be executed.
+    """
+    before = 0    # Package's preprocess function is executed before the global preprocess
+    after = 1     # Package's preprocess function is executed after the global preprocess
+    override = 2  # Package's preprocess function completely overrides the global preprocess.
 
 
 class DeveloperPackage(Package):
@@ -82,13 +94,13 @@ class DeveloperPackage(Package):
                     break
             if data:
                 name = data.get("name")
-                if name is not None or isinstance(name, six.string_types):
+                if name is not None or isinstance(name, basestring):
                     break
 
         if data is None:
             raise PackageMetadataError("No package definition file found at %s" % path)
 
-        if name is None or not isinstance(name, six.string_types):
+        if name is None or not isinstance(name, basestring):
             raise PackageMetadataError(
                 "Error in %r - missing or non-string field 'name'" % filepath)
 
@@ -107,7 +119,7 @@ class DeveloperPackage(Package):
         package.includes = set()
 
         def visit(d):
-            for k, v in d.items():
+            for k, v in d.iteritems():
                 if isinstance(v, SourceCode):
                     package.includes |= (v.includes or set())
                 elif isinstance(v, dict):
@@ -160,33 +172,38 @@ class DeveloperPackage(Package):
     def _get_preprocessed(self, data):
         """
         Returns:
-            (DeveloperPackage, new_data) 2-tuple IFF the preprocess function
+            (DeveloperPackage, new_data) 2-tuple IF the preprocess function
             changed the package; otherwise None.
         """
         from rez.serialise import process_python_objects
         from rez.utils.data_utils import get_dict_diff_str
         from copy import deepcopy
 
-        with add_sys_paths(config.package_definition_build_python_paths):
-            preprocess_func = getattr(self, "preprocess", None)
-            funcname = None
+        package_preprocess_mode = self.config.package_preprocess_mode
 
-            if preprocess_func:
-                print_info("Applying preprocess from package.py")
+        def _get_package_level():
+            return getattr(self, "preprocess", None)
+
+        def _get_global_level():
+            # load globally configured preprocess function
+            package_preprocess_function = self.config.package_preprocess_function
+
+            if not package_preprocess_function:
+                return None
+
+            elif isfunction(package_preprocess_function):
+                preprocess_func = package_preprocess_function
 
             else:
-                # load globally configured preprocess function
-                dotted = self.config.package_preprocess_function
-
-                if not dotted:
+                if '.' not in package_preprocess_function:
+                    print_error(
+                        "Setting 'package_preprocess_function' must be of "
+                        "form 'module[.module.module...].funcname'. Package  "
+                        "preprocessing has not been applied.")
                     return None
 
-                elif isfunction(dotted):
-                    funcname = dotted.__name__
-                    preprocess_func = dotted
-
-                elif isinstance(dotted, six.string_types):
-                    if '.' not in dotted:
+                elif isinstance(package_preprocess_function, basestring):
+                    if '.' not in package_preprocess_function:
                         print_error(
                             "Setting 'package_preprocess_function' must be of "
                             "form 'module[.module.module...].funcname'. "
@@ -194,14 +211,14 @@ class DeveloperPackage(Package):
                         )
                         return None
 
-                    name, funcname = dotted.rsplit('.', 1)
+                    name, funcname = package_preprocess_function.rsplit('.', 1)
 
                     try:
                         module = __import__(name=name, fromlist=[funcname])
                     except Exception as e:
                         print_error(
                             "Failed to load preprocessing function '%s': %s"
-                            % (dotted, str(e))
+                            % (package_preprocess_function, str(e))
                         )
 
                         return None
@@ -211,27 +228,47 @@ class DeveloperPackage(Package):
 
                 else:
                     print_error(
-                        "Invalid package_preprocess_function: %s" % funcname
+                        "Invalid package_preprocess_function: %s" % package_preprocess_function
                     )
                     return None
 
             if not preprocess_func or not isfunction(preprocess_func):
-                print_error("Function '%s' not found" % funcname)
+                print_error("Function '%s' not found" % package_preprocess_function)
                 return None
 
-            print_info("Applying preprocess function %s" % funcname)
+            return preprocess_func
+
+        with add_sys_paths(config.package_definition_build_python_paths):
+
+            preprocess_mode = PreprocessMode[self.config.package_preprocess_mode]
+            package_preprocess = _get_package_level()
+            global_preprocess = _get_global_level()
+
+            if preprocess_mode == PreprocessMode.after:
+                preprocessors = [global_preprocess, package_preprocess]
+            elif preprocess_mode == PreprocessMode.before:
+                preprocessors = [package_preprocess, global_preprocess]
+            else:
+                preprocessors = [package_preprocess or global_preprocess]
 
             preprocessed_data = deepcopy(data)
 
-            # apply preprocessing
-            try:
-                preprocess_func(this=self, data=preprocessed_data)
-            except InvalidPackageError:
-                raise
-            except Exception as e:
-                print_error("Failed to apply preprocess: %s: %s"
-                            % (e.__class__.__name__, str(e)))
-                return None
+            for preprocessor in preprocessors:
+                if not preprocessor:
+                    continue
+
+                level = "global" if preprocessor == global_preprocess else "local"
+                print_info("Applying {0} preprocess function".format(level))
+
+                # apply preprocessing
+                try:
+                    preprocessor(this=self, data=preprocessed_data)
+                except InvalidPackageError:
+                    raise
+                except Exception as e:
+                    print_error("Failed to apply preprocess: %s: %s"
+                                % (e.__class__.__name__, str(e)))
+                    return None
 
         # if preprocess added functions, these may need to be converted to
         # SourceCode instances

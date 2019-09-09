@@ -4,19 +4,18 @@ Windows Command Prompt (DOS) shell.
 from rez.config import config
 from rez.rex import RexExecutor, literal, OutputStyle, EscapedString
 from rez.shells import Shell
+from rez.system import system
 from rez.utils.system import popen
 from rez.utils.platform_ import platform_
-from rez.backport.shutilwhich import which
+from rez.util import shlex_join
+from rez.vendor.six import six
 from functools import partial
 import os
 import re
 import subprocess
 
-try:
-    basestring
-except NameError:
-    # Python 3+
-    basestring = str
+
+basestring = six.string_types[0]
 
 
 class CMD(Shell):
@@ -83,7 +82,7 @@ class CMD(Shell):
 
         # detect system paths using registry
         def gen_expected_regex(parts):
-            whitespace = r"[\s]+"
+            whitespace = "[\s]+"
             return whitespace.join(parts)
 
         paths = []
@@ -103,11 +102,8 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd,
-                  stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE,
-                  universal_newlines=True,
-                  shell=True)
+        p = popen(cmd, stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE, shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -131,11 +127,8 @@ class CMD(Shell):
             "(.*)"
         ])
 
-        p = popen(cmd,
-                  stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE,
-                  universal_newlines=True,
-                  shell=True)
+        p = popen(cmd, stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE, shell=True)
         out_, _ = p.communicate()
         out_ = out_.strip()
 
@@ -144,14 +137,7 @@ class CMD(Shell):
             if match:
                 paths.extend(match.group(2).split(os.pathsep))
 
-        cls.syspaths = list(set([x for x in paths if x]))
-
-        # add Rez binaries
-        exe = which("rez-env")
-        assert exe, "Could not find rez binary, this is a bug"
-        rez_bin_dir = os.path.dirname(exe)
-        cls.syspaths.insert(0, rez_bin_dir)
-
+        cls.syspaths = set([x for x in paths if x])
         return cls.syspaths
 
     def _bind_interactive_rez(self):
@@ -181,11 +167,12 @@ class CMD(Shell):
             if bind_rez:
                 ex.interpreter._bind_interactive_rez()
             if print_msg and not quiet:
-                # previously this was called with the /K flag, however
-                # that would leave spawn_shell hung on a blocked call
-                # waiting for the user to type "exit" into the shell that
-                # was spawned to run the rez context printout
-                ex.command("cmd /Q /C rez context")
+                if system.is_production_rez_install:
+                    # previously this was called with the /K flag, however
+                    # that would leave spawn_shell hung on a blocked call
+                    # waiting for the user to type "exit" into the shell that
+                    # was spawned to run the rez context printout
+                    ex.command("cmd /Q /C rez context")
 
         def _create_ex():
             return RexExecutor(interpreter=self.new_shell(),
@@ -239,11 +226,7 @@ class CMD(Shell):
 
         is_detached = (cmd[0] == 'START')
 
-        p = popen(cmd,
-                  env=env,
-                  shell=is_detached,
-                  universal_newlines=True,
-                  **Popen_args)
+        p = popen(cmd, env=env, shell=is_detached, **Popen_args)
         return p
 
     def get_output(self, style=OutputStyle.file):

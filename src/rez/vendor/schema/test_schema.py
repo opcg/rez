@@ -1,11 +1,12 @@
 from __future__ import with_statement
 from __future__ import absolute_import
-import unittest as unittest
+import unittest
 import os
 import tempfile
-
+from rez.vendor.six import six
 
 from .schema import Schema, Use, And, Or, Optional, SchemaError
+
 
 # REZ: These are some regular expressions used in converting from original
 #      pytest format to standard unittest format
@@ -34,12 +35,8 @@ from .schema import Schema, Use, And, Or, Optional, SchemaError
 # re replace:
 # \n\1def test_\2(self):
 
-
-try:
-    basestring
-except NameError:
-    basestring = str  # Python 3 does not have basestring
-
+if not six.PY2:
+    basestring = str
 
 def ve(_):
     raise ValueError()

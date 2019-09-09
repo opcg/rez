@@ -10,7 +10,6 @@ from rez.utils.system import popen
 from rez.utils.platform_ import platform_
 from rez.shells import Shell, UnixShell
 from rez.rex import EscapedString
-from rez.backport.shutilwhich import which
 
 
 class SH(UnixShell):
@@ -45,11 +44,8 @@ class SH(UnixShell):
         # detect system paths using registry
         cmd = "cmd=`which %s`; unset PATH; $cmd %s %s 'echo __PATHS_ $PATH'" \
               % (cls.name(), cls.norc_arg, cls.command_arg)
-        p = popen(cmd,
-                  stdout=subprocess.PIPE,
-                  stderr=subprocess.PIPE,
-                  universal_newlines=True,
-                  shell=True)
+        p = popen(cmd, stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE, shell=True)
         out_, err_ = p.communicate()
         if p.returncode:
             paths = []
@@ -62,13 +58,6 @@ class SH(UnixShell):
             if path not in paths:
                 paths.append(path)
         cls.syspaths = [x for x in paths if x]
-
-        # add Rez binaries
-        exe = which("rez-env")
-        assert exe, "Could not find rez binary, this is a bug"
-        rez_bin_dir = os.path.dirname(exe)
-        cls.syspaths.insert(0, rez_bin_dir)
-
         return cls.syspaths
 
     @classmethod
@@ -110,10 +99,7 @@ class SH(UnixShell):
 
     def _bind_interactive_rez(self):
         if config.set_prompt and self.settings.prompt:
-            self._addline(
-                r'if [ -z "$REZ_STORED_PROMPT" ]; '
-                'then export REZ_STORED_PROMPT="$PS1"; fi'
-            )
+            self._addline(r'if [ -z "$REZ_STORED_PROMPT" ]; then export REZ_STORED_PROMPT="$PS1"; fi')
             if config.prefix_prompt:
                 cmd = 'export PS1="%s $REZ_STORED_PROMPT"'
             else:
@@ -129,7 +115,7 @@ class SH(UnixShell):
 
     def alias(self, key, value):
         value = EscapedString.disallow(value)
-        cmd = 'function {key}() {{ {value} "$@"; }};export -f {key};'
+        cmd = '{key}() {{ {value} "$@"; }};'
         self._addline(cmd.format(key=key, value=value))
 
     def source(self, value):

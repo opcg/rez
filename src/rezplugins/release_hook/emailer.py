@@ -9,6 +9,7 @@ from rez.utils.logging_ import print_warning, print_error
 from rez.utils.yaml import load_yaml
 from rez.utils.scope import scoped_formatter
 from rez.vendor.schema.schema import Or
+from rez.vendor.six import six
 import os.path
 import smtplib
 
@@ -17,6 +18,9 @@ try:
 except NameError:
     # Python 3+
     basestring = str
+
+
+basestring = six.string_types[0]
 
 
 class EmailReleaseHook(ReleaseHook):

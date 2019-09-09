@@ -1,4 +1,4 @@
-from rez.utils._version import _rez_Version
+from rez.utils._version import _rez_version
 from rez.utils.schema import Required, schema_keys
 from rez.utils.filesystem import retain_cwd
 from rez.utils.formatting import PackageRequest
@@ -11,6 +11,7 @@ from rez.package_repository import create_memory_package_repository
 from rez.packages_ import Package
 from rez.package_py_utils import expand_requirement
 from rez.vendor.schema.schema import Schema, Optional, Or, Use, And
+from rez.vendor.six import six
 from rez.vendor.version.version import Version
 from rez.vendor.six import six
 from contextlib import contextmanager
@@ -18,6 +19,9 @@ import os
 
 # Backwards compatibility with Python 2
 basestring = six.string_types[0]
+
+basestring = six.string_types[0]
+
 
 # this schema will automatically harden request strings like 'python-*'; see
 # the 'expand_requires' function for more info.
@@ -107,10 +111,11 @@ class PackageMaker(AttrDictWrapper):
         if "requires_rez_version" in package_data:
             ver = package_data.pop("requires_rez_version")
 
-            if _rez_Version < ver:
+            if Version(_rez_version) < ver:
                 raise PackageMetadataError(
                     "Failed reading package definition file: rez version >= %s "
-                    "needed (current version is %s)" % (ver, _rez_Version))
+                    "needed (current version is %s)" % (ver, _rez_version)
+                )
 
         # create a 'memory' package repository containing just this package
         version_str = package_data.get("version") or "_NO_VERSION"

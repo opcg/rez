@@ -16,6 +16,7 @@ from rez.utils.logging_ import print_debug
 from rez.utils.scope import scoped_formatter
 from rez.utils.formatting import expandvars
 from rez.vendor.schema.schema import Schema, Or, Optional, Use, And
+from rez.vendor.six import six
 from rez.util import which
 
 try:
@@ -23,6 +24,9 @@ try:
 except NameError:
     # Python 3+
     basestring = str
+
+
+basestring = six.string_types[0]
 
 
 class CommandReleaseHook(ReleaseHook):

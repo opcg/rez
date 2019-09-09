@@ -1,9 +1,6 @@
-[report]
-omit = 
-    *rez/vendor*
-    *rez/backport*
-    *rez/tests*
-
-    ; Tests create a lot of temporary files
-    *temp*
-    *tmp*
+[run]
+branch = True
+omit =
+    src/rez/tests/*,
+    src/rez/completion/*,
+    src/rez/vendor/*

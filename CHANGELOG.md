@@ -1,5 +1,347 @@
 # Change Log
 
+## 2.44.2 (2019-09-07)
+[Source](https://github.com/nerdvegas/rez/tree/2.44.2) | [Diff](https://github.com/nerdvegas/rez/compare/2.44.1...2.44.2)
+
+**Merged pull requests:**
+
+- install variant.json file in the same manner as other extra install files [\#731](https://github.com/nerdvegas/rez/pull/731) ([nerdvegas](https://github.com/nerdvegas))
+
+**Closed issues:**
+
+- permissions failure on release (variant.json) [\#730](https://github.com/nerdvegas/rez/issues/730)
+
+## 2.44.1 (2019-09-07)
+[Source](https://github.com/nerdvegas/rez/tree/2.44.1) | [Diff](https://github.com/nerdvegas/rez/compare/2.44.0...2.44.1)
+
+**Notes**
+
+Misc Py3 compatibility updates, part 2.
+
+**Merged pull requests:**
+
+- update imports in vendored pydot for py3 [\#728](https://github.com/nerdvegas/rez/pull/728) ([maxnbk](https://github.com/maxnbk))
+- update vendored schema for py3 [\#729](https://github.com/nerdvegas/rez/pull/729) ([maxnbk](https://github.com/maxnbk))
+
+## 2.44.0 (2019-09-06)
+[Source](https://github.com/nerdvegas/rez/tree/2.44.0) | [Diff](https://github.com/nerdvegas/rez/compare/2.43.0...2.44.0)
+
+**Notes**
+
+Misc Py3 compatibility updates, part 2.
+
+**Merged pull requests:**
+
+- pull basestring from six.string_types - py2 gets basestring, py3 gets str [\#721](https://github.com/nerdvegas/rez/pull/721) ([maxnbk](https://github.com/maxnbk))
+- import StringIO from six.moves [\#722](https://github.com/nerdvegas/rez/pull/722) ([maxnbk](https://github.com/maxnbk))
+- update vendored colorama from 0.3.1 to 0.4.1 [\#723](https://github.com/nerdvegas/rez/pull/723) ([maxnbk](https://github.com/maxnbk))
+- update vendored memcache from 1.5.3 to 1.5.9 [\#724](https://github.com/nerdvegas/rez/pull/724) ([maxnbk](https://github.com/maxnbk))
+- make Version properly iterable in py3 [\#725](https://github.com/nerdvegas/rez/pull/725) ([maxnbk](https://github.com/maxnbk))
+- modernize function manipulations and attrs [\#727](https://github.com/nerdvegas/rez/pull/727) ([maxnbk](https://github.com/maxnbk))
+
+## 2.43.0 (2019-09-05)
+[Source](https://github.com/nerdvegas/rez/tree/2.43.0) | [Diff](https://github.com/nerdvegas/rez/compare/2.42.2...2.43.0)
+
+**Notes**
+
+Misc Py3 compatibility updates.
+
+**Merged pull requests:**
+
+- very small py3 compat changes [\#712](https://github.com/nerdvegas/rez/pull/712) ([maxnbk](https://github.com/maxnbk))
+- .next() to next() [\#713](https://github.com/nerdvegas/rez/pull/713) ([maxnbk](https://github.com/maxnbk))
+- yaml upgrade [\#714](https://github.com/nerdvegas/rez/pull/714) ([maxnbk](https://github.com/maxnbk))
+- improve non-string iterable handling [\#715](https://github.com/nerdvegas/rez/pull/715) ([maxnbk](https://github.com/maxnbk))
+- replace async with block to avoid py3 async keyword [\#716](https://github.com/nerdvegas/rez/pull/716) ([maxnbk](https://github.com/maxnbk))
+- import queue module through six [\#717](https://github.com/nerdvegas/rez/pull/717) ([maxnbk](https://github.com/maxnbk))
+- swap 2.6 support for 3.x in version module [\#718](https://github.com/nerdvegas/rez/pull/718) ([maxnbk](https://github.com/maxnbk))
+
+## 2.42.2 (2019-08-31)
+[Source](https://github.com/nerdvegas/rez/tree/2.42.2) | [Diff](https://github.com/nerdvegas/rez/compare/2.42.1...2.42.2)
+
+**Merged pull requests:**
+
+- fixed bez rezbuild.py breaking on old-style print [\#705](https://github.com/nerdvegas/rez/pull/705) ([nerdvegas](https://github.com/nerdvegas))
+- zsh tests passing by way of enabling analogue for bash shell completion [\#711](https://github.com/nerdvegas/rez/pull/711) ([maxnbk](https://github.com/maxnbk))
+
+## 2.42.1 (2019-08-31)
+[Source](https://github.com/nerdvegas/rez/tree/2.42.1) | [Diff](https://github.com/nerdvegas/rez/compare/2.42.0...2.42.1)
+
+**Notes**
+
+This PR introduces py3 compatibilities that do not functionally alter py2 code.
+
+**Merged pull requests:**
+
+- miscellanous atomic nonaffective py2/py3 compatibilities [\#710](https://github.com/nerdvegas/rez/pull/710) ([maxnbk](https://github.com/maxnbk))
+
+## 2.42.0 (2019-08-30)
+[Source](https://github.com/nerdvegas/rez/tree/2.42.0) | [Diff](https://github.com/nerdvegas/rez/compare/2.41.0...2.42.0)
+
+**Merged pull requests:**
+
+- Pip improvements [\#667](https://github.com/nerdvegas/rez/pull/667) ([nerdvegas](https://github.com/nerdvegas))
+- remove unneeded backports / vendored libraries [\#702](https://github.com/nerdvegas/rez/pull/702) ([maxnbk](https://github.com/maxnbk))
+
+## 2.41.0 (2019-08-29)
+[Source](https://github.com/nerdvegas/rez/tree/2.41.0) | [Diff](https://github.com/nerdvegas/rez/compare/2.40.3...2.41.0)
+
+**Merged pull requests:**
+
+- a few prints to py3-compat [\#701](https://github.com/nerdvegas/rez/pull/701) ([maxnbk](https://github.com/maxnbk))
+- Fixing error with changelog referenced before assigment [\#700](https://github.com/nerdvegas/rez/pull/700) ([bareya](https://github.com/bareya))
+- Adding GCC bind [\#699](https://github.com/nerdvegas/rez/pull/699) ([bareya](https://github.com/bareya))
+
+## 2.40.3 (2019-08-15)
+[Source](https://github.com/nerdvegas/rez/tree/2.40.3) | [Diff](https://github.com/nerdvegas/rez/compare/2.40.2...2.40.3)
+
+**Notes**
+
+This update allows custom plugins to override the builtin rez plugins. It does so by reversing the order
+in which plugins are loaded, so that builtins are loaded last.
+
+**Merged pull requests:**
+
+- Reverse order for plugins loading [\#692](https://github.com/nerdvegas/rez/pull/692) ([predat](https://github.com/predat))
+
+**Closed issues:**
+
+- rezplugins loading order [\#677](https://github.com/nerdvegas/rez/issues/677)
+
+## 2.40.2 (2019-08-15)
+[Source](https://github.com/nerdvegas/rez/tree/2.40.2) | [Diff](https://github.com/nerdvegas/rez/compare/2.40.1...2.40.2)
+
+**Notes**
+
+This release fixes an issue on Windows, which has non-case-sensitive filepaths. Requesting a package with a case
+differing from that on disk would cause two packages to exist in the resolve, which really were just different
+cases of the same package.
+
+The behaviour on Windows is now:
+
+- Packages are case-sensitive - `rez-env Foo` will fail if the package folder on disk is `foo`;
+- Package repository paths are case-insensitive - `~/packages` and `~/Packages` are regarded as the same repo.
+
+**Merged pull requests:**
+
+- [FIX] Make package resolve request respect case sensitivity -- Windows [\#689](https://github.com/nerdvegas/rez/pull/689) ([lambdaclan](https://github.com/lambdaclan))
+
+## 2.40.1 (2019-08-07)
+[Source](https://github.com/nerdvegas/rez/tree/2.40.1) | [Diff](https://github.com/nerdvegas/rez/compare/2.40.0...2.40.1)
+
+**Notes**
+
+Fixes regression introduced in v2.39.0.
+
+**Merged pull requests:**
+
+- added missing plugin config [\#690](https://github.com/nerdvegas/rez/pull/690) ([nerdvegas](https://github.com/nerdvegas))
+
+**Closed issues:**
+
+- [Regression - Version >= 2.39.0] ConfigurationError: Error in Rez configuration under plugins.shell [\#688](https://github.com/nerdvegas/rez/issues/688)
+
+## 2.40.0 (2019-08-07)
+[Source](https://github.com/nerdvegas/rez/tree/2.40.0) | [Diff](https://github.com/nerdvegas/rez/compare/2.39.0...2.40.0)
+
+**Notes**
+
+- Adds new Zsh shell plugin (**BETA**)
+
+**Merged pull requests:**
+
+- initial implementation of zsh shell plugin [\#686](https://github.com/nerdvegas/rez/pull/686) ([maxnbk](https://github.com/maxnbk))
+
+**Closed issues:**
+
+- zsh plugin for rez [\#451](https://github.com/nerdvegas/rez/issues/451)
+
+## 2.39.0 (2019-08-07)
+[Source](https://github.com/nerdvegas/rez/tree/2.39.0) | [Diff](https://github.com/nerdvegas/rez/compare/2.38.2...2.39.0)
+
+**Notes**
+
+- Fixes errors in new powershell plugin
+- Adds new powershell core 6+ plugin (**BETA**).
+
+**Merged pull requests:**
+
+- Fix missing import in powershell plugin [\#674](https://github.com/nerdvegas/rez/pull/674) ([instinct-vfx](https://github.com/instinct-vfx))
+- Add powershell core 6+ support (pwsh) [\#679](https://github.com/nerdvegas/rez/pull/679) ([instinct-vfx](https://github.com/instinct-vfx))
+
+**Closed issues:**
+
+- Add shell plugin for poweshell 6+ [\#678](https://github.com/nerdvegas/rez/issues/678)
+
+## 2.38.2 (2019-07-23)
+[Source](https://github.com/nerdvegas/rez/tree/2.38.2) | [Diff](https://github.com/nerdvegas/rez/compare/2.38.1...2.38.2)
+
+**Notes**
+
+Fixes regression in 2.38.0 that unintentionally renamed _rez_fwd tool to _rez-fwd.
+
+**Merged pull requests:**
+
+- fixed regression in 2.38.0 that unintentionally renamed _rez_fwd to _rez-fwd [\#676](https://github.com/nerdvegas/rez/pull/676) ([nerdvegas](https://github.com/nerdvegas))
+
+**Closed issues:**
+
+- build scripts generated with incorrect shebang arg [\#671](https://github.com/nerdvegas/rez/issues/671)
+
+## 2.38.1 (2019-07-20)
+[Source](https://github.com/nerdvegas/rez/tree/2.38.1) | [Diff](https://github.com/nerdvegas/rez/compare/2.38.0...2.38.1)
+
+**Notes**
+
+Fixes issue on Windows where rez-bind'ing pip creates a broken package.
+
+**Merged pull requests:**
+
+- [Fix] Windows rez-bind pip [\#659](https://github.com/nerdvegas/rez/pull/659) ([lambdaclan](https://github.com/lambdaclan))
+
+## 2.38.0 (2019-07-20)
+[Source](https://github.com/nerdvegas/rez/tree/2.38.0) | [Diff](https://github.com/nerdvegas/rez/compare/2.37.1...2.38.0)
+
+**Notes**
+
+Updates the installer (install.py).
+
+* patched distlib (in build_utils) has been removed. The patch we were relying on
+  has since been made part of the main distlib release, which we already have vendored;
+* virtualenv has been updated to latest;
+* scripts have been removed, and entry points are used instead;
+* install.py code has been cleaned up and simplified. Specifically, standard use of
+  distlib.ScriptMaker has been put in place;
+* INSTALL.md has been updated with a full explanation of the installer, and why a
+  pip-based installation is not the same as using install.py.
+
+**Merged pull requests:**
+
+- Installer updates [\#662](https://github.com/nerdvegas/rez/pull/662) ([nerdvegas](https://github.com/nerdvegas))
+
+## [2.37.1](https://github.com/nerdvegas/rez/tree/2.37.1) (2019-07-20)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.37.0...2.37.1)
+
+**Notes**
+
+This fixes a regression introduced in `2.34.0`, which causes `rez-context -g` to
+fail. The pydot vendor package was updated, and the newer version includes a
+breaking change. Where `pydot.graph_from_dot_data` used to return a single graph
+object, it now returns a list of graph objects.
+
+**Merged pull requests:**
+
+- Fix pydot regression [\#668](https://github.com/nerdvegas/rez/pull/668) ([nerdvegas](https://github.com/nerdvegas))
+
+## [2.37.0](https://github.com/nerdvegas/rez/tree/2.37.0) (2019-07-19)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.36.2...2.37.0)
+
+**Notes**
+
+Adds PowerShell support.
+https://docs.microsoft.com/en-us/powershell/
+
+**Merged pull requests:**
+
+- Implement PowerShell [\#644](https://github.com/nerdvegas/rez/pull/644) ([mottosso](https://github.com/mottosso))
+
+## [2.36.2](https://github.com/nerdvegas/rez/tree/2.36.2) (2019-07-16)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.36.1...2.36.2)
+
+**Merged pull requests:**
+
+- [Feature] Pure python package detection [\#628](https://github.com/nerdvegas/rez/pull/628) ([lambdaclan](https://github.com/lambdaclan))
+
+## [2.36.1](https://github.com/nerdvegas/rez/tree/2.36.1) (2019-07-16)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.36.0...2.36.1)
+
+**Merged pull requests:**
+
+- [Fix] Sh failing in `test_shells.TeshShells.text_rex_code_alias` [\#663](https://github.com/nerdvegas/rez/pull/663) ([bfloch](https://github.com/bfloch))
+
+## [2.36.0](https://github.com/nerdvegas/rez/tree/2.36.0) (2019-07-16)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.35.0...2.36.0)
+
+**Merged pull requests:**
+
+- Add a package_preprocess_mode [\#651](https://github.com/nerdvegas/rez/pull/651) ([JeanChristopheMorinPerso](https://github.com/JeanChristopheMorinPerso))
+
+**Closed issues:**
+
+- Support "additive" preprocess functions [\#609](https://github.com/nerdvegas/rez/issues/609)
+
+## [2.35.0](https://github.com/nerdvegas/rez/tree/2.35.0) (2019-07-10)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.34.0...2.35.0)
+
+**Backwards Compatibility Issues**
+
+Please note that this update alters the process hierarchy of a resolved rez environment,
+for Windows users. This does not necessarily represent a compatibility issue, but please
+be on the lookout for unintended side effects and report them if they arise.
+
+**Merged pull requests:**
+
+- WIP No more "Terminate Batch Job? (Y/N)" - Take 2 [\#627](https://github.com/nerdvegas/rez/pull/627) ([mottosso](https://github.com/mottosso))
+
+**Closed issues:**
+
+- Shell history not working in cmd.exe or PowerShell [\#616](https://github.com/nerdvegas/rez/issues/616)
+
+## [2.34.0](https://github.com/nerdvegas/rez/tree/2.34.0) (2019-07-10)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.33.0...2.34.0)
+
+**Merged pull requests:**
+
+- [Fix] Wheel pip regressions [\#656](https://github.com/nerdvegas/rez/pull/656) ([lambdaclan](https://github.com/lambdaclan))
+
+## [2.33.0](https://github.com/nerdvegas/rez/tree/2.33.0) (2019-06-26)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.32.1...2.33.0)
+
+**Merged pull requests:**
+
+- Update distlib vendor library [\#654](https://github.com/nerdvegas/rez/pull/654) ([lambdaclan](https://github.com/lambdaclan))
+- [WIP] Feature/pip install modern [\#602](https://github.com/nerdvegas/rez/pull/602) ([lambdaclan](https://github.com/lambdaclan))
+
+## [2.32.1](https://github.com/nerdvegas/rez/tree/2.32.1) (2019-06-24)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.32.0...2.32.1)
+
+**Merged pull requests:**
+
+- Support for external PyYAML and Python 3 [\#622](https://github.com/nerdvegas/rez/pull/622) ([mottosso](https://github.com/mottosso))
+- Fix escaping backslashes in tcsh on Mac OS [\#497](https://github.com/nerdvegas/rez/pull/497) ([skral](https://github.com/skral))
+
+## [2.32.0](https://github.com/nerdvegas/rez/tree/2.32.0) (2019-06-23)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.4...2.32.0)
+
+**Merged pull requests:**
+
+- Implement preprocess function support for rezconfig.py (takeover) [\#650](https://github.com/nerdvegas/rez/pull/650) ([JeanChristopheMorinPerso](https://github.com/JeanChristopheMorinPerso))
+
+## [2.31.4](https://github.com/nerdvegas/rez/tree/2.31.4) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.3...2.31.4)
+
+**Merged pull requests:**
+
+- Expose Python standard module __file__ and __name__ to rezconfig [\#636](https://github.com/nerdvegas/rez/pull/636) ([mottosso](https://github.com/mottosso))
+
+## [2.31.3](https://github.com/nerdvegas/rez/tree/2.31.3) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.2...2.31.3)
+
+**Merged pull requests:**
+
+- Bugfix for alias() on Windows [\#607](https://github.com/nerdvegas/rez/pull/607) ([mottosso](https://github.com/mottosso))
+
+## [2.31.2](https://github.com/nerdvegas/rez/tree/2.31.2) (2019-06-22)
+[Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.1...2.31.2)
+
+**Merged pull requests:**
+
+- Fix #558 [\#647](https://github.com/nerdvegas/rez/pull/647) ([mottosso](https://github.com/mottosso))
+
+**Closed issues:**
+
+- rez-build breaks if "|" in a required package's version on Windows [\#558](https://github.com/nerdvegas/rez/issues/558)
+
 ## [2.31.1](https://github.com/nerdvegas/rez/tree/2.31.1) (2019-06-18)
 [Full Changelog](https://github.com/nerdvegas/rez/compare/2.31.0...2.31.1)
 

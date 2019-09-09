@@ -5,6 +5,7 @@ from __future__ import print_function
 from rez.release_hook import ReleaseHook
 from rez.utils.logging_ import print_error, print_debug
 from rez.utils.amqp import publish_message
+from rez.vendor.six import six
 from rez.config import config
 
 try:
@@ -12,6 +13,9 @@ try:
 except NameError:
     # Python 3+
     basestring = str
+
+
+basestring = six.string_types[0]
 
 
 class AmqpReleaseHook(ReleaseHook):

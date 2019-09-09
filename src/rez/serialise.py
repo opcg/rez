@@ -3,7 +3,6 @@ Read and write data from file. File caching via a memcached server is supported.
 """
 from contextlib import contextmanager
 from inspect import isfunction, ismodule, getargspec
-from rez.vendor.six.six.moves import StringIO
 import sys
 import stat
 import os
@@ -21,6 +20,7 @@ from rez.utils.system import add_sys_paths
 from rez.config import config
 from rez.vendor.atomicwrites import atomic_write
 from rez.vendor.enum import Enum
+from rez.vendor.six.six.moves import StringIO
 from rez.vendor import yaml
 
 
@@ -135,7 +135,7 @@ def _load_from_file__key(filepath, format_, update_data_callback):
         callback_key = getattr(update_data_callback, "__name__", "None")
 
     return str(("package_file", filepath, str(format_), callback_key,
-                st.st_ino, st.st_mtime))
+                int(st.st_ino), st.st_mtime))
 
 
 @memcached(servers=config.memcached_uri if config.cache_package_files else None,
@@ -246,7 +246,7 @@ def _load_py(stream, filepath=None):
     excludes = set(('scope', 'InvalidPackageError', '__builtins__',
                     'early', 'late', 'include', 'ModifyList'))
 
-    for k, v in g.items():
+    for k, v in g.iteritems():
         if k not in excludes and \
                 (k not in __builtins__ or __builtins__[k] != v):
             result[k] = v
@@ -359,7 +359,7 @@ def process_python_objects(data, filepath=None):
 
     def _trim(value):
         if isinstance(value, dict):
-            for k, v in value.copy().items():
+            for k, v in value.items():
                 if isfunction(v):
                     if v.__name__ == "preprocess":
                         # preprocess is a special case. It has to stay intact
@@ -398,7 +398,7 @@ def load_yaml(stream, **kwargs):
     # "<string>" with the filename if there's an error...
     content = stream.read()
     try:
-        return yaml.load(content) or {}
+        return yaml.load(content, Loader=yaml.FullLoader) or {}
     except Exception as e:
         if stream.name and stream.name != '<string>':
             for mark_name in 'context_mark', 'problem_mark':

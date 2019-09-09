@@ -16,6 +16,9 @@ import shutil
 import os
 import re
 import stat
+import platform
+
+from rez.vendor.six import six
 
 
 # Backwards compatibility with Python 2
@@ -486,10 +489,10 @@ def encode_filesystem_name(input_str):
     As an example, the string "Foo_Bar (fun).txt" would get encoded as:
         _foo___bar_020_028fun_029.txt
     """
-    if isinstance(input_str, str):
+    if isinstance(input_str, six.string_types):
         input_str = unicode(input_str)
     elif not isinstance(input_str, unicode):
-        raise TypeError("input_str must be a basestring")
+        raise TypeError("input_str must be a %s" % six.string_types[0].__name__)
 
     as_is = u'abcdefghijklmnopqrstuvwxyz0123456789.-'
     uppercase = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ'

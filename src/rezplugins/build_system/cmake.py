@@ -12,6 +12,7 @@ from rez.utils.platform_ import platform_
 from rez.config import config
 from rez.backport.shutilwhich import which
 from rez.vendor.schema.schema import Or
+from rez.vendor.six import six
 from rez.shells import create_shell
 import functools
 import os.path
@@ -23,6 +24,9 @@ try:
 except NameError:
     # Python 3+
     basestring = str
+
+
+basestring = six.string_types[0]
 
 
 class RezCMakeError(BuildSystemError):

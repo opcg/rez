@@ -65,22 +65,31 @@ def get_reverse_dependency_tree(package_name, depth=None, paths=None,
     lookup = defaultdict(set)
 
     for i, package_name_ in enumerate(package_names):
-        next(bar)
-        packages = list(iter_packages(name=package_name_, paths=paths))
+        it = iter_packages(name=package_name_, paths=paths)
+        packages = list(it)
         if not packages:
             continue
-        pkg = max(packages, key=lambda x: x.version)
 
-        requires = set(pkg.requires or [])
-        for req_list in (pkg.variants or []):
-            requires.update(req_list)
+        pkg = max(packages, key=lambda x: x.version)
+        requires = []
+
+        for variant in pkg.iter_variants():
+            pbr = (private_build_requires and pkg.name == package_name)
+
+            requires += variant.get_requires(
+                build_requires=build_requires,
+                private_build_requires=pbr
+            )
 
         for req in requires:
             if not req.conflict:
                 lookup[req.name].add(package_name_)
 
-    # perform traversal
+        next(bar)
+
     bar.finish()
+
+    # perform traversal
     n = 0
     consumed = set([package_name])
     working_set = set([package_name])

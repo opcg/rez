@@ -4,9 +4,13 @@ from rezgui.mixins.ContextViewMixin import ContextViewMixin
 from rezgui.models.ContextModel import ContextModel
 from rez.config import config
 from rez.vendor import yaml
+from rez.vendor.six import six
 from rez.vendor.yaml.error import YAMLError
 from rez.vendor.schema.schema import Schema, SchemaError, Or, And, Use
 from functools import partial
+
+
+basestring = six.string_types[0]
 
 
 class ContextSettingsWidget(QtGui.QWidget, ContextViewMixin):
@@ -83,7 +87,7 @@ class ContextSettingsWidget(QtGui.QWidget, ContextViewMixin):
         # load new content
         try:
             txt = self.edit.toPlainText()
-            data = yaml.load(str(txt))
+            data = yaml.load(str(txt), Loader=yaml.FullLoader)
         except YAMLError as e:
             _content_error("Invalid syntax", str(e))
             return

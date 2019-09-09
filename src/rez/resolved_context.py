@@ -1,12 +1,12 @@
 from __future__ import print_function
-from rez.vendor.six import six
+
 from rez import __version__, module_root_path
 from rez.package_repository import package_repository_manager
 from rez.solver import SolverCallbackReturn
 from rez.resolver import Resolver, ResolverStatus
 from rez.system import system
 from rez.config import config
-from rez.util import shlex_join, dedup
+from rez.util import shlex_join, dedup, is_non_string_iterable
 from rez.utils.sourcecode import SourceCodeError
 from rez.utils.colorize import critical, heading, local, implicit, Printer
 from rez.utils.formatting import columnise, PackageRequest, ENV_VAR_REGEX
@@ -23,6 +23,7 @@ from rez.package_filter import PackageFilterList
 from rez.shells import create_shell
 from rez.exceptions import ResolvedContextError, PackageCommandError, RezError
 from rez.utils.graph_utils import write_dot, write_compacted, read_graph_from_string
+from rez.vendor.six import six
 from rez.vendor.version.version import VersionRange
 from rez.vendor.enum import Enum
 from rez.vendor import yaml
@@ -40,6 +41,9 @@ import time
 import sys
 import os
 import os.path
+
+
+basestring = six.string_types[0]
 
 
 class RezToolsVisibility(Enum):
@@ -195,7 +199,7 @@ class ResolvedContext(object):
 
         self._package_requests = []
         for req in package_requests:
-            if isinstance(req, six.string_types):
+            if isinstance(req, basestring):
                 req = PackageRequest(req)
             self._package_requests.append(req)
 
@@ -465,7 +469,7 @@ class ResolvedContext(object):
             request_ = []
 
             for req in package_requests:
-                if isinstance(req, six.string_types):
+                if isinstance(req, basestring):
                     req = PackageRequest(req)
 
                 if req.name in request_dict:
@@ -489,7 +493,7 @@ class ResolvedContext(object):
                 if variant.name not in overrides:
                     if len(variant.version) >= rank:
                         version = variant.version.trim(rank - 1)
-                        version = version.next()
+                        version = next(version)
                         req = "~%s<%s" % (variant.name, str(version))
                         rank_limiters.append(req)
             request += rank_limiters
@@ -839,7 +843,7 @@ class ResolvedContext(object):
         removed_packages = d.get("removed_packages", set())
 
         if newer_packages:
-            for name, pkgs in newer_packages.items():
+            for name, pkgs in newer_packages.iteritems():
                 this_pkg = pkgs[0]
                 other_pkg = pkgs[-1]
                 diff_str = "(+%d versions)" % (len(pkgs) - 1)
@@ -848,7 +852,7 @@ class ResolvedContext(object):
                             diff_str))
 
         if older_packages:
-            for name, pkgs in older_packages.items():
+            for name, pkgs in older_packages.iteritems():
                 this_pkg = pkgs[0]
                 other_pkg = pkgs[-1]
                 diff_str = "(-%d versions)" % (len(pkgs) - 1)
@@ -905,7 +909,7 @@ class ResolvedContext(object):
                  ("fillcolor", node_color),
                  ("style", "filled")]
 
-        for name, qname in nodes.items():
+        for name, qname in nodes.iteritems():
             g.add_node(name, attrs=attrs + [("label", qname)])
         for edge in edges:
             g.add_edge(edge)
@@ -987,7 +991,7 @@ class ResolvedContext(object):
         """
         variants = set()
         tools_dict = self.get_tools(request_only=False)
-        for variant, tools in tools_dict.values():
+        for variant, tools in tools_dict.itervalues():
             if tool_name in tools:
                 variants.add(variant)
         return variants
@@ -1007,11 +1011,11 @@ class ResolvedContext(object):
 
         tool_sets = defaultdict(set)
         tools_dict = self.get_tools(request_only=request_only)
-        for variant, tools in tools_dict.values():
+        for variant, tools in tools_dict.itervalues():
             for tool in tools:
                 tool_sets[tool].add(variant)
 
-        conflicts = dict((k, v) for k, v in tool_sets.items() if len(v) > 1)
+        conflicts = dict((k, v) for k, v in tool_sets.iteritems() if len(v) > 1)
         return conflicts
 
     @_on_success
@@ -1205,11 +1209,7 @@ class ResolvedContext(object):
         """
         sh = create_shell(shell)
 
-        is_iterable = hasattr(command, "__iter__")
-        is_string = isinstance(command, six.string_types)
-
-        # In Python 2, a string does not have `__iter__`
-        if is_iterable and not is_string:
+        if is_non_string_iterable(command):
             command = sh.join(command)
 
         # start a new session if specified
@@ -1328,8 +1328,8 @@ class ResolvedContext(object):
             requested_timestamp=self.requested_timestamp,
             building=self.building,
             caching=self.caching,
-            implicit_packages=list(map(str, self.implicit_packages)),
-            package_requests=list(map(str, self._package_requests)),
+            implicit_packages=map(str, self.implicit_packages),
+            package_requests=map(str, self._package_requests),
             package_paths=self.package_paths,
 
             default_patch_lock=self.default_patch_lock.name,
@@ -1356,7 +1356,7 @@ class ResolvedContext(object):
         ))
 
         if fields:
-            data = dict((k, v) for k, v in data.items() if k in fields)
+            data = dict((k, v) for k, v in data.iteritems() if k in fields)
 
         return data
 
@@ -1471,7 +1471,7 @@ class ResolvedContext(object):
 
         # track context usage
         if config.context_tracking_host:
-            data = dict((k, v) for k, v in d.items()
+            data = dict((k, v) for k, v in d.iteritems()
                         if k in config.context_tracking_context_fields)
 
             r._track_context(data, action="sourced")
@@ -1493,7 +1493,7 @@ class ResolvedContext(object):
         # remove fields with unexpanded env-vars, or empty string
         def _del(value):
             return (
-                isinstance(value, six.string_types) and
+                isinstance(value, basestring) and
                 (not value or ENV_VAR_REGEX.search(value))
             )
 
@@ -1534,7 +1534,7 @@ class ResolvedContext(object):
         if content.startswith('{'):  # assume json content
             doc = json.loads(content)
         else:
-            doc = yaml.load(content)
+            doc = yaml.load(content, Loader=yaml.FullLoader)
 
         context = cls.from_dict(doc, identifier_str)
         return context
@@ -1621,7 +1621,7 @@ class ResolvedContext(object):
 
         # binds objects such as 'request', which are accessible before a resolve
         bindings = self._get_pre_resolve_bindings()
-        for k, v in bindings.items():
+        for k, v in bindings.iteritems():
             executor.bind(k, v)
 
         executor.bind('resolve', VariantsBinding(resolved_pkgs))

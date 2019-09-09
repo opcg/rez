@@ -1,4 +1,3 @@
-from rez.vendor.six import six
 """
 This sourcefile is intended to be imported in package.py files, in functions
 including:
@@ -10,6 +9,10 @@ including:
 # these imports just forward the symbols into this module's namespace
 from rez.utils.system import popen
 from rez.exceptions import InvalidPackageError
+from rez.vendor.six import six
+
+
+basestring = six.string_types[0]
 
 
 def expand_requirement(request, paths=None):
@@ -113,9 +116,9 @@ def expand_requirement(request, paths=None):
         # 'foo-1+<1_' - '1_' is the next possible version after '1'. So we have
         # to detect this case and remap the uid-ified wildcard back here too.
         #
-        for v, expanded_v in expanded_versions.items():
-            if version == v.next():
-                return expanded_v.next()
+        for v, expanded_v in expanded_versions.iteritems():
+            if version == next(v):
+                return next(expanded_v)
 
         version_ = expand_version(version)
         if version_ is None:
@@ -130,7 +133,7 @@ def expand_requirement(request, paths=None):
     result = str(req)
 
     # do some cleanup so that long uids aren't left in invalid wildcarded strings
-    for uid, token in wildcard_map.items():
+    for uid, token in wildcard_map.iteritems():
         result = result.replace(uid, token)
 
     # cast back to a Requirement again, then back to a string. This will catch
@@ -190,7 +193,7 @@ def exec_python(attr, src, executable="python"):
     """
     import subprocess
 
-    if isinstance(src, six.string_types):
+    if isinstance(src, basestring):
         src = [src]
 
     p = popen([executable, "-c", "; ".join(src)],

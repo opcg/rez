@@ -1,8 +1,12 @@
 from rez.vendor.six import six
 """See util.create_forwarding_script()."""
-from rez.vendor import argparse
+import argparse
+from rez.vendor.six import six
 
 __doc__ = argparse.SUPPRESS
+
+
+basestring = six.string_types[0]
 
 
 def setup_parser(parser, completions=False):
@@ -33,7 +37,7 @@ def command(opts, parser, extra_arg_groups=None):
     with open(yaml_file) as f:
         content = f.read()
     try:
-        doc = yaml.load(content)
+        doc = yaml.load(content, Loader=yaml.FullLoader)
     except YAMLError as e:
         raise RezSystemError("Invalid executable file %s: %s"
                              % (yaml_file, str(e)))

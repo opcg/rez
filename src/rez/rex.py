@@ -1,20 +1,25 @@
 from __future__ import print_function
-from rez.vendor.six import six
+
 import os
+import subprocess
 import sys
+import pipes
 import re
+import inspect
 import traceback
 from string import Formatter
 from rez.system import system
 from rez.config import config
 from rez.exceptions import RexError, RexUndefinedVariableError, RezSystemError
-from rez.util import shlex_join
+from rez.util import shlex_join, is_non_string_iterable
 from rez.utils import reraise
 from rez.utils.system import popen
 from rez.utils.sourcecode import SourceCode, SourceCodeError
 from rez.utils.data_utils import AttrDictWrapper
 from rez.utils.formatting import expandvars
 from rez.vendor.enum import Enum
+from rez.vendor.six import six
+
 
 basestring = six.string_types[0]
 
@@ -612,18 +617,17 @@ class Python(ActionInterpreter):
         if self.manager:
             self.target_environ.update(self.manager.environ)
 
-        shell_mode = isinstance(args, basestring)
+        shell_mode = not hasattr(args, '__iter__')
         return popen(args,
                      shell=shell_mode,
                      env=self.target_environ,
-                     universal_newlines=True,
                      **subproc_kwargs)
 
     def command(self, value):
         if self.passive:
             return
 
-        if hasattr(value, '__iter__'):
+        if is_non_string_iterable(value):
             it = iter(value)
             cmd = EscapedString.disallow(next(it))
             value = [cmd] + [self.escape_string(x) for x in it]
@@ -732,7 +736,7 @@ class EscapedString(object):
         return "%s(%r)" % (self.__class__.__name__, self.strings)
 
     def __eq__(self, other):
-        if isinstance(other, six.string_types):
+        if isinstance(other, basestring):
             return (str(self) == str(other))
         else:
             return (isinstance(other, EscapedString)
@@ -951,7 +955,7 @@ class EnvironmentDict(dict):
         """
         self.manager = manager
         self._var_cache = dict((k, EnvironmentVariable(k, self))
-                               for k in manager.parent_environ.keys())
+                               for k in manager.parent_environ.iterkeys())
 
     def keys(self):
         return self._var_cache.keys()
